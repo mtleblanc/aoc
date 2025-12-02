@@ -1,0 +1,139 @@
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <cassert>
+
+template <typename T, T N>
+class dial
+{
+    T val;
+    T passZero{0};
+    T finishZero{0};
+
+public:
+    dial(T start) : val{start}
+    {
+    }
+    T value()
+    {
+        return val;
+    }
+    T landedZero()
+    {
+        return finishZero;
+    }
+    T rotations()
+    {
+        return passZero;
+    }
+    dial &add(T r)
+    {
+        T tpasses{0};
+#ifndef NDEBUG
+        if (r < 0)
+        {
+            T tval{val == 0 ? N : val};
+            T tr{-r};
+            while (tr > N)
+            {
+                tr -= N;
+                tpasses++;
+            }
+            if (tval <= tr)
+                tpasses++;
+        }
+        else if (r > 0)
+        {
+            T tval{val};
+            T tr{r};
+            while (tr > N)
+            {
+                tr -= N;
+                tpasses++;
+            }
+            if (tval + tr >= N)
+                tpasses++;
+        }
+#endif
+        T oval{val};
+        val += r;
+        T nval{val};
+        val %= N;
+        val += N;
+        val %= N;
+        if (val == 0)
+            finishZero++;
+        assert(val < N && 0 <= val);
+        if (nval < oval)
+        {
+            nval = -nval;
+            oval = -oval;
+        }
+        if (oval < 0)
+        {
+            T mult = nval / N + 1;
+            nval += mult * N;
+            oval += mult * N;
+        }
+        assert(nval > oval);
+        assert(oval >= 0);
+        assert(abs(nval - oval) == abs(r));
+        T passes = (nval / N) - ((oval) / N);
+        passZero += passes;
+        assert(passes == tpasses);
+#ifdef DEBUG
+        std::cout << " landed on " << val;
+        if (passes)
+        {
+            std::cout << " passed zero " << passes << " times";
+        }
+        std::cout << std::endl;
+#endif
+        return *this;
+    }
+};
+
+template <typename T, T N>
+std::istream &operator>>(std::istream &is, dial<T, N> &d)
+{
+    char c;
+    T val;
+    is >> c >> val;
+    switch (c)
+    {
+    case 'L':
+    case 'l':
+#ifdef DEBUG
+        std::cout << "Moving L" << val;
+#endif
+        d.add(-val);
+        break;
+    case 'R':
+    case 'r':
+#ifdef DEBUG
+        std::cout << "Moving R" << val;
+#endif
+        d.add(val);
+        break;
+    case '\0':
+        break;
+    default:
+        throw 0;
+    }
+    return is;
+}
+
+int main()
+{
+    using std::endl;
+    dial<int, 100> d{50};
+    std::fstream f{"input01.txt"};
+    int count = 0;
+    while (f >> d)
+    {
+        if (d.value() == 0)
+            count += 1;
+    }
+    std::cout << d.landedZero() << endl
+              << d.rotations() << endl;
+}
