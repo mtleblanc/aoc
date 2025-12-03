@@ -29,6 +29,7 @@ public:
     dial &add(T r)
     {
         T tpasses{0};
+        // one rotation at a time to track down what ended up being an off-by-one
 #ifndef NDEBUG
         if (r < 0)
         {
@@ -58,12 +59,14 @@ public:
         T oval{val};
         val += r;
         T nval{val};
+        // annoying truncate-towards-zero
         val %= N;
         val += N;
         val %= N;
         if (val == 0)
             finishZero++;
         assert(val < N && 0 <= val);
+        // adjust values to be non-negative so that /N works as floor, and increasing so that starting/ending at 0 is counted properly
         if (nval < oval)
         {
             nval = -nval;
@@ -130,10 +133,7 @@ int main()
     std::fstream f{"input01.txt"};
     int count = 0;
     while (f >> d)
-    {
-        if (d.value() == 0)
-            count += 1;
-    }
+        ;
     std::cout << d.landedZero() << endl
               << d.rotations() << endl;
 }

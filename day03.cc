@@ -16,6 +16,11 @@ int main()
     {
         if (s.length() < N)
             break;
+        // just start at the end and move backwards greedily
+        // if maxes were pointers and maxes[-1] were the iterator,
+        // we'd have an invariant that maxes[i] points to the leftmost largest element both right of maxes[i-1] and at least N-i from the end
+        // but we only need the values, as long as we don't break on equality
+        // (eg in xxxxx76, when moving to xxxx776 we have to move maxes[0] to the first 7 to make space for maxes[1] on the second 7)
         auto rit = s.crbegin();
         for (int i = N - 1; i >= 0; i--)
         {

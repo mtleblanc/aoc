@@ -20,6 +20,8 @@ int main()
             break;
         if (to > maxmax)
             maxmax = to;
+        
+        // could just use log/convert to string and call length
         uint64_t evenDigitsMin = 1;
         uint64_t multiplierMin = 10;
         while (evenDigitsMin * 100 <= from)
@@ -36,7 +38,7 @@ int main()
         }
         uint64_t min = from / multiplierMin;
         uint64_t max = to / multiplierMax;
-        uint64_t range {0};
+        uint64_t range{0};
         if (max * (multiplierMax + 1) > to)
             max -= 1;
         if (max >= multiplierMax)
@@ -49,30 +51,36 @@ int main()
             goto skip;
         if (min <= multiplierMin / 10)
             min = multiplierMin / 10;
+        // just not dealing with splitting ranges across # of digits since the input doesn't have any ranges spanning 2 orders of magnitude
         assert(multiplierMin == multiplierMax);
-        std::cout << from << "-" << to << ":" << min * (multiplierMin + 1) << "-" << max * (multiplierMax + 1) << std::endl;
+        // std::cout << from << "-" << to << ":" << min * (multiplierMin + 1) << "-" << max * (multiplierMax + 1) << std::endl;
         range = max * (max + 1) / 2 - min * (min - 1) / 2;
         accum += range * (multiplierMin + 1);
-        skip:
+    skip:
 
+        // part 2 could work similarly to part one but now range splitting is a thing and we need to do inclusion/exclusion to avoid double counting
+        // brute force works in 0.12s so :shrug:
         for (uint64_t cur = from; cur <= to; cur++)
         {
-            for (uint64_t mod = 10; mod * mod/10 < cur; mod *= 10)
+            for (uint64_t mod = 10; mod * mod / 10 < cur; mod *= 10)
             {
                 uint64_t rem = cur % mod;
-                if(rem * 10 < mod) continue;
+                if (rem * 10 < mod)
+                    continue;
                 uint64_t rep = rem;
-                while(rep < cur) {
+                while (rep < cur)
+                {
                     rep *= mod;
                     rep += rem;
-                    if(rep == cur) {
+                    if (rep == cur)
+                    {
                         accum2 += cur;
-                        std::cout << cur << std::endl;
+                        // std::cout << cur << std::endl;
                         goto end;
                     }
                 }
             }
-            end:
+        end:
             continue;
         }
     }
