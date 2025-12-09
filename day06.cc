@@ -29,6 +29,42 @@ struct event
     event(long id, long effect) : id{id}, effect{effect} {}
 };
 
+uint64_t part2(std::vector<std::string> v)
+{
+    uint64_t accum {0};
+    uint64_t cur {0};
+    bool isMult;
+    size_t opIdx = v.size() - 1;
+    for (int x = 0; x < v[0].size(); x++)
+    {
+        switch (v[opIdx][x])
+        {
+        case ' ':
+            break;
+        case '*':
+            accum += cur;
+            cur = 1;
+            isMult = true;
+            break;
+        case '+':
+            accum += cur;
+            cur = 0;
+            isMult = false;
+        }
+        uint64_t val {0};
+        for(int y = 0; y < opIdx; y++) {
+            char c = v[y][x];
+            if(c != ' ') {
+                val *= 10;
+                val += c - '0';
+            }
+        }
+        if(val != 0) cur = isMult ? cur * val : cur + val;
+    }
+    accum += cur;
+    return accum;
+}
+
 int main()
 {
     std::ifstream fs{"input06.txt"};
@@ -76,4 +112,5 @@ int main()
     for (auto v : results)
         accum += v;
     std::cout << accum << std::endl;
+    std::cout << part2(v) << std::endl;
 }
