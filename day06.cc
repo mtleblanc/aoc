@@ -35,7 +35,7 @@ uint64_t part2(std::vector<std::string> v)
     uint64_t cur {0};
     bool isMult;
     size_t opIdx = v.size() - 1;
-    for (int x = 0; x < v[0].size(); x++)
+    for (size_t x = 0; x < v[0].size(); x++)
     {
         switch (v[opIdx][x])
         {
@@ -52,7 +52,7 @@ uint64_t part2(std::vector<std::string> v)
             isMult = false;
         }
         uint64_t val {0};
-        for(int y = 0; y < opIdx; y++) {
+        for(size_t y = 0; y < opIdx; y++) {
             char c = v[y][x];
             if(c != ' ') {
                 val *= 10;
@@ -100,7 +100,7 @@ int main()
     {
         uint64_t cur;
         std::istringstream ss{l};
-        int i = 0;
+        size_t i = 0;
         while (ss >> cur)
         {
             results[i] = isMult[i] ? results[i] * cur : results[i] + cur;
@@ -108,7 +108,7 @@ int main()
         }
         assert(i == isMult.size());
     }
-    uint64_t accum;
+    uint64_t accum {};
     for (auto v : results)
         accum += v;
     std::cout << accum << std::endl;

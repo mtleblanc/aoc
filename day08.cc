@@ -4,7 +4,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <ranges>
 
 struct box
 {
@@ -95,7 +94,7 @@ part1(std::vector<std::string> &v, size_t connections)
         }
         boxes.push_back(b);
     }
-    for (int i = 0; i < connections; i++)
+    for (size_t i = 0; i < connections; i++)
     {
         wire w;
         do

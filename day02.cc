@@ -1,7 +1,6 @@
 #include <fstream>
 #include <iostream>
 #include <cassert>
-#include <vector>
 
 template <typename T>
 T ipow(T base, T exp)

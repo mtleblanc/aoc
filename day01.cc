@@ -1,5 +1,4 @@
 #include <fstream>
-#include <string>
 #include <iostream>
 #include <cassert>
 
@@ -131,7 +130,6 @@ int main()
     using std::endl;
     dial<int, 100> d{50};
     std::fstream f{"input01.txt"};
-    int count = 0;
     while (f >> d)
         ;
     std::cout << d.landedZero() << endl

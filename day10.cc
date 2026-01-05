@@ -4,8 +4,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <ranges>
-#include <numeric>
 #include <algorithm>
 
 struct problem
@@ -42,7 +40,6 @@ std::istream &operator>>(std::istream &is, problem &p)
         }
     }
     p.moves.clear();
-    bool done = false;
     while (is >> c)
     {
         if (c == ' ')
@@ -69,7 +66,6 @@ std::istream &operator>>(std::istream &is, problem &p)
                 is >> c;
                 if (c == '}')
                 {
-                    done = true;
                     break;
                 }
             }
@@ -87,7 +83,6 @@ struct node
 
 uint64_t bfs1(problem &p)
 {
-    const size_t len = p.target.size();
     std::deque<node<bool>> horizon;
     node<bool> start{p.target, 0, 0};
     horizon.push_back(start);
@@ -415,30 +410,28 @@ auto minPresses(Matrix<T> &m)
                    { return orig.column(c); });
     std::transform(free_column_indices.begin(), free_column_indices.end(), back_inserter(free_columns_reduced), [&m](auto c)
                    { return m.column(c); });
-    for (size_t index = 0;;)
-    {
+    // for (size_t index = 0;;)
+    // {
         std::vector<T> trial_target{rr_target};
         reduce_helper(free_columns_reduced, free_coeffs, trial_target);
         if(true || std::all_of(trial_target.begin(), trial_target.end(), [](auto v){return v >= -0.1 && abs(v - (int)v) < 0.1;})) {
             std::transform(trial_target.begin(), trial_target.end(), trial_target.begin(), [](auto v){ return round(v); });
             std::for_each(trial_target.begin(), trial_target.end(), [](auto v){ std::cout << v << " ";});
-            break;
+            // break;
         }
         
-    }
+    // }
     return presses;
 }
 
 uint64_t part2(std::vector<problem> &v)
 {
     uint64_t accum{};
-    size_t cur = 0;
     for (auto &p : v)
     {
         Matrix<float> m{p};
         // std::cout << m << std::endl;
         accum += minPresses(m);
-        cur++;
     }
     return accum;
 }

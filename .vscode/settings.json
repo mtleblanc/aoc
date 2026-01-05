@@ -37,5 +37,11 @@
         "algorithm": "cpp",
         "iostream": "cpp",
         "vector": "cpp"
-    }
+    },
+    "C_Cpp.intelliSenseEngine": "disabled",
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build",
+        "--background-index",
+        "--clang-tidy"
+    ]
 }

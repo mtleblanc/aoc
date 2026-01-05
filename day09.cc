@@ -4,7 +4,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#include <ranges>
 
 struct corner
 {
@@ -24,7 +23,6 @@ std::ostream &operator<<(std::ostream &os, const corner &b)
 
 std::istream &operator>>(std::istream &is, corner &corner)
 {
-    int64_t x, y;
     char c;
     return is >> corner.x >> c >> corner.y;
 }

@@ -1,7 +1,6 @@
 #include <cassert>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
 #include <ranges>
@@ -11,7 +10,7 @@ uint64_t part1(std::vector<std::string> &v) {
     std::string oldRow {v[0]};
     for(auto &cur : v | std::views::drop(1)) {
         std::string newRow {cur};
-        for(int x = 0; x < v[0].size(); x ++) {
+        for(size_t x = 0; x < v[0].size(); x ++) {
             if(oldRow[x] != 'S') continue;
             if(cur[x] == '.') newRow[x] = 'S';
             else {
@@ -26,13 +25,12 @@ uint64_t part1(std::vector<std::string> &v) {
 }
 
 uint64_t part2(std::vector<std::string> &v) {
-    uint64_t splits {0};
     std::vector<uint64_t> oldRow (v[0].size());
     size_t start = v[0].find('S');
     oldRow[start] = 1;
     for(auto &cur : v | std::views::drop(1)) {
         std::vector<uint64_t> newRow(oldRow.size());
-        for(int x = 0; x < v[0].size(); x ++) {
+        for(size_t x = 0; x < v[0].size(); x ++) {
             if(cur[x] == '.') newRow[x] += oldRow[x];
             else {
                 if(x > 0) newRow[x-1]+= oldRow[x];
