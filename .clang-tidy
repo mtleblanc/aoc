@@ -1,0 +1,32 @@
+---
+# clang-tidy configuration for learning C++
+Checks: >
+  clang-diagnostic-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  bugprone-*,
+  -modernize-use-trailing-return-type,
+  -bugprone-easily-swappable-parameters,
+  -readability-identifier-length,
+  -readability-implicit-bool-conversion,
+  -readability-math-missing-parentheses,
+  -performance-avoid-endl
+
+WarningsAsErrors: ''
+HeaderFilterRegex: ''
+FormatStyle: none
+
+CheckOptions:
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase

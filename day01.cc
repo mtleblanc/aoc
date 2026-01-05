@@ -1,18 +1,15 @@
+#include <cassert>
 #include <fstream>
 #include <iostream>
-#include <cassert>
 
-template <typename T, T N>
-class dial
+template <typename T, T N> class Dial
 {
     T val;
     T passZero{0};
     T finishZero{0};
 
-public:
-    dial(T start) : val{start}
-    {
-    }
+  public:
+    Dial(T start) : val{start} {}
     T value()
     {
         return val;
@@ -25,7 +22,7 @@ public:
     {
         return passZero;
     }
-    dial &add(T r)
+    Dial& add(T r)
     {
         T tpasses{0};
         // one rotation at a time to track down what ended up being an off-by-one
@@ -40,7 +37,9 @@ public:
                 tpasses++;
             }
             if (tval <= tr)
+            {
                 tpasses++;
+            }
         }
         else if (r > 0)
         {
@@ -52,7 +51,9 @@ public:
                 tpasses++;
             }
             if (tval + tr >= N)
+            {
                 tpasses++;
+            }
         }
 #endif
         T oval{val};
@@ -63,9 +64,12 @@ public:
         val += N;
         val %= N;
         if (val == 0)
+        {
             finishZero++;
+        }
         assert(val < N && 0 <= val);
-        // adjust values to be non-negative so that /N works as floor, and increasing so that starting/ending at 0 is counted properly
+        // adjust values to be non-negative so that /N works as floor, and increasing so that
+        // starting/ending at 0 is counted properly
         if (nval < oval)
         {
             nval = -nval;
@@ -95,10 +99,9 @@ public:
     }
 };
 
-template <typename T, T N>
-std::istream &operator>>(std::istream &is, dial<T, N> &d)
+template <typename T, T N> std::istream& operator>>(std::istream& is, Dial<T, N>& d)
 {
-    char c;
+    char c{};
     T val;
     is >> c >> val;
     switch (c)
@@ -127,11 +130,13 @@ std::istream &operator>>(std::istream &is, dial<T, N> &d)
 
 int main()
 {
+    constexpr auto N = 100;
+    constexpr auto D = 50;
     using std::endl;
-    dial<int, 100> d{50};
+    Dial<int, N> d{D};
     std::fstream f{"input01.txt"};
     while (f >> d)
-        ;
-    std::cout << d.landedZero() << endl
-              << d.rotations() << endl;
+    {
+    }
+    std::cout << d.landedZero() << endl << d.rotations() << endl;
 }
