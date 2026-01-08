@@ -5,8 +5,27 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Add debug symbols
-set(CMAKE_BUILD_TYPE Debug)
+# Fetch Catch2 for testing
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.12.0  # Latest stable version
+)
+FetchContent_MakeAvailable(Catch2)
+
+# Add Catch2's CMake modules to the path
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+
+# Set default build type if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
+
+# Configure flags for each build type
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -fno-inline")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g -DNDEBUG")
 
 # Generate compile_commands.json for language server
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -34,4 +53,29 @@ foreach(DAY_SOURCE ${DAY_SOURCES})
     else()
         target_compile_options(${DAY_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
     endif()
+endforeach()
+
+# Enable testing
+enable_testing()
+
+# Find all test files
+file(GLOB TEST_SOURCES "test_*.cc")
+
+# Create test executable for each test file
+foreach(TEST_SOURCE ${TEST_SOURCES})
+    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
+
+    add_executable(${TEST_NAME} ${TEST_SOURCE})
+    target_link_libraries(${TEST_NAME} PRIVATE Catch2::Catch2WithMain)
+    target_compile_definitions(${TEST_NAME} PRIVATE TESTING)
+
+    # Enable warnings for tests too
+    if(MSVC)
+        target_compile_options(${TEST_NAME} PRIVATE /W4)
+    else()
+        target_compile_options(${TEST_NAME} PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+
+    # Register with CTest
+    add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach()

@@ -24,9 +24,9 @@ template <typename T, T N> class Dial
     }
     Dial& add(T r)
     {
-        T tpasses{0};
         // one rotation at a time to track down what ended up being an off-by-one
 #ifndef NDEBUG
+        T tpasses{0};
         if (r < 0)
         {
             T tval{val == 0 ? N : val};
