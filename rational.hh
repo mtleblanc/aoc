@@ -43,7 +43,7 @@ template <typename T> struct Rational
     }
     bool operator>=(Rational<T> other) const
     {
-        return !(*this > other);
+        return !(*this < other);
     }
     Rational<T>& operator+=(Rational<T> other)
     {

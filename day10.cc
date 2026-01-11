@@ -1,7 +1,9 @@
 #include <algorithm>
 #include <cassert>
+#include <climits>
 #include <fstream>
 #include <iostream>
+#include <machine/limits.h>
 #include <numeric>
 #include <sstream>
 #include <string>
@@ -176,7 +178,7 @@ auto nextCoeffs(std::vector<Col>& cols, std::vector<Coeff>& coeffs, std::vector<
         coeffs[idx]++;
         std::vector<T> test{orig};
         reduceHelper(cols, coeffs, test);
-        if (std::all_of(test.begin(), test.end(), [](auto t) { return t > 0; }))
+        if (std::all_of(test.begin(), test.end(), [](auto t) { return t >= 0; }))
         {
             return true;
         }
@@ -189,9 +191,9 @@ template <typename T = Q> auto minPresses(Matrix<T>& m)
 {
     int presses = INT_MAX;
     Matrix<T> orig{m};
-    std::cout << m << std::endl;
+    // std::cout << m << std::endl;
     m.rowReduce();
-    std::cout << m << std::endl;
+    // std::cout << m << std::endl;
     size_t lastPivot = -1;
     size_t dim = std::min(m.rows(), m.cols() - 1);
     for (size_t c = 0; c < dim; c++)
@@ -203,7 +205,7 @@ template <typename T = Q> auto minPresses(Matrix<T>& m)
         }
         for (size_t d = c + 1; d < m.cols() - 1; d++)
         {
-            if (m(d, d) == 1)
+            if (m(c, d) == 1)
             {
                 m.swapColumns(c, d);
                 orig.swapColumns(c, d);
@@ -213,22 +215,24 @@ template <typename T = Q> auto minPresses(Matrix<T>& m)
         }
     }
     std::cout << m << std::endl;
-    std::cout << lastPivot;
+    // std::cout << lastPivot << std::endl;
 
     std::vector<int> freeCoeffs((m.cols() - lastPivot - 2), 0);
     std::vector<typename Matrix<T>::Column> freeCols{};
+    std::vector<typename Matrix<T>::Column> origFreeCols{};
 
     for (size_t c = lastPivot + 1; c < m.cols() - 1; c++)
     {
         freeCols.push_back(m.column(c));
+        origFreeCols.push_back(orig.column(c));
     }
 
     std::vector<typename Matrix<T>::Column> allCols{};
 
-    allCols.reserve(m.cols() - 1);
-for (size_t c = 0; c < m.cols() - 1; c++)
+    allCols.reserve(orig.cols() - 1);
+    for (size_t c = 0; c < orig.cols() - 1; c++)
     {
-        allCols.push_back(m.column(c));
+        allCols.push_back(orig.column(c));
     };
 
     auto origTargetCol = orig.column(orig.cols() - 1);
@@ -239,58 +243,39 @@ for (size_t c = 0; c < m.cols() - 1; c++)
     {
         std::vector<T> rrTest{rrTarget};
         reduceHelper(freeCols, freeCoeffs, rrTest);
-        if (std::all_of(rrTest.begin(), rrTest.end(), [](auto t) { return t > 0; }))
+        if (std::all_of(rrTest.begin(), rrTest.end(), [](auto t) { return t >= 0; }))
         {
             std::vector<int> allCoeffs{};
             allCoeffs.reserve(m.cols() - 1);
             for (size_t c = 0; c < m.cols() - 1; c++)
             {
-                allCoeffs.push_back(static_cast<int>(
-                    c <= lastPivot ? rrTest[c] : freeCoeffs[c - lastPivot - 1]));
+                allCoeffs.push_back(
+                    static_cast<int>(c <= lastPivot ? rrTest[c] : freeCoeffs[c - lastPivot - 1]));
             }
             std::vector<T> origTest{origTarget};
             reduceHelper(allCols, allCoeffs, origTest);
-             if (std::all_of(rrTest.begin(), rrTest.end(), [](auto t) { return t == 0; })) {
+            if (std::all_of(origTest.begin(), origTest.end(), [](auto t) { return t == 0; }))
+            {
                 presses = std::min(presses, std::accumulate(allCoeffs.begin(), allCoeffs.end(), 0));
-             }
+            }
         }
-        if(!nextCoeffs(freeCols, freeCoeffs, origTarget)) {
+        if (!nextCoeffs(origFreeCols, freeCoeffs, origTarget))
+        {
             break;
         }
     }
-
-    // std::vector<typename Matrix<T>::Column> freeColOrig;
-    // std::vector<typename Matrix<T>::Column> freeColRed;
-    // std::transform(freeColumnIdx.begin(), freeColumnIdx.end(), back_inserter(freeColOrig),
-    //                [&orig](auto c) { return orig.column(c); });
-    // std::transform(freeColumnIdx.begin(), freeColumnIdx.end(), back_inserter(freeColRed),
-    //                [&m](auto c) { return m.column(c); });
-    // // for (size_t index = 0;;)
-    // // {
-    // std::vector<T> trialTarget{rrTarget};
-    // reduceHelper(freeColRed, coeffs, trialTarget);
-    //
-    // if (true || std::all_of(trialTarget.begin(), trialTarget.end(), // NOLINT
-    //                         [](auto v) { return v >= -EPS && abs(v - (int)v) < EPS; }))
-    // {
-    //     std::transform(trialTarget.begin(), trialTarget.end(), trialTarget.begin(),
-    //                    [](auto v) { return round(v); });
-    //     std::for_each(trialTarget.begin(), trialTarget.end(),
-    //                   [](auto v) { std::cout << v << " "; });
-    //     // break;
-    // }
-
-    // }
+    std::cout << presses << std::endl;
     return presses;
 }
 
 uint64_t part2(std::vector<Problem>& v)
 {
     uint64_t accum{};
+    // int count = 0;
     for (auto& p : v)
     {
+        // std::cout << count++ << std::endl;
         auto m = p.toMatrix<Q>();
-        // std::cout << m << std::endl;
         accum += minPresses(m);
     }
     return accum;
@@ -298,7 +283,7 @@ uint64_t part2(std::vector<Problem>& v)
 #ifndef TESTING
 int main()
 {
-    std::ifstream fs{"sample10.txt"};
+    std::ifstream fs{"input10.txt"};
     std::vector<Problem> v;
     for (std::string s; getline(fs, s);)
     {
