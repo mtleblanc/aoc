@@ -1,14 +1,33 @@
-#include <cassert>
-#include <iostream>
 #include <sstream>
+#include <cmath>
 
 #include "aoc.hh"
+
+/* https://adventofcode.com/2025/day/1
+ *
+ * input:
+ * L23
+ * R15
+ * ...
+ *
+ * problem: given a dial with 100 locations, starting at location 50, perform the turns from the
+ * input part1: how many turns end on 0 part2: how many times does the dial move to 0, including
+ * during a turn.  
+ */
 
 namespace aoc
 {
 constexpr size_t YEAR = 2025;
 constexpr size_t DAY = 1;
-template <typename T, T N> class Dial
+
+namespace
+{
+inline auto mod(auto m, auto d)
+{
+    return ((m % d) + d) % d;
+}
+
+template <class T, T N> class Dial
 {
     T val;
     size_t passZero{0};
@@ -16,128 +35,64 @@ template <typename T, T N> class Dial
 
   public:
     Dial(T start) : val{start} {}
-    T value()
+    [[nodiscard]] auto value() const noexcept
     {
         return val;
     }
-    size_t landedZero()
+    [[nodiscard]] auto landedZero() const noexcept
     {
         return finishZero;
     }
-    size_t rotations()
+    [[nodiscard]] auto rotations() const noexcept
     {
         return passZero;
     }
-    Dial& add(T r)
+    auto& add(T r)
     {
-        // one rotation at a time to track down what ended up being an off-by-one
-#ifndef NDEBUG
-        T tpasses{0};
-        if (r < 0)
-        {
-            T tval{val == 0 ? N : val};
-            T tr{-r};
-            while (tr > N)
-            {
-                tr -= N;
-                tpasses++;
-            }
-            if (tval <= tr)
-            {
-                tpasses++;
-            }
-        }
-        else if (r > 0)
-        {
-            T tval{val};
-            T tr{r};
-            while (tr > N)
-            {
-                tr -= N;
-                tpasses++;
-            }
-            if (tval + tr >= N)
-            {
-                tpasses++;
-            }
-        }
-#endif
-        T oval{val};
-        val += r;
-        T nval{val};
-        // annoying truncate-towards-zero
-        val %= N;
-        val += N;
-        val %= N;
+        // count full rotations
+        passZero += std::abs(r / N);
+        r %= N;
+
+        val = mod(val + r, N);
         if (val == 0)
         {
             finishZero++;
         }
-        assert(val < N && 0 <= val);
-        // adjust values to be non-negative so that /N works as floor, and increasing so that
-        // starting/ending at 0 is counted properly
-        if (nval < oval)
+        // The extra % N is for the case where r < 0, val == 0
+        // Essentially when turning left, we should treat 0 as N when checking for wraparound
+        if (r > val || r < (val - N) % N)
         {
-            nval = -nval;
-            oval = -oval;
+            passZero++;
         }
-        if (oval < 0)
-        {
-            T mult = nval / N + 1;
-            nval += mult * N;
-            oval += mult * N;
-        }
-        assert(nval > oval);
-        assert(oval >= 0);
-        assert(abs(nval - oval) == abs(r));
-        T passes = (nval / N) - ((oval) / N);
-        passZero += passes;
-        assert(passes == tpasses);
-#ifdef DEBUG
-        std::cout << " landed on " << val;
-        if (passes)
-        {
-            std::cout << " passed zero " << passes << " times";
-        }
-        std::cout << std::endl;
-#endif
         return *this;
     }
 };
 
-template <typename T, T N> std::istream& operator>>(std::istream& is, Dial<T, N>& d)
+template <class T, T N> std::istream& operator>>(std::istream& is, Dial<T, N>& d)
 {
     char c{};
     T val;
-    is >> c >> val;
-    switch (c)
+    if (is >> c >> val)
     {
-    case 'L':
-    case 'l':
-#ifdef DEBUG
-        std::cout << "Moving L" << val;
-#endif
-        d.add(-val);
-        break;
-    case 'R':
-    case 'r':
-#ifdef DEBUG
-        std::cout << "Moving R" << val;
-#endif
-        d.add(val);
-        break;
-    case '\0':
-        break;
-    default:
-        throw 0;
+        if (c == 'L')
+        {
+            d.add(-val);
+        }
+        else if (c == 'R')
+        {
+            d.add(val);
+        }
+        else {
+            is.setstate(std::ios_base::failbit);
+        }
     }
     return is;
 }
+} // namespace
 template <> Solution solve<YEAR, DAY>(const std::vector<std::string>& lines)
 {
     constexpr auto N = 100;
     constexpr auto D = 50;
-    using std::endl;
     Dial<int, N> d{D};
     for (const auto& turn : lines)
     {
