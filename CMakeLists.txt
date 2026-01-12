@@ -36,30 +36,27 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #     set(CMAKE_CXX_CLANG_TIDY "${CLANG_TIDY_EXE}")
 # endif()
 
-# Find all day*.cc files
-file(GLOB DAY_SOURCES "day*.cc")
+# Add include directory
+include_directories(include)
 
-# Create an executable for each day
-foreach(DAY_SOURCE ${DAY_SOURCES})
-    # Get the filename without extension (e.g., day01)
-    get_filename_component(DAY_NAME ${DAY_SOURCE} NAME_WE)
+# Find all day*.cc files across all years
+file(GLOB_RECURSE DAY_SOURCES "src/*/day*.cc")
 
-    # Create executable
-    add_executable(${DAY_NAME} ${DAY_SOURCE})
+# Main executable that runs solutions
+add_executable(aoc src/main.cc ${DAY_SOURCES})
 
-    # Enable warnings
-    if(MSVC)
-        target_compile_options(${DAY_NAME} PRIVATE /W4 /WX)
-    else()
-        target_compile_options(${DAY_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
-    endif()
-endforeach()
+# Enable warnings for main executable
+if(MSVC)
+    target_compile_options(aoc PRIVATE /W4 /WX)
+else()
+    target_compile_options(aoc PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 
 # Enable testing
 enable_testing()
 
-# Find all test files
-file(GLOB TEST_SOURCES "test_*.cc")
+# Find all test files in tests directory
+file(GLOB TEST_SOURCES "tests/test_*.cc")
 
 # Create test executable for each test file
 foreach(TEST_SOURCE ${TEST_SOURCES})

@@ -1,18 +1,18 @@
 #include <catch2/catch_test_macros.hpp>
 //NOLINTBEGIN
-#include "day10.cc"
+#include "../src/2025/day10.cc"
 
 TEST_CASE("Reduce Helper", "[linalg]") {
     std::vector<std::vector<float>> cols;
     std::vector<float> coeffs {1.0f};
     std::vector<float> orig {2.f, 3.f, 4.f };
     cols.push_back({4.f, 3.f, 2.f});
-    reduceHelper(cols, coeffs, orig);
+    aoc::reduceHelper(cols, coeffs, orig);
     REQUIRE( orig == std::vector{-2.f, 0.f, 2.f});
 
     cols.push_back({7.f, 1.f, 4.f});
     coeffs.push_back(-1.f);
-    reduceHelper(cols, coeffs, orig);
+    aoc::reduceHelper(cols, coeffs, orig);
     REQUIRE( orig == std::vector{1.f,-2.f, 4.f });
 }
 

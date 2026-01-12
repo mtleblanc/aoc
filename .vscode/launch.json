@@ -1,15 +1,14 @@
 {
     "version": "0.2.0",
     "configurations": [
-        
         {
-            "name": "Debug Active File",
+            "name": "Debug AOC",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/build-debug/${fileBasenameNoExtension}",
+            "program": "${workspaceFolder}/build-debug/aoc",
             "args": [],
             "cwd": "${workspaceFolder}",
-            "preLaunchTask": "CMake: Build Active File"
+            "preLaunchTask": "CMake: Build All (Debug)"
         }
     ]
 }

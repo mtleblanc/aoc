@@ -1,14 +1,17 @@
-#include <cassert>
-#include <cstdint>
-#include <fstream>
 #include <iostream>
-#include <machine/limits.h>
 #include <map>
 #include <numeric>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "aoc.hh"
+namespace aoc
+{
+constexpr size_t YEAR = 2025;
+constexpr size_t DAY = 11;
+namespace
+{
 struct Node
 {
     std::string id;
@@ -75,16 +78,12 @@ void countPaths(const std::string& source, auto& m)
 
 size_t part1(std::vector<Node>& ns)
 {
-    return 0;
     std::map<std::string, Node> m;
     for (const auto& n : ns)
     {
         m[n.id] = n;
     }
     m["out"].paths = 1;
-    m["out"].pathsNoDac = 1;
-    m["out"].pathsNoFft = 1;
-    m["out"].pathsNeither = 1;
     countPaths(std::string{"you"}, m);
     return m["you"].paths.value();
 }
@@ -127,13 +126,11 @@ size_t part2(std::vector<Node>& ns)
     // return n.paths.value() - n.pathsNoFft.value() - n.pathsNoDac.value() +
     // n.pathsNeither.value();
 }
-
-#ifndef TESTING
-int main()
+} // namespace
+template <> Solution solve<YEAR, DAY>(const std::vector<std::string>& lines)
 {
-    std::ifstream fs{"input11.txt"};
     std::vector<Node> v;
-    for (std::string s; getline(fs, s);)
+    for (const auto& s : lines)
     {
         if (s.length() == 0)
         {
@@ -141,22 +138,8 @@ int main()
         }
         std::istringstream iss{s};
         v.emplace_back();
-        try
-        {
-            iss >> v.back();
-        }
-        catch (const std::exception& ex)
-        {
-            std::cerr << ex.what() << std::endl;
-            exit(1);
-        }
-        catch (...)
-        {
-            std::cerr << "Unknown exception" << std::endl;
-        }
+        iss >> v.back();
     }
-
-    std::cout << part1(v) << std::endl;
-    std::cout << part2(v) << std::endl;
+    return Solution{part1(v), part2(v)};
 }
-#endif
+} // namespace aoc

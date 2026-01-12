@@ -1,12 +1,17 @@
 #include <cassert>
-#include <fstream>
 #include <iostream>
 #include <machine/limits.h>
 #include <numeric>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include "aoc.hh"
+namespace aoc
+{
+constexpr size_t YEAR = 2025;
+constexpr size_t DAY = 12;
 namespace
 {
 struct Problem
@@ -19,7 +24,7 @@ struct Problem
 std::istream& operator>>(std::istream& is, Problem& n)
 {
     is >> n.l;
-    char c {};
+    char c{};
     is >> c;
     is >> n.w;
     is >> c;
@@ -33,31 +38,23 @@ std::istream& operator>>(std::istream& is, Problem& n)
 
 size_t part1(std::vector<Problem>& ns)
 {
-    constexpr std::array<size_t, 6> SIZES = {7,7,7,7,6,5};
+    constexpr std::array<size_t, 6> SIZES = {7, 7, 7, 7, 6, 5};
     std::vector<size_t> fits;
-    std::ranges::transform(ns, back_inserter(fits), [&SIZES](auto &p) {
-        return std::inner_product(SIZES.begin(), SIZES.end(), p.presents.begin(), size_t{}) < p.l * p.w ? 1 : 0;
-    });
+    std::ranges::transform(ns, back_inserter(fits),
+                           [&SIZES](auto& p)
+                           {
+                               return std::inner_product(SIZES.begin(), SIZES.end(),
+                                                         p.presents.begin(), size_t{}) < p.l * p.w
+                                          ? 1
+                                          : 0;
+                           });
     return std::accumulate(fits.begin(), fits.end(), size_t{});
 }
-
-size_t part2(std::vector<Problem>& ns)
-{
-    (void)ns;
-    return 0;
-}
 } // namespace
-#ifndef TESTING
-int main()
+template <> Solution solve<YEAR, DAY>(const std::vector<std::string>& lines)
 {
-    std::ifstream fs{"input12.txt"};
     std::vector<Problem> v;
-    std::string s;
-    for (int i = 0; i < 30; i++)
-    {
-        getline(fs, s);
-    }
-    for (; getline(fs, s);)
+    for (const auto& s : lines | std::views::drop(30))
     {
         if (s.length() == 0)
         {
@@ -80,7 +77,6 @@ int main()
         }
     }
 
-    std::cout << part1(v) << std::endl;
-    std::cout << part2(v) << std::endl;
+    return Solution { part1(v)};
 }
-#endif
+} // namespace aoc

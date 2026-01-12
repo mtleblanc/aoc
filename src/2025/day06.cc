@@ -1,39 +1,24 @@
 #include <cassert>
-#include <fstream>
 #include <iostream>
+#include <ranges>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
-#include <ranges>
 
-struct range
+#include "aoc.hh"
+namespace aoc
 {
-    long min;
-    long max;
-    bool in(long v)
-    {
-        return v >= min && v <= max;
-    }
-    range(std::string s)
-    {
-        char c;
-        std::istringstream ss{s};
-        ss >> min >> c >> max;
-    }
-};
-
-struct event
+constexpr size_t YEAR = 2025;
+constexpr size_t DAY = 6;
+namespace
 {
-    long id;
-    long effect;
-    event(long id, long effect) : id{id}, effect{effect} {}
-};
 
 uint64_t part2(std::vector<std::string> v)
 {
-    uint64_t accum {0};
-    uint64_t cur {0};
-    bool isMult;
+    uint64_t accum{0};
+    uint64_t cur{0};
+    bool isMult = false;
     size_t opIdx = v.size() - 1;
     for (size_t x = 0; x < v[0].size(); x++)
     {
@@ -50,36 +35,39 @@ uint64_t part2(std::vector<std::string> v)
             accum += cur;
             cur = 0;
             isMult = false;
+            break;
+        default:
+        {
+            throw std::invalid_argument("Unexpected symbol in input");
         }
-        uint64_t val {0};
-        for(size_t y = 0; y < opIdx; y++) {
+        }
+        uint64_t val{0};
+        constexpr uint64_t BASE = 10;
+        for (size_t y = 0; y < opIdx; y++)
+        {
             char c = v[y][x];
-            if(c != ' ') {
-                val *= 10;
+            if (c != ' ')
+            {
+                val *= BASE;
                 val += c - '0';
             }
         }
-        if(val != 0) cur = isMult ? cur * val : cur + val;
+        if (val != 0)
+        {
+            cur = isMult ? cur * val : cur + val;
+        }
     }
     accum += cur;
     return accum;
 }
-
-int main()
+} // namespace
+template <> Solution solve<YEAR, DAY>(const std::vector<std::string>& lines)
 {
-    std::ifstream fs{"input06.txt"};
-    std::vector<std::string> v;
-    for (std::string s; getline(fs, s);)
-    {
-        if (s.length() == 0)
-            break;
-        v.emplace_back(s);
-    }
 
     std::vector<bool> isMult;
     std::vector<uint64_t> results;
-    std::istringstream ss{v.back()};
-    char c;
+    std::istringstream ss{lines.back()};
+    char c = 0;
     while (ss >> c)
     {
         switch (c)
@@ -96,9 +84,9 @@ int main()
             break;
         }
     }
-    for (const auto &l : std::ranges::subrange(v.begin(), v.end() - 1))
+    for (const auto& l : std::ranges::subrange(lines.begin(), lines.end() - 1))
     {
-        uint64_t cur;
+        uint64_t cur = 0;
         std::istringstream ss{l};
         size_t i = 0;
         while (ss >> cur)
@@ -108,9 +96,11 @@ int main()
         }
         assert(i == isMult.size());
     }
-    uint64_t accum {};
+    uint64_t accum{};
     for (auto v : results)
+    {
         accum += v;
-    std::cout << accum << std::endl;
-    std::cout << part2(v) << std::endl;
+    }
+    return Solution{accum, part2(lines)};
 }
+} // namespace aoc

@@ -1,12 +1,18 @@
 #include <cassert>
-#include <fstream>
 #include <iostream>
+#include <sstream>
 
+#include "aoc.hh"
+
+namespace aoc
+{
+constexpr size_t YEAR = 2025;
+constexpr size_t DAY = 1;
 template <typename T, T N> class Dial
 {
     T val;
-    T passZero{0};
-    T finishZero{0};
+    size_t passZero{0};
+    size_t finishZero{0};
 
   public:
     Dial(T start) : val{start} {}
@@ -14,11 +20,11 @@ template <typename T, T N> class Dial
     {
         return val;
     }
-    T landedZero()
+    size_t landedZero()
     {
         return finishZero;
     }
-    T rotations()
+    size_t rotations()
     {
         return passZero;
     }
@@ -127,16 +133,17 @@ template <typename T, T N> std::istream& operator>>(std::istream& is, Dial<T, N>
     }
     return is;
 }
-
-int main()
+template <> Solution solve<YEAR, DAY>(const std::vector<std::string>& lines)
 {
     constexpr auto N = 100;
     constexpr auto D = 50;
     using std::endl;
     Dial<int, N> d{D};
-    std::fstream f{"input01.txt"};
-    while (f >> d)
+    for (const auto& turn : lines)
     {
+        std::istringstream iss{turn};
+        iss >> d;
     }
-    std::cout << d.landedZero() << endl << d.rotations() << endl;
+    return Solution{d.landedZero(), d.rotations()};
 }
+} // namespace aoc

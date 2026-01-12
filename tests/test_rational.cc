@@ -1,4 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
+#include <stdexcept>
 // NOLINTBEGIN
 #include "rational.hh"
 
@@ -24,7 +25,7 @@ TEST_CASE("Division by zero throws")
 {
     R r1{1, 2};
     R r2{0, 1};
-    REQUIRE_THROWS_AS(r1 / r2, std::overflow_error);
+    REQUIRE_THROWS_AS(r1 / r2, std::invalid_argument);
 }
 
 TEST_CASE("Reduction to lowest terms")

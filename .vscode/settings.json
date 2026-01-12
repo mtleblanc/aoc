@@ -40,8 +40,11 @@
     },
     "C_Cpp.intelliSenseEngine": "disabled",
     "clangd.arguments": [
-        "--compile-commands-dir=${workspaceFolder}/build",
+        "--compile-commands-dir=${workspaceFolder}/build-debug",
         "--background-index",
         "--clang-tidy"
-    ]
+    ],
+    "cmake.buildDirectory": "${workspaceFolder}/build-debug",
+    "cmake.configureOnOpen": false,
+    "cmake.configureOnEdit": false
 }

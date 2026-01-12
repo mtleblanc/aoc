@@ -1,9 +1,4 @@
 #include <algorithm>
-#include <cassert>
-#include <climits>
-#include <fstream>
-#include <iostream>
-#include <machine/limits.h>
 #include <numeric>
 #include <sstream>
 #include <string>
@@ -11,6 +6,14 @@
 
 #include "matrix.hh"
 #include "rational.hh"
+
+#include "aoc.hh"
+namespace aoc
+{
+constexpr size_t YEAR = 2025;
+constexpr size_t DAY = 10;
+namespace
+{
 using Q = Rational<int>;
 
 struct Problem
@@ -214,7 +217,7 @@ template <typename T = Q> auto minPresses(Matrix<T>& m)
             }
         }
     }
-    std::cout << m << std::endl;
+    // std::cout << m << std::endl;
     // std::cout << lastPivot << std::endl;
 
     std::vector<int> freeCoeffs((m.cols() - lastPivot - 2), 0);
@@ -264,7 +267,7 @@ template <typename T = Q> auto minPresses(Matrix<T>& m)
             break;
         }
     }
-    std::cout << presses << std::endl;
+    // std::cout << presses << std::endl;
     return presses;
 }
 
@@ -280,12 +283,12 @@ uint64_t part2(std::vector<Problem>& v)
     }
     return accum;
 }
-#ifndef TESTING
-int main()
+} // namespace
+
+template <> Solution solve<YEAR, DAY>(const std::vector<std::string>& lines)
 {
-    std::ifstream fs{"input10.txt"};
     std::vector<Problem> v;
-    for (std::string s; getline(fs, s);)
+    for (const auto& s : lines)
     {
         if (s.length() == 0)
         {
@@ -293,22 +296,8 @@ int main()
         }
         std::istringstream iss{s};
         v.emplace_back();
-        try
-        {
-            iss >> v.back();
-        }
-        catch (const std::exception& ex)
-        {
-            std::cerr << ex.what() << std::endl;
-            exit(1);
-        }
-        catch (...)
-        {
-            std::cerr << "Unknown exception" << std::endl;
-        }
+        iss >> v.back();
     }
-
-    std::cout << part1(v) << std::endl;
-    std::cout << part2(v) << std::endl;
+    return Solution{part1(v), part2(v)};
 }
-#endif
+} // namespace aoc
