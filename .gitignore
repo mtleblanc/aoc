@@ -3,5 +3,5 @@ a.out
 build/
 build-debug/
 build-release/
-input*
+input*.txt
 .cache

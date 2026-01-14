@@ -10,7 +10,7 @@ MAX_DAY=$2
 DIR="src/${YEAR}"
 
 mkdir -p "$DIR"
-mkdir -p "inputs/${YEAR} tests/${YEAR}"
+mkdir -p "inputs/${YEAR}" "tests/${YEAR}"
 
 for DAY in $(seq 1 $MAX_DAY); do
     FILE="${DIR}/day$(printf '%02d' $DAY).cc"
