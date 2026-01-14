@@ -1,3 +1,4 @@
+#include <ios>
 #include <istream>
 #include <string>
 #include <vector>
@@ -24,6 +25,17 @@ inline void readAllLines(std::istream& input, std::vector<std::string>& lines)
     {
         lines.push_back(std::move(tmp));
     }
+}
+
+inline std::string slurp(std::istream& input)
+{
+    auto cur = input.tellg();
+    input.seekg(0, std::ios_base::seekdir::end);
+    auto end = input.tellg();
+    input.seekg(cur, std::ios_base::seekdir::beg);
+    std::string ret("\0", end - cur);
+    input.read(ret.data(), end - cur);
+    return ret;
 }
 
 template <size_t Y, size_t D> Solution solve(std::istream& input)
