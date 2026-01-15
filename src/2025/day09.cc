@@ -105,8 +105,7 @@ uint64_t part2(const std::vector<Corner>& v)
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> lines;
-    readAllLines(input, lines);
+    auto lines = readAllLines(input);
     std::vector<Corner> v;
     for (const auto& s : lines)
     {

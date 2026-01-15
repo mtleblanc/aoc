@@ -36,8 +36,7 @@ struct Event
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> lines;
-    readAllLines(input, lines);
+    auto lines = readAllLines(input);
     std::vector<Range> v;
     auto blank = std::ranges::find(lines, "");
     std::copy(lines.begin(), blank, std::back_inserter(v));

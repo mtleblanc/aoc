@@ -120,8 +120,7 @@ Solution improved(uint64_t from, uint64_t to)
 } // namespace
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> lines;
-    readAllLines(input, lines);
+    auto lines = readAllLines(input);
 
     // auto start = std::chrono::steady_clock::now();
 

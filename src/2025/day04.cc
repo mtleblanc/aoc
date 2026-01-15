@@ -99,8 +99,7 @@ size_t part2(Grid g)
 } // namespace
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> lines;
-    readAllLines(input, lines);
+    auto lines = readAllLines(input);
     Grid g{lines};
     return Solution{part1(g), part2(g)};
 }

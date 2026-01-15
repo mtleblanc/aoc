@@ -85,8 +85,7 @@ uint64_t part2(const std::vector<std::string>& v)
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> lines;
-    readAllLines(input, lines);
+    auto lines = readAllLines(input);
     return Solution{part1(lines), part2(lines)};
 }
 } // namespace aoc

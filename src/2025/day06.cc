@@ -63,8 +63,7 @@ uint64_t part2(std::vector<std::string> v)
 } // namespace
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> lines;
-    readAllLines(input, lines);
+    auto lines = readAllLines(input);
 
     std::vector<bool> isMult;
     std::vector<uint64_t> results;

@@ -287,8 +287,7 @@ uint64_t part2(std::vector<Problem>& v)
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> lines;
-    readAllLines(input, lines);
+    auto lines = readAllLines(input);
     std::vector<Problem> v;
     for (const auto& s : lines)
     {

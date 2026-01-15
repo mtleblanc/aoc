@@ -83,8 +83,7 @@ inline bool isSemiGradual(const std::vector<int>& v)
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> rss;
-    readAllLines(input, rss);
+    auto rss = readAllLines(input);
     std::vector<std::vector<int>> rsi;
     std::ranges::transform(rss, back_inserter(rsi), toVec);
     return {static_cast<size_t>(std::ranges::count_if(rsi, isGradual)),

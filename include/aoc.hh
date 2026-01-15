@@ -18,13 +18,15 @@ struct Solution
     }
 };
 
-inline void readAllLines(std::istream& input, std::vector<std::string>& lines)
+inline std::vector<std::string> readAllLines(std::istream& input)
 {
+    std::vector<std::string> lines;
     std::string tmp;
     while (std::getline(input, tmp))
     {
         lines.push_back(std::move(tmp));
     }
+    return lines;
 }
 
 inline std::string slurp(std::istream& input)

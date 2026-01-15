@@ -168,8 +168,7 @@ uint64_t part2(const std::vector<std::string>& v)
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<std::string> lines;
-    readAllLines(input, lines);
+    auto lines = readAllLines(input);
     constexpr size_t SAMPLE_CONNECTIONS = 10;
     constexpr size_t ACTUAL_CONNECTIONS = 1000;
     return Solution{
