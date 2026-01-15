@@ -1,4 +1,5 @@
 #include "aoc.hh"
+#include <array>
 #include <cassert>
 #include <cstddef>
 #include <limits>
@@ -11,7 +12,8 @@
  * MASX
  * ...
  *
- * Part 1:
+ * Part 1: Count occurrences of XMAS in the wordsearch
+ * Part 2: Count occurrences of 2 diagonal MAS intersecting at A
  */
 namespace aoc
 {
@@ -22,46 +24,39 @@ namespace
 {
 class WordSearch
 {
-    static constexpr char DUMMY = '.';
+  public:
     using size_type = std::string::size_type;
     using difference_type = std::string::difference_type;
-    std::string s;
-    size_type w;
-    size_type h;
-
-  public:
-    WordSearch(const std::string& s) : s{s}, w(s.find('\n')), h(s.size() / w)
+    using const_iterator = std::string::const_iterator;
+    using offset_type = std::pair<difference_type, difference_type>;
+    // NB: newlines aren't removed, so width includes them.  This lets us use w for stride length and
+    // doesn't affect searching since \n is just a mismatch like any other character
+    explicit WordSearch(const std::string& s) : s{s}, w(s.find('\n') + 1), h(s.size() / w)
     {
         assert(w * h == s.size());
-        assert(w < std::numeric_limits<int>::max());
-        assert(h < std::numeric_limits<int>::max());
+        assert(w < std::numeric_limits<difference_type>::max());
+        assert(h < std::numeric_limits<difference_type>::max());
     }
-    [[__nodiscard__]] size_type width() const
+    [[nodiscard]] size_type width() const
     {
         return w;
     }
-    [[__nodiscard__]] size_type height() const
+    [[nodiscard]] size_type height() const
     {
         return h;
     }
-    [[__nodiscard__]] difference_type dwidth() const
+    [[nodiscard]] difference_type dwidth() const
     {
         return static_cast<difference_type>(w);
     }
-    [[__nodiscard__]] difference_type dheight() const
+    [[nodiscard]] difference_type dheight() const
     {
         return static_cast<difference_type>(h);
     }
-    // Return character at grid location, with dummy return for locations outside of grid
-    // arguments are size_type, attempts to use negatives will wrap around and correctly fail the
-    // range check
-    [[__nodiscard__]] char operator()(size_type x, size_type y) const
+
+    [[nodiscard]] char operator()(size_type x, size_type y) const
     {
-        if (x >= w || y >= h)
-        {
-            return DUMMY;
-        }
-        return s[h * y + x];
+        return s[w * y + x];
     }
 
     [[nodiscard]] auto begin() const
@@ -73,157 +68,88 @@ class WordSearch
         return s.end();
     }
 
-    [[__nodiscard__]] bool matchAt(size_t x, size_t y, ssize_t dx, ssize_t dy,
-                                   const std::string& target) const
+    [[nodiscard]] bool matchAt(const_iterator it, offset_type o, const std::string& target) const
     {
-        s.begin();
+        if (!canMove(it, o, static_cast<difference_type>(target.size()) - 1))
+        {
+            return false;
+        }
+        auto stride = o.first + dwidth() * o.second;
+
         for (auto c : target)
         {
-            if (c != (*this)(x, y))
+            if (c != *it)
             {
                 return false;
             }
-            x += dx;
-            y += dy;
+            it += stride;
         }
         return true;
     }
-};
 
-template <class It> class TwoDimGuardedIterator : public It
-{
-    using iterator_category = std::random_access_iterator_tag;
-    using value_type = It::value_type;
-    using difference_type = It::difference_type;
-    using pointer = It::pointer;
-    using reference = It::reference;
+  private:
+    std::string s;
+    size_type w;
+    size_type h;
 
-    difference_type stride;
-    It start;
-    It end_;
-    bool oob{false};
-    value_type oobValue;
-
-  public:
-    TwoDimGuardedIterator(It start, difference_type rows, difference_type columns,
-                          value_type oobValue)
-        : It{start}, stride{columns}, start{start}, end_{start + rows * columns}, oobValue(oobValue)
+    [[nodiscard]] bool canMove(const_iterator it, offset_type o, difference_type steps) const
     {
-    }
-
-    [[nodiscard]] TwoDimGuardedIterator<It> end() const
-    {
-        return TwoDimGuardedIterator<It>{end_, 0, 0, oobValue};
-    }
-    reference operator*()
-    {
-        if (oob)
-        {
-            return oobValue;
-        }
-        return It::operator*();
-    }
-
-    pointer operator->()
-    {
-        if (oob)
-        {
-            return oobValue;
-        }
-        return It::operator->();
-    }
-
-    [[__nodiscard__]] difference_type row() const
-    {
-        return (*this - start) / stride;
-    }
-    [[__nodiscard__]] difference_type col() const
-    {
-        return (*this - start) % stride;
-    }
-    auto& operator+=(difference_type d)
-    {
-        return this->It::operator+=(d);
-    }
-    auto& operator+=(std::pair<difference_type, difference_type> delta)
-    {
-        auto newCol = col() + delta.second;
-        if (newCol < 0 || newCol >= stride)
-        {
-            oob = true;
-        }
-        *this += delta.first * stride + delta.second;
-        if (*this < start || *this >= end_)
-        {
-            oob = true;
-        }
-        return *this;
+        auto idx = (it - s.begin());
+        auto r = static_cast<difference_type>(idx / w);
+        auto c = static_cast<difference_type>(idx % w);
+        auto r2 = r + o.second * steps;
+        auto c2 = c + o.first * steps;
+        return r2 >= 0 && r2 < static_cast<difference_type>(h) && c2 >= 0 &&
+               c2 < static_cast<difference_type>(w);
     }
 };
 
-template <class It>
-TwoDimGuardedIterator<It>
-operator+(TwoDimGuardedIterator<It> it,
-          std::pair<typename It::difference_type, typename It::difference_type> delta)
+constexpr auto kingMoves()
 {
-    return it += delta;
-}
-
-size_t part1(const WordSearch& ws)
-{
-    constexpr std::string TARGET = "XMAS";
-    size_t accum{};
-    // TwoDimGuardedIterator wsi{ws.begin(), ws.dheight(), ws.dwidth(), '.'};
-
-    // auto wsend = wsi.end();
-    std::vector<std::pair<ssize_t, ssize_t>> deltas;
+    constexpr size_t NUM_MOVES = 8;
+    std::array<WordSearch::offset_type, NUM_MOVES> deltas;
+    size_t i{0};
     for (ssize_t dx{-1}; dx <= 1; ++dx)
     {
         for (ssize_t dy{-1}; dy <= 1; ++dy)
         {
             if (dx != 0 || dy != 0)
             {
-                deltas.emplace_back(dx, dy);
+                deltas[i++] = {dx, dy};
             }
         }
     }
+    return deltas;
+}
 
-    // for (; wsi != wsend; ++wsi)
-    // {
-    //     for (auto del : deltas)
-    //     {
-    //         auto twsi = wsi;
-    //         bool matching{true};
-    //         for (auto c : TARGET)
-    //         {
-    //             if (c != *twsi)
-    //             {
-    //                 matching = false;
-    //                 break;
-    //             }
-    //             twsi += del;
-    //         }
-    //         if (matching)
-    //         {
-    //             ++accum;
-    //         }
-    //     }
-    // }
-
-    for (size_t x{0}; x < ws.width(); ++x)
+constexpr auto diagonalMoves()
+{
+    constexpr size_t NUM_MOVES = 4;
+    std::array<WordSearch::offset_type, NUM_MOVES> deltas;
+    size_t i{0};
+    for (ssize_t dx : {-1, 1})
     {
-        for (size_t y{0}; y < ws.height(); ++y)
+        for (ssize_t dy : {-1, 1})
         {
-            if (ws(x, y) != TARGET[0])
+            deltas[i++] = {dx, dy};
+        }
+    }
+    return deltas;
+}
+
+size_t part1(const WordSearch& ws)
+{
+    constexpr std::string TARGET = "XMAS";
+    size_t accum{};
+    constexpr auto DELTAS = kingMoves();
+
+    for (auto it = ws.begin(); it != ws.end(); ++it)
+    {
+        for (auto o : DELTAS)
+        {
+            if (ws.matchAt(it, o, TARGET))
             {
-                continue;
-            }
-            for (auto [dx, dy] : deltas)
-            {
-                if (ws.matchAt(x, y, dx, dy, TARGET))
-                {
-                    ++accum;
-                }
+                ++accum;
             }
         }
     }
@@ -232,39 +158,30 @@ size_t part1(const WordSearch& ws)
 
 size_t part2(const WordSearch& ws)
 {
-    std::vector<std::pair<ssize_t, ssize_t>> deltas;
-    for (ssize_t dx : {-1, 1})
-    {
-        for (ssize_t dy : {-1, 1})
-        {
-            if (dx != 0 && dy != 0)
-            {
-                deltas.emplace_back(dx, dy);
-            }
-        }
-    }
+    constexpr auto DELTAS = diagonalMoves();
     size_t accum{};
-    for (size_t y{0}; y < ws.height(); ++y)
+    for (size_t y{1}; y < ws.height() - 1; ++y)
     {
-        for (size_t x{0}; x < ws.width(); ++x)
+        for (size_t x{1}; x < ws.width() - 1; ++x)
         {
             if (ws(x, y) != 'A')
             {
                 continue;
             }
-            for (auto [dx, dy] : deltas)
+            auto isMS = [&](auto delta)
             {
+                auto [dx, dy] = delta;
                 auto c = ws(x + dx, y + dy);
-                if (c != 'M' && c != 'S')
-                {
-                    goto cont;
-                }
+                return c == 'M' || c == 'S';
+            };
+            if (!std::ranges::all_of(DELTAS, isMS))
+            {
+                continue;
             }
             if ((ws(x - 1, y - 1) != ws(x + 1, y + 1)) && (ws(x - 1, y + 1) != ws(x + 1, y - 1)))
             {
                 ++accum;
             }
-        cont:;
         }
     }
     return accum;
