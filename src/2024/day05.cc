@@ -2,7 +2,9 @@
 #include <algorithm>
 #include <cassert>
 #include <ios>
+#include <iterator>
 #include <map>
+#include <ranges>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -57,19 +59,13 @@ OrderRule::OrderRule(const std::string& s)
     iss >> *this;
 }
 
-struct Seq
-{
-    std::vector<size_t> seq;
-    Seq(std::vector<size_t> seq) : seq{std::move(seq)} {};
-    explicit Seq(const std::string& s);
-};
-std::istream& operator>>(std::istream& is, Seq& r)
+std::istream& operator>>(std::istream& is, std::vector<size_t>& seq)
 {
     char c{};
     size_t t{};
     while (is >> t)
     {
-        r.seq.push_back(t);
+        seq.push_back(t);
         if (is >> c && c != ',')
         {
             is.setstate(std::ios_base::failbit);
@@ -79,51 +75,74 @@ std::istream& operator>>(std::istream& is, Seq& r)
 
     return is;
 }
-Seq::Seq(const std::string& s)
-{
-    std::istringstream iss{s};
-    iss >> *this;
-}
 
-bool inOrder(const Seq& s, const std::multimap<size_t, OrderRule>& lu)
+std::pair<bool, std::multimap<size_t, size_t>> inOrder(const std::vector<size_t>& seq,
+                                             const std::set<OrderRule>& lu)
 {
-    std::set<OrderRule> seen;
-    for (auto v : s.seq)
+    std::multimap<size_t, size_t> applicableRules;
+    bool result{true};
+    for (auto oit = seq.begin(); oit != seq.end(); ++oit)
     {
-        auto [it, end] = lu.equal_range(v);
-        for (; it != end; ++it)
+        for (auto iit = seq.begin(); iit != oit; ++iit)
         {
-            auto r = it->second;
-            if (v == r.second)
+            if (lu.contains({*oit, *iit}))
             {
-                seen.insert(r);
+                applicableRules.insert({*oit, *iit});
+                result = false;
             }
-            else
+            if (lu.contains({*iit, *oit}))
             {
-                if (seen.contains(r))
-                {
-                    return false;
-                }
+                applicableRules.insert({*iit, *oit});
             }
         }
     }
-    return true;
+    return {result, applicableRules};
 }
 
-Solution solve(const std::vector<OrderRule>& rules, const std::vector<Seq>& sequences)
+void topSortHelper(const size_t n, std::multimap<size_t, size_t>& edges, auto& outIt,
+                   std::set<size_t>& seen)
+{
+    for (auto [cur, end] = edges.equal_range(n); cur != end; ++cur)
+    {
+        if (!seen.contains(cur->second))
+        {
+            topSortHelper(cur->second, edges, outIt, seen);
+        }
+    }
+    seen.insert(n);
+    *outIt++ = n;
+}
+
+void topSort(const std::vector<size_t>& nodes, std::multimap<size_t, size_t>& edges, auto&& outIt)
+{
+    std::set<size_t> seen;
+    for (auto n : nodes)
+    {
+        if (!seen.contains(n))
+        {
+            topSortHelper(n, edges, outIt, seen);
+        }
+    }
+}
+
+Solution solve(const std::vector<OrderRule>& rules,
+               const std::vector<std::vector<size_t>>& sequences)
 {
     Solution s;
-    std::multimap<size_t, OrderRule> lu;
-    for (auto r : rules)
+    std::set<OrderRule> lu{rules.begin(), rules.end()};
+    for (const auto& seq : sequences)
     {
-        lu.insert({r.first, r});
-        lu.insert({r.second, r});
-    }
-    for (const auto& r : sequences)
-    {
-        if (inOrder(r, lu))
+        auto [isOrdered, rules] = inOrder(seq, lu);
+        if (isOrdered)
         {
-            s.part1 += r.seq[r.seq.size() / 2];
+            s.part1 += seq[seq.size() / 2];
+        }
+        else
+        {
+            std::vector<size_t> sorted;
+            sorted.reserve(seq.size());
+            topSort(seq, rules, std::back_inserter(sorted));
+            s.part2 += sorted[sorted.size() / 2];
         }
     }
     return s;
@@ -141,10 +160,12 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     {
         rules.emplace_back(*it);
     }
-    std::vector<Seq> sequences;
+    std::vector<std::vector<size_t>> sequences;
     for (auto it = blank + 1; it != lines.end(); ++it)
     {
-        sequences.emplace_back(*it);
+        std::istringstream iss{*it};
+        sequences.emplace_back();
+        iss >> sequences.back();
     }
     return solve(rules, sequences);
 }
