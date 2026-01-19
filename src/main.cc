@@ -7,7 +7,7 @@ template <size_t Y, size_t D> void printSolution(bool useSample)
 {
     std::ostringstream oss{};
     oss << "inputs/" << Y << "/" << (useSample ? "sample" : "input") << std::setfill('0')
-        << std::setw(2) << D << ".txt";
+        << std::setw(2) << D;
     std::ifstream ifs{oss.str()};
     auto solution = aoc::solve<Y, D>(ifs);
 
