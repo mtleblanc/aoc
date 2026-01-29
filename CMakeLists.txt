@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 project(AdventOfCode2025 CXX)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -27,6 +27,7 @@ FetchContent_Declare(
   scn
   GIT_REPOSITORY https://github.com/eliaskosunen/scnlib.git
   GIT_TAG        v4.0.1
+  SYSTEM
 )
 
 FetchContent_MakeAvailable(Catch2 json scn)
