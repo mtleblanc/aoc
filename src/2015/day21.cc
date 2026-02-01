@@ -1,5 +1,6 @@
 #include "aoc.hh"
 #include <iostream>
+#include <ranges>
 #include <scn/scan.h>
 
 /* https://adventofcode.com/2015/day/21
@@ -108,29 +109,33 @@ int rounds(int damage, int hp)
     }
     return (hp + damage - 1) / damage;
 }
-bool playerWins(Stats player, Stats monster)
+bool playerWins(const Stats& player, const Stats& monster)
 {
     return rounds(player.damage - monster.armor, monster.hp) <=
            rounds(monster.damage - player.armor, player.hp);
 }
 
-size_t part1(Stats monster)
+size_t part1(const Stats& monster)
 {
     constexpr int PLAYER_HEALTH = 100;
     size_t minCost = std::numeric_limits<size_t>::max();
     Stats player{PLAYER_HEALTH, 0, 0};
-    for (auto weapon : weapons)
+    auto equip = [&player](auto item) { return player.equip(item); };
+
+    auto weaponView = weapons | std::views::transform(equip);
+    auto armorView = armors | std::views::transform(equip);
+    auto ringView = rings | std::views::transform(equip);
+    for (auto w : weaponView)
     {
-        auto wg = player.equip(weapon);
-        for (auto armor : armors)
+        for (auto a : armorView)
         {
-            auto ag = player.equip(armor);
+            // I don't have views::enumerate in my libc++
+            // for (auto [i, r1]: ringView | std::views::enumerate)
             for (size_t first{}; first < rings.size(); ++first)
             {
                 auto r1g = player.equip(rings[first]);
-                for (size_t second{first + 1}; second < rings.size(); ++second)
+                for (auto r2 : ringView | std::views::drop(first))
                 {
-                    auto r2g = player.equip(rings[second]);
                     if (playerWins(player, monster))
                     {
                         minCost = std::min(minCost, player.spent);
@@ -142,17 +147,16 @@ size_t part1(Stats monster)
     return minCost;
 }
 
-size_t part2(Stats monster)
+size_t part2(const Stats& monster)
 {
     constexpr int PLAYER_HEALTH = 100;
     size_t maxCost = std::numeric_limits<size_t>::min();
     Stats player{PLAYER_HEALTH, 0, 0};
-    for (auto weapon : weapons)
+    auto equip = [&player](auto item) { return player.equip(item); };
+    for (auto weapon : weapons | std::views::transform(equip))
     {
-        auto wg = player.equip(weapon);
-        for (auto armor : armors)
+        for (auto armor : armors | std::views::transform(equip))
         {
-            auto ag = player.equip(armor);
             for (size_t first{}; first < rings.size(); ++first)
             {
                 auto r1g = player.equip(rings[first]);
