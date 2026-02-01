@@ -19,34 +19,37 @@ namespace
 // the structs are 12% smaller.  Switching the small stats like ticks to uint8 is slower on M2
 using stat_t = short;
 using resource_t = short;
+
+constexpr resource_t PLAYER_HEALTH = 49;
+constexpr resource_t PLAYER_MANA = 500;
+constexpr resource_t RECHARGE_MANA = 101;
+constexpr resource_t SHIELD_ARMOR = 7;
+
+struct ManaCost
+{
+    static constexpr resource_t MAGIC_MISSILE = 53;
+    static constexpr resource_t DRAIN = 73;
+    static constexpr resource_t SHIELD = 113;
+    static constexpr resource_t POISON = 173;
+    static constexpr resource_t RECHARGE = 229;
+};
+
+struct Damage
+{
+    static constexpr resource_t MAGIC_MISSILE = 4;
+    static constexpr resource_t DRAIN = 2;
+    static constexpr resource_t POISON = 3;
+};
+
+struct Duration
+{
+    static constexpr stat_t SHIELD = 6;
+    static constexpr stat_t POISON = 6;
+    static constexpr stat_t RECHARGE = 5;
+};
+
 template <resource_t DEGEN> struct ActionPoint
 {
-    // NOLINTBEGIN (performance-enum-size)
-    enum class ManaCost : resource_t
-    {
-        MAGIC_MISSILE = 53,
-        DRAIN = 73,
-        SHIELD = 113,
-        POISON = 173,
-        RECHARGE = 229
-    };
-    enum class Damage : resource_t
-    {
-        MAGIC_MISSILE = 4,
-        DRAIN = 2,
-        POISON = 3
-    };
-    enum class Duration : stat_t
-    {
-        SHIELD = 6,
-        POISON = 6,
-        RECHARGE = 5
-    };
-    // NOLINTEND
-    static constexpr resource_t PLAYER_HEALTH = 49;
-    static constexpr resource_t PLAYER_MANA = 500;
-    static constexpr resource_t RECHARGE_MANA = 101;
-    static constexpr resource_t SHIELD_ARMOR = 7;
 
     resource_t playerHealth{PLAYER_HEALTH};
     resource_t playerMana{PLAYER_MANA};
@@ -106,7 +109,7 @@ template <resource_t DEGEN> struct ActionPoint
         if (poisonTicks)
         {
             --poisonTicks;
-            bossHealth -= static_cast<resource_t>(Damage::POISON);
+            bossHealth -= Damage::POISON;
         }
         if (rechargeTicks)
         {
@@ -131,10 +134,10 @@ template <resource_t DEGEN> struct ActionPoint
         playerHealth -= DEGEN;
     }
 
-    bool spend(ManaCost mana)
+    bool spend(resource_t mana)
     {
-        playerMana -= static_cast<resource_t>(mana);
-        spentMana += static_cast<resource_t>(mana);
+        playerMana -= mana;
+        spentMana += mana;
         if (playerMana < 0)
         {
             playerHealth = 0;
@@ -148,7 +151,7 @@ template <resource_t DEGEN> struct ActionPoint
         ActionPoint next = *this;
         if (next.spend(ManaCost::MAGIC_MISSILE))
         {
-            next.bossHealth -= static_cast<resource_t>(Damage::MAGIC_MISSILE);
+            next.bossHealth -= Damage::MAGIC_MISSILE;
         }
 
         // next.history.append("m");
@@ -160,8 +163,8 @@ template <resource_t DEGEN> struct ActionPoint
         ActionPoint next = *this;
         if (next.spend(ManaCost::DRAIN))
         {
-            next.bossHealth -= static_cast<resource_t>(Damage::DRAIN);
-            next.playerHealth += static_cast<resource_t>(Damage::DRAIN);
+            next.bossHealth -= Damage::DRAIN;
+            next.playerHealth += Damage::DRAIN;
         }
         // next.history.append("d");
         return next;
@@ -172,7 +175,7 @@ template <resource_t DEGEN> struct ActionPoint
         ActionPoint next = *this;
         if (next.spend(ManaCost::SHIELD))
         {
-            next.shieldTicks = static_cast<stat_t>(Duration::SHIELD);
+            next.shieldTicks = Duration::SHIELD;
         }
         // next.history.append("s");
         return next;
@@ -182,7 +185,7 @@ template <resource_t DEGEN> struct ActionPoint
         ActionPoint next = *this;
         if (next.spend(ManaCost::RECHARGE))
         {
-            next.rechargeTicks = static_cast<stat_t>(Duration::RECHARGE);
+            next.rechargeTicks = Duration::RECHARGE;
         }
         // next.history.append("r");
         return next;
@@ -192,7 +195,7 @@ template <resource_t DEGEN> struct ActionPoint
         ActionPoint next = *this;
         if (next.spend(ManaCost::POISON))
         {
-            next.poisonTicks = static_cast<stat_t>(Duration::POISON);
+            next.poisonTicks = Duration::POISON;
         }
         // next.history.append("p");
         return next;
