@@ -15,10 +15,14 @@ namespace
 
 // Represents the stats immediately before or after casting a spell, specifically the state is after
 // start of player's turn health degeneration and effects
-struct ActionPoint
+// Seems silly to template DEGEN but it runs 10% faster than having a member, likely just because
+// the structs are 12% smaller.  Switching the small stats like ticks to uint8 is slower on M2
+using stat_t = short;
+using resource_t = short;
+template <resource_t DEGEN> struct ActionPoint
 {
     // NOLINTBEGIN (performance-enum-size)
-    enum class ManaCost : int
+    enum class ManaCost : resource_t
     {
         MAGIC_MISSILE = 53,
         DRAIN = 73,
@@ -26,33 +30,32 @@ struct ActionPoint
         POISON = 173,
         RECHARGE = 229
     };
-    enum class Damage : int
+    enum class Damage : resource_t
     {
         MAGIC_MISSILE = 4,
         DRAIN = 2,
         POISON = 3
     };
-    enum class Duration : int
+    enum class Duration : stat_t
     {
         SHIELD = 6,
         POISON = 6,
         RECHARGE = 5
     };
     // NOLINTEND
-    static constexpr int PLAYER_HEALTH = 49;
-    static constexpr int PLAYER_MANA = 500;
-    static constexpr int RECHARGE_MANA = 101;
-    static constexpr int SHIELD_ARMOR = 7;
+    static constexpr resource_t PLAYER_HEALTH = 49;
+    static constexpr resource_t PLAYER_MANA = 500;
+    static constexpr resource_t RECHARGE_MANA = 101;
+    static constexpr resource_t SHIELD_ARMOR = 7;
 
-    int playerHealth{PLAYER_HEALTH};
-    int playerMana{PLAYER_MANA};
-    int shieldTicks{};
-    int rechargeTicks{};
-    int poisonTicks{};
-    int spentMana{};
-    int bossHealth{};
-    int bossDamage{};
-    int degen{};
+    resource_t playerHealth{PLAYER_HEALTH};
+    resource_t playerMana{PLAYER_MANA};
+    resource_t bossHealth{};
+    resource_t spentMana{};
+    stat_t shieldTicks{};
+    stat_t rechargeTicks{};
+    stat_t poisonTicks{};
+    stat_t bossDamage{};
 
     // std::string history{};
 
@@ -63,82 +66,75 @@ struct ActionPoint
 
     [[nodiscard]] bool won() const
     {
-        return bossHealth == 0;
+        return bossHealth <= 0;
     }
 
     [[nodiscard]] bool lost() const
     {
-        return playerHealth == 0;
+        return playerHealth <= 0;
     }
 
-    [[nodiscard]] auto actions() const
+    void forEachAction(auto fn) const
     {
-        auto acts = std::vector{&ActionPoint::magicMissile, &ActionPoint::drain};
+        auto doIfAlive = [&fn](auto next)
+        {
+            next.advanceToNextDecision();
+
+            if (!next.lost())
+            {
+                fn(next);
+            }
+        };
+        doIfAlive(magicMissile());
+        doIfAlive(drain());
         if (!shieldTicks)
         {
-            acts.push_back(&ActionPoint::shield);
+            doIfAlive(shield());
         }
         if (!rechargeTicks)
         {
-            acts.push_back(&ActionPoint::recharge);
+            doIfAlive(recharge());
         }
         if (!poisonTicks)
         {
-            acts.push_back(&ActionPoint::poison);
+            doIfAlive(poison());
         }
-        return acts;
     }
 
-    /*
-     * advance from the point where a player has just cast a spell to just before they cast their
-     * next spell
-     *
-     * i.e. Player's turn
-     *.     helth degenerates
-     *      effects tick
-     *      player casts spell
-     *      ----- we are here
-     *      Boss's turn
-     *      effects tick
-     *      boss attacks
-     *      Player's turn
-     *      helth degenerates
-     *      effects tick
-     *      ---- get to here
-     *
-     * We need to split poison ticks in case the first tick kills boss before attack, or boss's
-     * attack kills player before second tick. The other effects can just be done 2x at the end
-     */
+    void applyEffects()
+    {
+        if (poisonTicks)
+        {
+            --poisonTicks;
+            bossHealth -= static_cast<resource_t>(Damage::POISON);
+        }
+        if (rechargeTicks)
+        {
+            --rechargeTicks;
+            playerMana += RECHARGE_MANA;
+        }
+        if (shieldTicks)
+        {
+            --shieldTicks;
+        }
+    }
+
     void advanceToNextDecision()
     {
-        bossHealth -= poisonTicks ? static_cast<int>(Damage::POISON) : 0;
-        poisonTicks = std::max(0, poisonTicks - 1);
+        applyEffects();
         if (bossHealth <= 0)
         {
-            bossHealth = 0;
             return;
         }
-
-        // shield ticks reduce by 1 before boss attack, but don't update until we combine it with
-        // the tick before the player's next turn
-        playerHealth -= (shieldTicks > 1 ? std::max(1, bossDamage - SHIELD_ARMOR) : bossDamage);
-        playerHealth -= degen;
-        if (playerHealth <= 0)
-        {
-            playerHealth = 0;
-            return;
-        }
-        shieldTicks = std::max(0, shieldTicks - 2);
-        bossHealth -= poisonTicks ? static_cast<int>(Damage::POISON) : 0;
-        poisonTicks = std::max(0, poisonTicks - 1);
-        playerMana += std::min(rechargeTicks, 2) * RECHARGE_MANA;
-        rechargeTicks = std::max(0, rechargeTicks - 2);
+        playerHealth -= (shieldTicks ? std::max(1, bossDamage - SHIELD_ARMOR) : bossDamage);
+        applyEffects();
+        playerHealth -= DEGEN;
     }
 
     bool spend(ManaCost mana)
     {
-        playerMana -= static_cast<int>(mana);
-        spentMana += static_cast<int>(mana);
+        playerMana -= static_cast<resource_t>(mana);
+        spentMana += static_cast<resource_t>(mana);
         if (playerMana < 0)
         {
             playerHealth = 0;
@@ -147,70 +143,69 @@ struct ActionPoint
         return true;
     }
 
-    ActionPoint magicMissile()
+    [[nodiscard]] ActionPoint magicMissile() const
     {
         ActionPoint next = *this;
         if (next.spend(ManaCost::MAGIC_MISSILE))
         {
-            next.bossHealth -= static_cast<int>(Damage::MAGIC_MISSILE);
+            next.bossHealth -= static_cast<resource_t>(Damage::MAGIC_MISSILE);
         }
 
         // next.history.append("m");
         return next;
     }
 
-    ActionPoint drain()
+    [[nodiscard]] ActionPoint drain() const
     {
         ActionPoint next = *this;
         if (next.spend(ManaCost::DRAIN))
         {
-            next.bossHealth -= static_cast<int>(Damage::DRAIN);
-            next.playerHealth += static_cast<int>(Damage::DRAIN);
+            next.bossHealth -= static_cast<resource_t>(Damage::DRAIN);
+            next.playerHealth += static_cast<resource_t>(Damage::DRAIN);
         }
         // next.history.append("d");
         return next;
     }
 
-    ActionPoint shield()
+    [[nodiscard]] ActionPoint shield() const
     {
         ActionPoint next = *this;
         if (next.spend(ManaCost::SHIELD))
         {
-            next.shieldTicks = static_cast<int>(Duration::SHIELD);
+            next.shieldTicks = static_cast<stat_t>(Duration::SHIELD);
         }
         // next.history.append("s");
         return next;
     }
-    ActionPoint recharge()
+    [[nodiscard]] ActionPoint recharge() const
     {
         ActionPoint next = *this;
         if (next.spend(ManaCost::RECHARGE))
         {
-            next.rechargeTicks = static_cast<int>(Duration::RECHARGE);
+            next.rechargeTicks = static_cast<stat_t>(Duration::RECHARGE);
         }
         // next.history.append("r");
         return next;
     }
-    ActionPoint poison()
+    [[nodiscard]] ActionPoint poison() const
     {
         ActionPoint next = *this;
         if (next.spend(ManaCost::POISON))
         {
-            next.poisonTicks = static_cast<int>(Duration::POISON);
+            next.poisonTicks = static_cast<stat_t>(Duration::POISON);
         }
         // next.history.append("p");
         return next;
     }
 };
 
-size_t optimize(ActionPoint g, int degen)
+template <resource_t DEGEN> size_t optimize(ActionPoint<DEGEN> g)
 {
-    g.degen = degen;
-    g.playerHealth -= degen;
-    std::priority_queue<ActionPoint, std::deque<ActionPoint>, std::greater<>> dijk;
+    g.playerHealth -= DEGEN;
+    std::priority_queue<ActionPoint<DEGEN>, std::deque<ActionPoint<DEGEN>>, std::greater<>> dijk;
     dijk.push(g);
 
-    for (;;)
+    while (dijk.size())
     {
         auto cur = dijk.top();
         dijk.pop();
@@ -219,26 +214,20 @@ size_t optimize(ActionPoint g, int degen)
             // std::cout << cur.history << std::endl;
             return cur.spentMana;
         }
-
-        for (auto a : cur.actions())
-        {
-            auto next = std::invoke(a, cur);
-            next.advanceToNextDecision();
-            if (!next.lost())
-            {
-                dijk.push(next);
-            }
-        }
+        cur.forEachAction([&dijk](auto x) { dijk.push(x); });
     }
+    return std::numeric_limits<size_t>::max();
 }
 } // namespace
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    auto [hp, damage] = scn::scan<int, int>(slurp(input), "Hit Points: {}\nDamage: {}\n")->values();
+    auto [hp, damage] =
+        scn::scan<resource_t, stat_t>(slurp(input), "Hit Points: {}\nDamage: {}\n")->values();
 
-    ActionPoint g{.bossHealth = hp, .bossDamage = damage};
+    ActionPoint<0> g0{.bossHealth = hp, .bossDamage = damage};
+    ActionPoint<1> g1{.bossHealth = hp, .bossDamage = damage};
 
-    return {optimize(g, 0), optimize(g, 1)};
+    return {optimize<0>(g0), optimize<1>(g1)};
 }
 } // namespace aoc

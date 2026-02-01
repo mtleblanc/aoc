@@ -56,4 +56,34 @@ template <size_t Y, size_t D> Solution solve(std::istream& input)
     (void)input;
     return {};
 }
+
+// NOLINTBEGIN(readability-magic-numbers)
+// Forward declarations for 2015
+template <> Solution solve<2015, 1>(std::istream& input);
+template <> Solution solve<2015, 2>(std::istream& input);
+template <> Solution solve<2015, 3>(std::istream& input);
+template <> Solution solve<2015, 4>(std::istream& input);
+template <> Solution solve<2015, 5>(std::istream& input);
+template <> Solution solve<2015, 6>(std::istream& input);
+template <> Solution solve<2015, 7>(std::istream& input);
+template <> Solution solve<2015, 8>(std::istream& input);
+template <> Solution solve<2015, 9>(std::istream& input);
+template <> Solution solve<2015, 10>(std::istream& input);
+template <> Solution solve<2015, 11>(std::istream& input);
+template <> Solution solve<2015, 12>(std::istream& input);
+template <> Solution solve<2015, 13>(std::istream& input);
+template <> Solution solve<2015, 14>(std::istream& input);
+template <> Solution solve<2015, 15>(std::istream& input);
+template <> Solution solve<2015, 16>(std::istream& input);
+template <> Solution solve<2015, 17>(std::istream& input);
+template <> Solution solve<2015, 18>(std::istream& input);
+template <> Solution solve<2015, 19>(std::istream& input);
+template <> Solution solve<2015, 20>(std::istream& input);
+template <> Solution solve<2015, 21>(std::istream& input);
+template <> Solution solve<2015, 22>(std::istream& input);
+template <> Solution solve<2015, 23>(std::istream& input);
+template <> Solution solve<2015, 24>(std::istream& input);
+template <> Solution solve<2015, 25>(std::istream& input);
+// NOLINTEND(readability-magic-numbers)
+
 } // namespace aoc
