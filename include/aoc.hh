@@ -21,12 +21,22 @@ struct Solution
 inline std::vector<std::string> readAllLines(std::istream& input)
 {
     std::vector<std::string> lines;
-    std::string tmp;
-    while (std::getline(input, tmp))
+
+    for (std::string tmp; std::getline(input, tmp);)
     {
         lines.push_back(std::move(tmp));
     }
     return lines;
+}
+
+template <typename T> inline std::vector<T> readAll(std::istream& input)
+{
+    std::vector<T> res;
+    for (T t; input >> t;)
+    {
+        res.push_back(std::move(t));
+    }
+    return res;
 }
 
 inline std::string slurp(std::istream& input)
@@ -57,7 +67,7 @@ template <size_t Y, size_t D> Solution solve(std::istream& input)
     return {};
 }
 
-// NOLINTBEGIN(readability-magic-numbers)
+// NOLINTBEGIN (cppcoreguidelines-avoid-magic-numbers)
 // Forward declarations for 2015
 template <> Solution solve<2015, 1>(std::istream& input);
 template <> Solution solve<2015, 2>(std::istream& input);
@@ -84,6 +94,6 @@ template <> Solution solve<2015, 22>(std::istream& input);
 template <> Solution solve<2015, 23>(std::istream& input);
 template <> Solution solve<2015, 24>(std::istream& input);
 template <> Solution solve<2015, 25>(std::istream& input);
-// NOLINTEND(readability-magic-numbers)
+// NOLINTEND
 
 } // namespace aoc
