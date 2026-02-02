@@ -30,7 +30,15 @@ FetchContent_Declare(
   SYSTEM
 )
 
-FetchContent_MakeAvailable(Catch2 json scn)
+# Fetch CTRE for compile-time regular expressions
+FetchContent_Declare(
+  ctre
+  GIT_REPOSITORY https://github.com/hanickadot/compile-time-regular-expressions.git
+  GIT_TAG        v3.9.0
+  SYSTEM
+)
+
+FetchContent_MakeAvailable(Catch2 json scn ctre)
 
 # Add Catch2's CMake modules to the path
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
@@ -73,7 +81,7 @@ file(GLOB_RECURSE DAY_SOURCES "src/*/day*.cc")
 
 # Main executable that runs solutions
 add_executable(aoc src/main.cc ${DAY_SOURCES})
-target_link_libraries(aoc PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json scn::scn)
+target_link_libraries(aoc PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json scn::scn ctre::ctre)
 
 # Enable warnings for main executable
 if(MSVC)
