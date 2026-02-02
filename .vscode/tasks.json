@@ -1,6 +1,23 @@
 {
     "tasks": [
         {
+            "label": "Toggle Source/Input File",
+            "type": "shell",
+            "command": "${workspaceFolder}/.vscode/toggle-file.sh",
+            "args": [
+                "${file}"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "shared",
+                "showReuseMessage": false
+            }
+        },
+        {
             "label": "CMake: Configure Debug",
             "type": "shell",
             "command": "cmake",
