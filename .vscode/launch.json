@@ -9,6 +9,16 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             "preLaunchTask": "CMake: Build All (Debug)"
+        },
+        {
+            "name": "Run Release",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build-release/aoc",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "CMake: Build All (Release)",
+            "noDebug": true
         }
     ]
 }

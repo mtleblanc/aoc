@@ -136,6 +136,20 @@
             },
             "problemMatcher": [],
             "dependsOn": ["CMake: Build All (Release)"]
+        },
+        {
+            "label": "Build and Run Release",
+            "type": "shell",
+            "command": "./build-release/aoc",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "dependsOn": ["CMake: Build All (Release)"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
         }
     ],
     "version": "2.0.0"
