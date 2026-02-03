@@ -1,5 +1,5 @@
 #include "aoc.hh"
-#include "openssl/md5.h"
+#include "hash.hh"
 #include <algorithm>
 #include <ranges>
 #include <thread>
@@ -13,24 +13,11 @@ constexpr size_t DAY = 4;
 
 namespace
 {
-
-using md5_t = std::array<unsigned char, MD5_DIGEST_LENGTH>;
-auto computeMD5FromString(const std::string& str)
-{
-    md5_t result{};
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-    MD5(reinterpret_cast<const unsigned char*>(str.c_str()), str.length(), result.data());
-#pragma clang diagnostic pop
-    return result;
-}
-
-template <size_t N> bool hasStartingZeros(md5_t md5)
+template <size_t N> bool hasStartingZeros(const std::vector<uint8_t>& md5)
 {
     if constexpr (N % 2 == 1)
     {
-        constexpr md5_t::value_type FIRST_DIGIT = 0xF0;
+        constexpr uint8_t FIRST_DIGIT = 0xF0;
         if (md5[N / 2] & FIRST_DIGIT)
         {
             return false;
@@ -41,12 +28,13 @@ template <size_t N> bool hasStartingZeros(md5_t md5)
 }
 
 template <size_t N>
-std::optional<size_t> mineSlice(const std::string& prefix, size_t from, size_t count)
+std::optional<size_t> mineSlice(const std::string& prefix, size_t from, size_t count,
+                                Hash::Hasher& hasher)
 {
     auto appendN = [&prefix](auto n) { return prefix + std::to_string(n); };
 
     auto view = std::views::iota(from, from + count) | std::views::transform(appendN) |
-                std::views::transform(computeMD5FromString);
+                std::views::transform([&hasher](const std::string& s) { return hasher(s); });
     auto found = std::ranges::find_if(view, hasStartingZeros<N>);
     return found == view.end() ? std::optional<size_t>{} : found - view.begin() + from;
 }
@@ -55,6 +43,7 @@ template <size_t N, size_t BLOCKSIZE>
 // NOLINTNEXTLINE (performance-unnecessary-value-param)
 void mine(std::string prefix, std::atomic<size_t>& counter, std::atomic<size_t>& result)
 {
+    auto hasher = Hash::Hasher::md5Hasher();
     for (;;)
     {
         if (result.load() != 0)
@@ -62,7 +51,7 @@ void mine(std::string prefix, std::atomic<size_t>& counter, std::atomic<size_t>&
             break;
         }
         size_t from = counter.fetch_add(BLOCKSIZE);
-        auto res = mineSlice<N>(prefix, from, BLOCKSIZE);
+        auto res = mineSlice<N>(prefix, from, BLOCKSIZE, hasher);
         if (res)
         {
             size_t prev{};
