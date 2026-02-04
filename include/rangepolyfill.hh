@@ -49,12 +49,18 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
             return *this;
         }
         Iterator operator++(int)
+            requires(std::ranges::forward_range<Rng>)
         {
             Iterator retval = *this;
             ++(*this);
             return retval;
         }
-        bool operator==(Iterator other) const
+        void operator++(int)
+            requires(!std::ranges::forward_range<Rng>)
+        {
+            ++(*this);
+        }
+        bool operator==(const Iterator& other) const
         {
             return it_ == other.it_;
         }
@@ -113,7 +119,7 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
         {
             return it_ - o.it_;
         }
-        friend Iterator operator+(difference_type n, Iterator o)
+        friend Iterator operator+(difference_type n, const Iterator& o)
             requires(std::random_access_iterator<It>)
         {
             return o + n;
@@ -206,7 +212,9 @@ struct EnumerateView : std::ranges::view_interface<EnumerateView<Rng>>
         using value_type = std::pair<size_t, Val>;
         using reference = std::pair<size_t, Ref>;
 
-        Iterator() requires std::default_initializable<It> = default;
+        Iterator()
+            requires std::default_initializable<It>
+        = default;
         Iterator(It it) : it_{std::move(it)} {};
         reference operator*() const
         {
@@ -224,7 +232,7 @@ struct EnumerateView : std::ranges::view_interface<EnumerateView<Rng>>
             ++(*this);
             return retval;
         }
-        bool operator==(Iterator other) const
+        bool operator==(const Iterator& other) const
             requires(std::ranges::forward_range<Rng>)
         {
             return it_ == other.it_;
@@ -284,7 +292,7 @@ struct EnumerateView : std::ranges::view_interface<EnumerateView<Rng>>
         {
             return it_ - o.it_;
         }
-        friend Iterator operator+(difference_type n, Iterator o)
+        friend Iterator operator+(difference_type n, const Iterator& o)
             requires(std::random_access_iterator<It>)
         {
             return o + n;

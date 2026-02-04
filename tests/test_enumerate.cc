@@ -208,6 +208,35 @@ TEST_CASE("enumerate satisfies view", "[category]")
     STATIC_REQUIRE(std::ranges::view<view_t>);
 }
 
+// TEST_CASE("enumerate is common_range for common underlying range", "[category]")
+// {
+//     using view_t = decltype(enumerate(std::declval<std::vector<int>&>()));
+//     STATIC_REQUIRE(std::ranges::common_range<view_t>);
+// }
+//
+// TEST_CASE("enumerate is not common_range for non-common underlying range", "[category]")
+// {
+//     using view_t = decltype(enumerate(
+//         std::declval<std::ranges::take_while_view<std::ranges::ref_view<std::vector<int>>, bool (*)(int)>&>()));
+//     STATIC_REQUIRE(!std::ranges::common_range<view_t>);
+// }
+//
+// TEST_CASE("enumerate supports const begin/end for const-iterable range", "[category]")
+// {
+//     std::vector<int> v = {1, 2, 3};
+//     const auto view = enumerate(v);
+//     using const_view_t = std::remove_reference_t<decltype(view)>;
+//     STATIC_REQUIRE(std::ranges::range<const_view_t>);
+//     std::vector<std::pair<size_t, int>> result;
+//     for (auto [i, val] : view)
+//     {
+//         result.emplace_back(i, val);
+//     }
+//     REQUIRE(result.size() == 3);
+//     REQUIRE(result[0] == std::pair{0UL, 1});
+//     REQUIRE(result[2] == std::pair{2UL, 3});
+// }
+
 TEST_CASE("enumerate is sized_range for sized underlying range", "[category]")
 {
     using view_t = decltype(enumerate(std::declval<std::vector<int>&>()));

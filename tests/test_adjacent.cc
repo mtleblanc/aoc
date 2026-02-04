@@ -264,6 +264,35 @@ TEST_CASE("adjacent satisfies view", "[category]")
     STATIC_REQUIRE(std::ranges::view<view_t>);
 }
 
+// TEST_CASE("adjacent is common_range for common underlying range", "[category]")
+// {
+//     using view_t = decltype(adjacent<2>(std::declval<std::vector<int>&>()));
+//     STATIC_REQUIRE(std::ranges::common_range<view_t>);
+// }
+//
+// TEST_CASE("adjacent is not common_range for non-common underlying range", "[category]")
+// {
+//     using view_t = decltype(adjacent<2>(
+//         std::declval<std::ranges::take_while_view<std::ranges::ref_view<std::vector<int>>, bool (*)(int)>&>()));
+//     STATIC_REQUIRE(!std::ranges::common_range<view_t>);
+// }
+//
+// TEST_CASE("adjacent supports const begin/end for const-iterable range", "[category]")
+// {
+//     std::vector<int> v = {1, 2, 3, 4, 5};
+//     const auto view = adjacent<2>(v);
+//     using const_view_t = std::remove_reference_t<decltype(view)>;
+//     STATIC_REQUIRE(std::ranges::range<const_view_t>);
+//     std::vector<std::tuple<int, int>> result;
+//     for (auto [a, b] : view)
+//     {
+//         result.emplace_back(a, b);
+//     }
+//     REQUIRE(result.size() == 4);
+//     REQUIRE(result[0] == std::tuple{1, 2});
+//     REQUIRE(result[3] == std::tuple{4, 5});
+// }
+
 TEST_CASE("adjacent is sized_range for sized underlying range", "[category]")
 {
     using view_t = decltype(adjacent<2>(std::declval<std::vector<int>&>()));
