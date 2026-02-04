@@ -11,6 +11,15 @@
             "preLaunchTask": "CMake: Build All (Debug)"
         },
         {
+            "name": "Debug Test",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build-debug/${fileBasenameNoExtension}",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "CMake: Build Active File"
+        },
+        {
             "name": "Run Release",
             "type": "lldb",
             "request": "launch",

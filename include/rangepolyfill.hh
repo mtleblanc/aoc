@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <optional>
 #include <ranges>
 #include <tuple>
 
@@ -10,14 +11,17 @@ template <size_t N, std::ranges::forward_range Rng>
 struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
 {
 
+    struct Sentinel;
+
     class Iterator
     {
-        friend class Sentinel;
-        using underlying_iterator = std::ranges::iterator_t<Rng>;
-        using underlying_value = typename std::ranges::range_value_t<Rng>;
-        using underlying_reference = typename std::ranges::range_reference_t<Rng>;
+        friend struct Sentinel;
+        using It = std::ranges::iterator_t<Rng>;
+        using Val = std::ranges::range_value_t<Rng>;
+        using Ref = std::ranges::range_reference_t<Rng>;
 
-        underlying_iterator it_;
+        It it_;
+        It fit_;
 
         template <typename T, typename = std::make_index_sequence<N>> struct repeat_tuple;
         template <typename T, size_t... Is> struct repeat_tuple<T, std::index_sequence<Is...>>
@@ -27,15 +31,21 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
         };
 
       public:
-        using difference_type = underlying_iterator::difference_type;
-        using value_type = repeat_tuple<underlying_value>::type;
-        using reference = repeat_tuple<underlying_reference>::type;
-        using iterator_category = underlying_iterator::iterator_category;
+        using difference_type = std::ranges::range_difference_t<Rng>;
+        using value_type = repeat_tuple<Val>::type;
+        using reference = repeat_tuple<Ref>::type;
 
-        Iterator(underlying_iterator rng_it) : it_{rng_it} {}
+        Iterator(It it, It fit) : it_{std::move(it)}, fit_{std::move(fit)} {}
+        Iterator(It it = It{}) : it_{it}, fit_{std::move(it)} {}
+
+        reference operator*() const
+        {
+            return refHelper(std::make_index_sequence<N>{});
+        }
         Iterator& operator++()
         {
             ++it_;
+            ++fit_;
             return *this;
         }
         Iterator operator++(int)
@@ -48,13 +58,65 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
         {
             return it_ == other.it_;
         }
-        bool operator!=(Iterator other) const
+        Iterator& operator--()
+            requires(std::bidirectional_iterator<It>)
         {
-            return !(*this == other);
+            --it_;
+            --fit_;
+            return *this;
         }
-        reference operator*() const
+        Iterator operator--(int)
+            requires(std::bidirectional_iterator<It>)
         {
-            return refHelper(std::make_index_sequence<N>{});
+            Iterator retval = *this;
+            --(*this);
+            return retval;
+        }
+        Iterator& operator+=(difference_type n)
+            requires(std::random_access_iterator<It>)
+        {
+            it_ += n;
+            fit_ += n;
+            return *this;
+        }
+        Iterator operator+(difference_type n) const
+            requires(std::random_access_iterator<It>)
+        {
+            auto ret = *this;
+            return ret += n;
+        }
+        Iterator& operator-=(difference_type n)
+            requires(std::random_access_iterator<It>)
+        {
+            it_ -= n;
+            fit_ -= n;
+            return *this;
+        }
+        Iterator operator-(difference_type n) const
+            requires(std::random_access_iterator<It>)
+        {
+            auto ret = *this;
+            return ret -= n;
+        }
+        reference operator[](difference_type n) const
+            requires(std::random_access_iterator<It>)
+        {
+            return *(*this + n);
+        }
+        auto operator<=>(const Iterator& o) const
+            requires(std::random_access_iterator<It>)
+        {
+            return it_ <=> o.it_;
+        }
+        difference_type operator-(const Iterator& o) const
+            requires(std::random_access_iterator<It>)
+        {
+            return it_ - o.it_;
+        }
+        friend Iterator operator+(difference_type n, Iterator o)
+            requires(std::random_access_iterator<It>)
+        {
+            return o + n;
         }
 
       private:
@@ -66,49 +128,202 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
 
     struct Sentinel
     {
-        std::ranges::sentinel_t<Rng> end_;
-        bool operator==(Iterator it) const
+        std::optional<std::ranges::sentinel_t<Rng>> end_;
+        bool operator==(const Iterator& it) const
         {
-
-            for (auto _ : std::views::iota(0UL, N))
-            {
-                if (it.it_ == end_)
-                {
-                    return true;
-                }
-                ++it.it_;
-            }
-            return false;
+            return !end_ || it.fit_ == *end_;
         }
     };
 
     template <std::ranges::forward_range Arg> AdjacentView(Arg&& arg) : rng_(std::forward<Arg>(arg))
     {
+        if constexpr (std::ranges::sized_range<Rng>)
+        {
+            empty = std::ranges::size(rng_) < N;
+        }
+        else
+        {
+            auto it = std::ranges::begin(rng_);
+            auto end = std::ranges::end(rng_);
+            for (auto _ : std::views::iota(0UL, N))
+            {
+                if (it == end)
+                {
+                    empty = true;
+                    return;
+                }
+                ++it;
+            }
+        }
     }
 
     auto begin()
     {
-        return Iterator{rng_.begin()};
+        auto begin = std::ranges::begin(rng_);
+        return Iterator{begin, empty ? begin : std::next(begin, N - 1)};
     }
     auto end()
     {
-        if constexpr (std::ranges::sized_range<Rng>)
+        if (empty)
         {
-            auto sz = std::ranges::size(rng_);
-            return sz < N ? begin() : Iterator{std::next(rng_.begin(), sz - N + 1)};
+            return Sentinel{};
         }
-        else
-        {
-            return Sentinel{rng_.end()};
-        }
+        return Sentinel{std::ranges::end(rng_)};
+    }
+    std::ranges::range_difference_t<Rng> size() const
+        requires(std::ranges::sized_range<Rng>)
+    {
+        return empty ? 0UL : rng_.size() - N + 1;
     }
 
   private:
     Rng rng_;
+    bool empty{false};
 };
 
 template <size_t N, std::ranges::forward_range Arg> auto adjacent(Arg&& arg)
 {
     return AdjacentView<N, std::ranges::views::all_t<Arg>>{std::forward<Arg>(arg)};
 }
+
+template <std::ranges::input_range Rng>
+struct EnumerateView : std::ranges::view_interface<EnumerateView<Rng>>
+{
+    struct Sentinel;
+    struct Iterator
+    {
+      private:
+        friend struct Sentinel;
+        using It = std::ranges::iterator_t<Rng>;
+        using Val = std::ranges::range_value_t<Rng>;
+        using Ref = std::ranges::range_reference_t<Rng>;
+
+        It it_;
+        size_t idx_{};
+
+      public:
+        using difference_type = std::ranges::range_difference_t<Rng>;
+        using value_type = std::pair<size_t, Val>;
+        using reference = std::pair<size_t, Ref>;
+
+        Iterator() requires std::default_initializable<It> = default;
+        Iterator(It it) : it_{std::move(it)} {};
+        reference operator*() const
+        {
+            return {idx_, *it_};
+        }
+        Iterator& operator++()
+        {
+            ++it_;
+            ++idx_;
+            return *this;
+        }
+        Iterator operator++(int)
+        {
+            Iterator retval = *this;
+            ++(*this);
+            return retval;
+        }
+        bool operator==(Iterator other) const
+            requires(std::ranges::forward_range<Rng>)
+        {
+            return it_ == other.it_;
+        }
+        Iterator& operator--()
+            requires(std::bidirectional_iterator<It>)
+        {
+            --it_;
+            --idx_;
+            return *this;
+        }
+        Iterator operator--(int)
+            requires(std::bidirectional_iterator<It>)
+        {
+            Iterator retval = *this;
+            --(*this);
+            return retval;
+        }
+        Iterator& operator+=(difference_type n)
+            requires(std::random_access_iterator<It>)
+        {
+            it_ += n;
+            idx_ += n;
+            return *this;
+        }
+        Iterator operator+(difference_type n) const
+            requires(std::random_access_iterator<It>)
+        {
+            auto ret = *this;
+            return ret += n;
+        }
+        Iterator& operator-=(difference_type n)
+            requires(std::random_access_iterator<It>)
+        {
+            it_ -= n;
+            idx_ -= n;
+            return *this;
+        }
+        Iterator operator-(difference_type n) const
+            requires(std::random_access_iterator<It>)
+        {
+            auto ret = *this;
+            return ret -= n;
+        }
+        reference operator[](difference_type n) const
+            requires(std::random_access_iterator<It>)
+        {
+            return *(*this + n);
+        }
+        auto operator<=>(const Iterator& o) const
+            requires(std::random_access_iterator<It>)
+        {
+            return it_ <=> o.it_;
+        }
+        difference_type operator-(const Iterator& o) const
+            requires(std::random_access_iterator<It>)
+        {
+            return it_ - o.it_;
+        }
+        friend Iterator operator+(difference_type n, Iterator o)
+            requires(std::random_access_iterator<It>)
+        {
+            return o + n;
+        }
+    };
+
+    struct Sentinel
+    {
+        std::ranges::sentinel_t<Rng> end_;
+        bool operator==(const Iterator& it) const
+        {
+            return it.it_ == end_;
+        }
+    };
+
+    template <std::ranges::range Arg> EnumerateView(Arg&& arg) : rng_(std::forward<Arg>(arg)) {}
+
+    auto begin()
+    {
+        return Iterator{std::ranges::begin(rng_)};
+    }
+    auto end()
+    {
+        return Sentinel{std::ranges::end(rng_)};
+    }
+
+    std::ranges::range_difference_t<Rng> size() const
+        requires(std::ranges::sized_range<Rng>)
+    {
+        return rng_.size();
+    }
+
+  private:
+    Rng rng_;
+};
+
+template <std::ranges::input_range Arg> auto enumerate(Arg&& arg)
+{
+    return EnumerateView<std::ranges::views::all_t<Arg>>{std::forward<Arg>(arg)};
+}
+
 } // namespace aoc
