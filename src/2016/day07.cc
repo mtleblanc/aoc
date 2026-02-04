@@ -1,4 +1,5 @@
 #include "aoc.hh"
+#include "rangepolyfill.hh"
 #include <algorithm>
 #include <ctre.hpp>
 #include <set>
@@ -17,19 +18,19 @@ bool supportsTLS(const std::string& ip)
     bool hypernet{};
     bool seen{};
     // my libc++ doesn't have views::adjacent
-    for (size_t i{}; i < ip.size() - 3; ++i)
+    for (auto [a, b, c, d] : adjacent<4>(ip))
     {
-        if (ip[i] == '[')
+        if (a == '[')
         {
             hypernet = true;
             continue;
         }
-        if (ip[i] == ']')
+        if (a == ']')
         {
             hypernet = false;
             continue;
         }
-        if (ip[i] != ip[i + 1] && ip[i] == ip[i + 3] && ip[i + 1] == ip[i + 2])
+        if (a != b && a == d && b == c)
         {
             if (hypernet)
             {
@@ -48,21 +49,21 @@ bool supportsSLS(const std::string& ip)
     net_t bab;
     net_t* net = &aba;
     // my libc++ doesn't have views::adjacent
-    for (size_t i{}; i < ip.size() - 2; ++i)
+    for (auto [a, b, c] : adjacent<3>(ip))
     {
-        if (ip[i] == '[')
+        if (a == '[')
         {
             net = &bab;
             continue;
         }
-        if (ip[i] == ']')
+        if (a == ']')
         {
             net = &aba;
             continue;
         }
-        if (ip[i] != ip[i + 1] && ip[i] == ip[i + 2])
+        if (a != b && a == c)
         {
-            net->insert(std::make_pair(ip[i], ip[i + 1]));
+            net->insert(std::make_pair(a, b));
         }
     }
     return std::ranges::any_of(aba, [&bab](auto p)
