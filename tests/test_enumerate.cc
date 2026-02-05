@@ -236,6 +236,35 @@ TEST_CASE("enumerate satisfies view", "[category]")
 //     REQUIRE(result[0] == std::pair{0UL, 1});
 //     REQUIRE(result[2] == std::pair{2UL, 3});
 // }
+//
+// TEST_CASE("enumerate const view yields const references", "[category]")
+// {
+//     std::vector<int> v = {1, 2, 3};
+//     const auto view = enumerate(v);
+//     for (auto [i, val] : view)
+//     {
+//         // val should be const int& when iterating a const view
+//         STATIC_REQUIRE(std::is_const_v<std::remove_reference_t<decltype(val)>>);
+//     }
+// }
+//
+// TEST_CASE("enumerate const vs non-const view yield different reference types", "[category]")
+// {
+//     std::vector<int> v = {1, 2, 3};
+//     auto view = enumerate(v);
+//     const auto const_view = enumerate(v);
+//
+//     auto it = view.begin();
+//     auto const_it = const_view.begin();
+//
+//     // Non-const view should yield non-const references
+//     auto [i, val] = *it;
+//     STATIC_REQUIRE(!std::is_const_v<std::remove_reference_t<decltype(val)>>);
+//
+//     // Const view should yield const references
+//     auto [ci, cval] = *const_it;
+//     STATIC_REQUIRE(std::is_const_v<std::remove_reference_t<decltype(cval)>>);
+// }
 
 TEST_CASE("enumerate is sized_range for sized underlying range", "[category]")
 {

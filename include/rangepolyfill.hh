@@ -7,6 +7,11 @@
 
 namespace aoc
 {
+
+template <typename T>
+concept CommonAdaptable = std::ranges::common_range<T> &&
+                          (std::ranges::bidirectional_range<T> || std::ranges::sized_range<T>);
+
 template <size_t N, std::ranges::forward_range Rng>
 struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
 {
@@ -135,9 +140,20 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
     struct Sentinel
     {
         std::optional<std::ranges::sentinel_t<Rng>> end_;
+
         bool operator==(const Iterator& it) const
         {
             return !end_ || it.fit_ == *end_;
+        }
+        std::ranges::range_difference_t<Rng> operator-(const Iterator& it) const
+            requires(std::ranges::sized_range<Rng>)
+        {
+            return end_ ? *end_ - it.fit_ : 0;
+        }
+        friend std::ranges::range_difference_t<Rng> operator-(const Iterator& it, const Sentinel& s)
+            requires(std::ranges::sized_range<Rng>)
+        {
+            return s.end_ ? *s.end_ - it.fit_ : 0;
         }
     };
 
@@ -169,6 +185,7 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
         return Iterator{begin, empty ? begin : std::next(begin, N - 1)};
     }
     auto end()
+        requires(!CommonAdaptable<Rng>)
     {
         if (empty)
         {
@@ -176,10 +193,23 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
         }
         return Sentinel{std::ranges::end(rng_)};
     }
-    std::ranges::range_difference_t<Rng> size() const
-        requires(std::ranges::sized_range<Rng>)
+    auto end()
+        requires(CommonAdaptable<Rng>)
     {
-        return empty ? 0UL : rng_.size() - N + 1;
+        if (empty)
+        {
+            return begin();
+        }
+        if constexpr (std::ranges::bidirectional_range<Rng>)
+        {
+            auto end = std::ranges::end(rng_);
+            return Iterator{
+                std::next(end, 1 - static_cast<std::ranges::range_difference_t<Rng>>(N))};
+        }
+        else if constexpr (std::ranges::sized_range<Rng>)
+        {
+            return std::next(begin(), N - 1);
+        }
     }
 
   private:

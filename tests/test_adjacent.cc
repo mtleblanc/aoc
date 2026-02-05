@@ -264,19 +264,19 @@ TEST_CASE("adjacent satisfies view", "[category]")
     STATIC_REQUIRE(std::ranges::view<view_t>);
 }
 
-// TEST_CASE("adjacent is common_range for common underlying range", "[category]")
-// {
-//     using view_t = decltype(adjacent<2>(std::declval<std::vector<int>&>()));
-//     STATIC_REQUIRE(std::ranges::common_range<view_t>);
-// }
-//
-// TEST_CASE("adjacent is not common_range for non-common underlying range", "[category]")
-// {
-//     using view_t = decltype(adjacent<2>(
-//         std::declval<std::ranges::take_while_view<std::ranges::ref_view<std::vector<int>>, bool (*)(int)>&>()));
-//     STATIC_REQUIRE(!std::ranges::common_range<view_t>);
-// }
-//
+TEST_CASE("adjacent is common_range for common underlying range", "[category]")
+{
+    using view_t = decltype(adjacent<2>(std::declval<std::vector<int>&>()));
+    STATIC_REQUIRE(std::ranges::common_range<view_t>);
+}
+
+TEST_CASE("adjacent is not common_range for non-common underlying range", "[category]")
+{
+    using view_t = decltype(adjacent<2>(
+        std::declval<std::ranges::take_while_view<std::ranges::ref_view<std::vector<int>>, bool (*)(int)>&>()));
+    STATIC_REQUIRE(!std::ranges::common_range<view_t>);
+}
+
 // TEST_CASE("adjacent supports const begin/end for const-iterable range", "[category]")
 // {
 //     std::vector<int> v = {1, 2, 3, 4, 5};
@@ -291,6 +291,37 @@ TEST_CASE("adjacent satisfies view", "[category]")
 //     REQUIRE(result.size() == 4);
 //     REQUIRE(result[0] == std::tuple{1, 2});
 //     REQUIRE(result[3] == std::tuple{4, 5});
+// }
+
+// TEST_CASE("adjacent const view yields const references", "[category]")
+// {
+//     std::vector<int> v = {1, 2, 3};
+//     const auto view = adjacent<3>(v);
+//     for (auto [a, b, c] : view)
+//     {
+//         // These should be const int& when iterating a const view
+//         STATIC_REQUIRE(std::is_const_v<std::remove_reference_t<decltype(a)>>);
+//         STATIC_REQUIRE(std::is_const_v<std::remove_reference_t<decltype(b)>>);
+//         STATIC_REQUIRE(std::is_const_v<std::remove_reference_t<decltype(c)>>);
+//     }
+// }
+
+// TEST_CASE("adjacent const vs non-const view yield different reference types", "[category]")
+// {
+//     std::vector<int> v = {1, 2, 3};
+//     auto view = adjacent<2>(v);
+//     const auto const_view = adjacent<2>(v);
+
+//     auto it = view.begin();
+//     auto const_it = const_view.begin();
+
+//     // Non-const view should yield non-const references
+//     auto [a, b] = *it;
+//     STATIC_REQUIRE(!std::is_const_v<std::remove_reference_t<decltype(a)>>);
+
+//     // Const view should yield const references
+//     auto [ca, cb] = *const_it;
+//     STATIC_REQUIRE(std::is_const_v<std::remove_reference_t<decltype(ca)>>);
 // }
 
 TEST_CASE("adjacent is sized_range for sized underlying range", "[category]")
