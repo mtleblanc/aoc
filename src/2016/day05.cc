@@ -26,13 +26,12 @@ template <size_t N> bool hasStartingZeros(const std::vector<uint8_t>& md5)
     return std::ranges::all_of(view, [](auto c) { return c == 0; });
 }
 
-Solution crack(const std::string& prefix)
+template <size_t LEADING_ZEROS> Solution crack(const std::string& prefix)
 {
     auto hasher = Hash::Hasher::md5Hasher();
     auto appendN = [&prefix](auto n) { return prefix + std::to_string(n); };
     {
         using namespace std::views;
-        constexpr size_t LEADING_ZEROS = 5;
         constexpr uint8_t SECOND_DIGIT = 0x0F;
         constexpr size_t PASSWORD_LENGTH = 8;
         constexpr size_t BASE = 16;
@@ -75,7 +74,8 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     std::string seed;
     input >> seed;
-    // NB need to convert answers to hex
-    return crack(seed);
+    // NB need to convert answers to hex, change template to 5 for actual answer, less for faster
+    // execution while working on other days
+    return crack<1>(seed);
 }
 } // namespace aoc
