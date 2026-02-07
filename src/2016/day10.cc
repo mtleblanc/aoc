@@ -136,16 +136,15 @@ Solution simulate(const std::vector<std::string>& descs)
         input.dest->accept(input.value, report);
     }
 
-    using namespace std::views;
-
-    auto firstThreeOutputs = iota(0UL, 3UL) | transform([&outputs](auto i) { return outputs[i]; });
+    auto firstThreeOutputs = std::views::iota(0UL, 3UL) |
+                             std::views::transform([&outputs](auto i) { return outputs[i]; });
     if (std::ranges::any_of(firstThreeOutputs, [](const auto& o) { return o.values.size() != 1; }))
     {
         throw std::runtime_error("Outputs 0-2 did not each have a single element");
     }
-    auto part2 =
-        std::ranges::fold_left(firstThreeOutputs | transform([](auto o) { return o.values[0]; }),
-                               1UL, std::multiplies<>());
+    auto part2 = std::ranges::fold_left(
+        firstThreeOutputs | std::views::transform([](auto o) { return o.values[0]; }), 1UL,
+        std::multiplies<>());
     return {part1, part2};
 }
 } // namespace
