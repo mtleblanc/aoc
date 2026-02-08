@@ -51,7 +51,8 @@ template <size_t N> struct ArrayState
         return floors[2 * i];
     }
 
-    [[nodiscard]] constexpr size_t astarDistance() const
+    // using A* improves runtime over dijkstra by 20x
+    [[nodiscard]] constexpr size_t aStarDistance() const
     {
         // To find min moves, consider one item permanently in the elevator, and each other item
         // only moves up. Then each item starting on floor f accounts for FLOORS - f up-moves.  The
@@ -69,7 +70,7 @@ template <size_t N> struct ArrayState
 
     constexpr auto operator<=>(const ArrayState<N>& o) const
     {
-        return astarDistance() <=> o.astarDistance();
+        return aStarDistance() <=> o.aStarDistance();
     }
 
     [[nodiscard]] constexpr bool isDone() const
@@ -120,6 +121,9 @@ template <size_t N> struct ArrayState
                 {
                     nexts.push_back(next);
                 }
+                // intuitively we should never move down with 2 items, but I can't prove that.  On
+                // my input, only doing this check for dir = 1 still gives the correct answer and
+                // runs more than 2x as fast, but leaving it in unless I can prove correctness
                 for (size_t idx2{idx + 1}; idx2 < floors.size() - 1; ++idx2)
                 {
                     if (floors[idx2] != elevator())
@@ -192,7 +196,7 @@ template <size_t N> size_t arraySolve([[maybe_unused]] const std::vector<uint8_t
 
 template <> size_t arraySolve<0>([[maybe_unused]] const std::vector<uint8_t>& start)
 {
-    return 0;
+    throw std::invalid_argument("Must be at least 1 type of chip");
 }
 
 } // namespace
