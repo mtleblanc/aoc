@@ -85,9 +85,11 @@ class Hasher
     MessageDigestContext mdc;
 
   public:
+    using Digest = std::vector<uint8_t>;
+
     explicit Hasher(EVP_MD* md) : md{md} {}
 
-    std::vector<uint8_t> operator()(std::string const& message)
+    Digest operator()(std::string const& message)
     {
         if (!EVP_DigestInit_ex(mdc.get(), md.get(), nullptr))
         {
