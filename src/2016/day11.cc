@@ -3,7 +3,6 @@
 #include <cassert>
 #include <functional>
 #include <queue>
-#include <ranges>
 #include <set>
 #include <utility>
 
@@ -17,139 +16,6 @@ constexpr size_t DAY = 11;
 namespace
 {
 constexpr auto FLOORS = 4UL;
-struct RTG
-{
-    bool isChip;
-    size_t type;
-    size_t floor;
-
-    [[nodiscard]] bool shieldedBy(const RTG& o) const
-    {
-        return o.type == type && o.isChip == !isChip && o.floor == floor;
-    }
-    [[nodiscard]] bool friedBy(const RTG& o) const
-    {
-        return isChip && !o.isChip && o.type != type && o.floor == floor;
-    }
-    [[nodiscard]] auto operator<=>(const RTG& o) const
-    {
-        return std::tie(type, isChip) <=> std::tie(o.type, o.isChip);
-    }
-};
-
-struct State
-{
-    using Sig = std::vector<size_t>;
-    std::vector<RTG> rtgs;
-    size_t elevator{};
-    size_t steps{};
-
-    [[nodiscard]] Sig sig() const
-    {
-        auto sg = rtgs | std::views::transform([](const auto& r) { return r.floor; }) |
-                  std::ranges::to<std::vector>();
-        sg.push_back(elevator);
-        return sg;
-    }
-
-    [[nodiscard]] size_t astarDistance() const
-    {
-        auto costs =
-            rtgs | std::views::transform([](const auto& rtg) { return 2 * (FLOORS - rtg.floor); });
-        return steps + std::ranges::fold_left(costs, 0UL, std::plus<>()) - (FLOORS - elevator) * 3;
-    }
-
-    [[nodiscard]] bool isValid() const
-    {
-        // floors are 1-based
-        if (0 == elevator || elevator > FLOORS)
-        {
-            return false;
-        }
-        auto shielded = rtgs |
-                        std::views::filter(
-                            [this](const auto& rtg)
-                            {
-                                return std::ranges::any_of(this->rtgs, [&rtg](const auto& r)
-                                                           { return rtg.shieldedBy(r); });
-                            }) |
-                        std::ranges::to<std::set>();
-        auto fried = rtgs | std::views::filter(
-                                [this](const auto& rtg)
-                                {
-                                    return std::ranges::any_of(this->rtgs, [&rtg](const auto& r)
-                                                               { return rtg.friedBy(r); });
-                                });
-        return std::ranges::all_of(fried,
-                                   [&shielded](const auto& rtg) { return shielded.contains(rtg); });
-    }
-
-    [[nodiscard]] bool isDone() const
-    {
-        return std::ranges::all_of(rtgs, [](const auto& rtg) { return rtg.floor == FLOORS; });
-    }
-
-    [[nodiscard]] std::vector<State> nextStates() const
-    {
-        std::vector<State> validNextStates;
-
-        auto newState = *this;
-        ++newState.steps;
-        for (auto& rtg :
-             newState.rtgs | std::views::filter([this](const auto& rtg)
-                                                { return rtg.floor == this->elevator; }))
-        {
-            if (elevator > 1)
-            {
-                newState.elevator = --rtg.floor;
-                if (newState.isValid())
-                {
-                    validNextStates.push_back(newState);
-                }
-                for (auto& rtg2 :
-                     newState.rtgs |
-                         std::views::filter([this, &rtg](const auto& rtg2)
-                                            { return rtg2 > rtg && rtg2.floor == this->elevator; }))
-                {
-                    --rtg2.floor;
-                    if (newState.isValid())
-                    {
-                        validNextStates.push_back(newState);
-                    }
-                    ++rtg2.floor;
-                }
-                ++rtg.floor;
-            }
-            if (elevator < FLOORS)
-            {
-                newState.elevator = ++rtg.floor;
-                if (newState.isValid())
-                {
-                    validNextStates.push_back(newState);
-                }
-                for (auto& rtg2 :
-                     newState.rtgs |
-                         std::views::filter([this, &rtg](const auto& rtg2)
-                                            { return rtg2 > rtg && rtg2.floor == this->elevator; }))
-                {
-                    ++rtg2.floor;
-                    if (newState.isValid())
-                    {
-                        validNextStates.push_back(newState);
-                    }
-                    --rtg2.floor;
-                }
-                --rtg.floor;
-            }
-        }
-        return validNextStates;
-    }
-
-    auto operator<=>(const State& o) const
-    {
-        return astarDistance() <=> o.astarDistance();
-    }
-};
 
 template <size_t N> struct ArrayState
 {
@@ -233,18 +99,23 @@ template <size_t N> struct ArrayState
     [[nodiscard]] std::vector<ArrayState<N>> nextStates() const
     {
         std::vector<ArrayState<N>> nexts;
-        for (size_t idx{}; idx < floors.size() - 1; ++idx)
+        std::vector<ssize_t> dirs;
+        for (auto dir : {-1, 1})
         {
-            if (floors[idx] != elevator())
+            if ((dir == -1 && elevator() <= 1) || (dir == 1 && elevator() >= FLOORS))
             {
                 continue;
             }
-            if (elevator() > 1)
+            for (size_t idx{}; idx < floors.size() - 1; ++idx)
             {
+                if (floors[idx] != elevator())
+                {
+                    continue;
+                }
                 auto next = *this;
                 ++next.steps;
-                --next.floors[idx];
-                --next.elevator();
+                next.floors[idx] += dir;
+                next.elevator() += dir;
                 if (next.isValid())
                 {
                     nexts.push_back(next);
@@ -256,31 +127,7 @@ template <size_t N> struct ArrayState
                         continue;
                     }
                     auto next2 = next;
-                    --next2.floors[idx2];
-                    if (next2.isValid())
-                    {
-                        nexts.push_back(next2);
-                    }
-                }
-            }
-            if (elevator() < FLOORS)
-            {
-                auto next = *this;
-                ++next.steps;
-                ++next.floors[idx];
-                ++next.elevator();
-                if (next.isValid())
-                {
-                    nexts.push_back(next);
-                }
-                for (size_t idx2{idx + 1}; idx2 < floors.size() - 1; ++idx2)
-                {
-                    if (floors[idx2] != elevator())
-                    {
-                        continue;
-                    }
-                    auto next2 = next;
-                    ++next2.floors[idx2];
+                    next2.floors[idx2] += dir;
                     if (next2.isValid())
                     {
                         nexts.push_back(next2);
@@ -298,15 +145,15 @@ template <size_t N> struct ArrayState
     }
 };
 
-template <typename S> size_t solve(S s)
+template <typename St> size_t solve(St s)
 {
-    std::set<typename S::Sig> seen;
-    std::priority_queue<S, std::vector<S>, std::greater<>> frontier;
+    std::set<typename St::Sig> seen;
+    std::priority_queue<St, std::vector<St>, std::greater<>> frontier;
     seen.insert(s.sig());
-    frontier.push((s));
+    frontier.push(s);
     while (frontier.size())
     {
-        S s = frontier.top();
+        St s = frontier.top();
         frontier.pop();
         if (s.isDone())
         {
@@ -324,24 +171,38 @@ template <typename S> size_t solve(S s)
     return 0;
 }
 
+template <size_t N> size_t arraySolve([[maybe_unused]] const std::vector<uint8_t>& start)
+{
+    if (start.size() % 2 == 0)
+    {
+        throw std::invalid_argument("Malformed input, missing elevator?");
+    }
+    if (start.size() > 2 * N + 1)
+    {
+        throw std::invalid_argument("Unsupported number of chips");
+    }
+    if (start.size() == 2 * N + 1)
+    {
+        ArrayState<N> state{};
+        std::ranges::copy(start, state.floors.data());
+        return solve(state);
+    }
+    return arraySolve<N - 1>(start);
+}
+
+template <> size_t arraySolve<0>([[maybe_unused]] const std::vector<uint8_t>& start)
+{
+    return 0;
+}
+
 } // namespace
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
+    constexpr size_t MAX_CHIPS = 10;
     (void)input;
-
-    std::vector<RTG> s = {{true, 0, 1}, {false, 0, 1}, {false, 1, 1}, {false, 2, 1}, {true, 1, 2},
-                          {true, 2, 2}, {true, 3, 3},  {false, 3, 3}, {true, 4, 3},  {false, 4, 3}};
-    State start{};
-    start.elevator = 1;
-    start.steps = 0;
-    start.rtgs = std::move(s);
-    // auto part1 = solve<State>(start);
-    auto part1 = solve<ArrayState<4>>({.floors = {1, 1, 1, 2, 1, 2, 3, 3,1}});
-    // s.emplace_back(true, 5, 1);
-    // // s.emplace_back(true, 6, 1);
-    // s.emplace_back(false, 5, 1);
-    // s.emplace_back(false, 6, 1);
-    return {part1, /*solve<State>(start)*/ 0};
+    auto part1 = arraySolve<MAX_CHIPS>({1, 1, 1, 2, 1, 2, 3, 3, 3, 3, 1});
+    auto part2 = arraySolve<MAX_CHIPS>({1, 1, 1, 2, 1, 2, 3, 3, 3, 3, 1, 1, 1, 1, 1});
+    return {part1, part2};
 }
 } // namespace aoc
