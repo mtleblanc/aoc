@@ -1,7 +1,6 @@
 #pragma once
 #include <array>
 #include <openssl/evp.h>
-#include <string>
 #include <utility>
 #include <vector>
 
@@ -89,7 +88,7 @@ class Hasher
 
     explicit Hasher(EVP_MD* md) : md{md} {}
 
-    Digest operator()(std::string const& message)
+    Digest operator()(std::string_view const& message)
     {
         if (!EVP_DigestInit_ex(mdc.get(), md.get(), nullptr))
         {
@@ -107,6 +106,28 @@ class Hasher
             throw std::runtime_error{"Failed to extract message digest"};
         }
         return {digest.begin(), std::next(digest.begin(), length)};
+    }
+
+    template <size_t N> std::array<uint8_t, N> digest(std::string_view const& message)
+    {
+        if (!EVP_DigestInit_ex(mdc.get(), md.get(), nullptr))
+        {
+            throw std::runtime_error{"Failed to initialize message digest"};
+        }
+        if (!EVP_DigestUpdate(mdc.get(), message.data(), message.size()))
+        {
+            throw std::runtime_error{"Failed to update message digest"};
+        }
+
+        std::array<unsigned char, EVP_MAX_MD_SIZE> digest{};
+        unsigned int length{};
+        if (!EVP_DigestFinal_ex(mdc.get(), digest.data(), &length))
+        {
+            throw std::runtime_error{"Failed to extract message digest"};
+        }
+        std::array<uint8_t, N> ret;
+        std::copy(digest.begin(), std::next(digest.begin(), N), ret.begin());
+        return ret;
     }
 
     static Hasher md5Hasher()
