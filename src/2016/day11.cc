@@ -1,9 +1,11 @@
 #include "aoc.hh"
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <queue>
 #include <ranges>
 #include <set>
+#include <utility>
 
 /* https://adventofcode.com/2016/day/11
  */
@@ -37,11 +39,12 @@ struct RTG
 
 struct State
 {
+    using Sig = std::vector<size_t>;
     std::vector<RTG> rtgs;
     size_t elevator{};
     size_t steps{};
 
-    [[nodiscard]] std::vector<size_t> sig() const
+    [[nodiscard]] Sig sig() const
     {
         auto sg = rtgs | std::views::transform([](const auto& r) { return r.floor; }) |
                   std::ranges::to<std::vector>();
@@ -148,19 +151,162 @@ struct State
     }
 };
 
-size_t solve(std::vector<RTG> start)
+template <size_t N> struct ArrayState
 {
-    std::set<std::vector<size_t>> seen;
-    State s{};
-    s.elevator = 1;
-    s.steps = 0;
-    s.rtgs = std::move(start);
-    std::priority_queue<State, std::vector<State>, std::greater<>> frontier;
+    using Rep = std::array<uint8_t, 2 * N + 1>;
+    // generator i at floors[2*i], chip at floors[2*i + 1], elevator at floors[2*N]
+    Rep floors;
+    size_t steps{};
+
+    [[nodiscard]] constexpr uint8_t& elevator()
+    {
+        return floors.back();
+    }
+
+    [[nodiscard]] constexpr const uint8_t& elevator() const
+    {
+        return floors.back();
+    }
+
+    [[nodiscard]] constexpr uint8_t& chip(size_t i)
+    {
+        return floors[2 * i + 1];
+    }
+    [[nodiscard]] constexpr const uint8_t& chip(size_t i) const
+    {
+        return floors[2 * i + 1];
+    }
+    [[nodiscard]] constexpr uint8_t& gen(size_t i)
+    {
+        return floors[2 * i];
+    }
+    [[nodiscard]] constexpr const uint8_t& gen(size_t i) const
+    {
+        return floors[2 * i];
+    }
+
+    [[nodiscard]] constexpr size_t astarDistance() const
+    {
+        // To find min moves, consider one item permanently in the elevator, and each other item
+        // only moves up. Then each item starting on floor f accounts for FLOORS - f up-moves.  The
+        // net movement of the elevator is FLOORS - elevator, so factoring that out to subtract
+        // later, each items up move also generates a down move for net 0
+        auto elevatorNet = FLOORS - elevator();
+        auto chipNGenMoves = FLOORS * (4 * N) -
+                             2 * (std::ranges::fold_left(floors, 0UL, std::plus<>()) - elevator());
+        // but we are carrying one element permanently and overcounted it, which can be any item
+        // from the elevator's starting floor, i.e. another elevatorNet*2
+        // there's an edgecase if only one item is on the elevator's floor and no items are below
+        // it, this can count negative, so clamp
+        return chipNGenMoves - std::min(3 * elevatorNet, chipNGenMoves) + steps;
+    }
+
+    constexpr auto operator<=>(const ArrayState<N>& o) const
+    {
+        return astarDistance() <=> o.astarDistance();
+    }
+
+    [[nodiscard]] constexpr bool isDone() const
+    {
+        return std::ranges::all_of(floors, [](auto f) { return f == FLOORS; });
+    }
+
+    [[nodiscard]] constexpr bool isValid() const
+    {
+        for (size_t i{}; i < N; ++i)
+        {
+            if (chip(i) == gen(i))
+            {
+                continue;
+            }
+            for (size_t j{}; j < N; ++j)
+            {
+                if (chip(i) == gen(j))
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    [[nodiscard]] std::vector<ArrayState<N>> nextStates() const
+    {
+        std::vector<ArrayState<N>> nexts;
+        for (size_t idx{}; idx < floors.size() - 1; ++idx)
+        {
+            if (floors[idx] != elevator())
+            {
+                continue;
+            }
+            if (elevator() > 1)
+            {
+                auto next = *this;
+                ++next.steps;
+                --next.floors[idx];
+                --next.elevator();
+                if (next.isValid())
+                {
+                    nexts.push_back(next);
+                }
+                for (size_t idx2{idx + 1}; idx2 < floors.size() - 1; ++idx2)
+                {
+                    if (floors[idx2] != elevator())
+                    {
+                        continue;
+                    }
+                    auto next2 = next;
+                    --next2.floors[idx2];
+                    if (next2.isValid())
+                    {
+                        nexts.push_back(next2);
+                    }
+                }
+            }
+            if (elevator() < FLOORS)
+            {
+                auto next = *this;
+                ++next.steps;
+                ++next.floors[idx];
+                ++next.elevator();
+                if (next.isValid())
+                {
+                    nexts.push_back(next);
+                }
+                for (size_t idx2{idx + 1}; idx2 < floors.size() - 1; ++idx2)
+                {
+                    if (floors[idx2] != elevator())
+                    {
+                        continue;
+                    }
+                    auto next2 = next;
+                    ++next2.floors[idx2];
+                    if (next2.isValid())
+                    {
+                        nexts.push_back(next2);
+                    }
+                }
+            }
+        }
+        return nexts;
+    }
+
+    using Sig = Rep;
+    [[nodiscard]] auto sig() const
+    {
+        return floors;
+    }
+};
+
+template <typename S> size_t solve(S s)
+{
+    std::set<typename S::Sig> seen;
+    std::priority_queue<S, std::vector<S>, std::greater<>> frontier;
     seen.insert(s.sig());
     frontier.push((s));
     while (frontier.size())
     {
-        State s = frontier.top();
+        S s = frontier.top();
         frontier.pop();
         if (s.isDone())
         {
@@ -186,12 +332,16 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 
     std::vector<RTG> s = {{true, 0, 1}, {false, 0, 1}, {false, 1, 1}, {false, 2, 1}, {true, 1, 2},
                           {true, 2, 2}, {true, 3, 3},  {false, 3, 3}, {true, 4, 3},  {false, 4, 3}};
-
-    auto part1 = solve(s);
+    State start{};
+    start.elevator = 1;
+    start.steps = 0;
+    start.rtgs = std::move(s);
+    // auto part1 = solve<State>(start);
+    auto part1 = solve<ArrayState<4>>({.floors = {1, 1, 1, 2, 1, 2, 3, 3,1}});
     // s.emplace_back(true, 5, 1);
     // // s.emplace_back(true, 6, 1);
     // s.emplace_back(false, 5, 1);
     // s.emplace_back(false, 6, 1);
-    return {part1, solve(s)};
+    return {part1, /*solve<State>(start)*/ 0};
 }
 } // namespace aoc
