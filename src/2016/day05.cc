@@ -81,7 +81,7 @@ template <> StringSolution solve<YEAR, DAY>(std::istream& input)
     std::string seed;
     input >> seed;
     // Set to 5 for correct answer, lower so this runs quickly when working on later problems
-    constexpr auto ZEROS = 5;
+    constexpr auto ZEROS = 1;
     return crack<ZEROS>(seed);
 }
 } // namespace aoc

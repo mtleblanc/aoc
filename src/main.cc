@@ -18,8 +18,8 @@ template <size_t Y, size_t D> void printSolution(bool useSample)
 
     // NOLINTBEGIN
     std::cout << Y << " Day " << std::setfill('0') << std::setw(2) << D
-              << " part 1: " << std::setfill(' ') << std::setw(10) << solution.part1 << "\t"
-              << " part 2: " << std::setfill(' ') << std::setw(10) << solution.part2 << "\t"
+              << " part 1: " << std::setfill(' ') << std::setw(18) << solution.part1 << "\t"
+              << " part 2: " << std::setfill(' ') << std::setw(18) << solution.part2 << "\t"
               << " (" << duration.count() << " μs)\n";
     // NOLINTEND
 }
