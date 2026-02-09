@@ -15,7 +15,7 @@ template <int ROWS> int countSafe(std::string row)
 {
     if (row.size() < 2)
     {
-        return 0L;
+        return 0;
     }
     auto accum = std::ranges::count(row, '.');
     std::string newRow(row.size(), '.');
@@ -23,7 +23,7 @@ template <int ROWS> int countSafe(std::string row)
     {
         newRow[0] = row[1];
         newRow.back() = row[row.size() - 2];
-        for (auto i : std::views::iota(1U, row.size() - 1))
+        for (auto i : std::views::iota(1UZ, row.size() - 1))
         {
             newRow[i] = row[i - 1] == row[i + 1] ? '.' : '^';
         }

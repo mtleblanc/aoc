@@ -97,11 +97,11 @@ Solution_t<YEAR, DAY> simulate(const std::vector<std::string>& descs)
     {
         constexpr auto BOT_PAT = ctll::fixed_string(
             R"(bot (\d+) gives low to (bot|output) (\d+) and high to (bot|output) (\d+))");
-        constexpr size_t BOT_ID = 1;
-        constexpr size_t BOT_LOW_IS_BOT = 2;
-        constexpr size_t BOT_LOW_ID = 3;
-        constexpr size_t BOT_HIGH_IS_BOT = 4;
-        constexpr size_t BOT_HIGH_ID = 5;
+        constexpr auto BOT_ID = 1;
+        constexpr auto BOT_LOW_IS_BOT = 2;
+        constexpr auto BOT_LOW_ID = 3;
+        constexpr auto BOT_HIGH_IS_BOT = 4;
+        constexpr auto BOT_HIGH_ID = 5;
         constexpr auto INPUT_PAT = ctll::fixed_string(R"(value (\d+) goes to bot (\d+))");
         constexpr auto INPUT_VAL = 1;
         constexpr auto INPUT_ID = 2;
@@ -136,7 +136,7 @@ Solution_t<YEAR, DAY> simulate(const std::vector<std::string>& descs)
         input.dest->accept(input.value, report);
     }
 
-    auto firstThreeOutputs = std::views::iota(0UL, 3UL) |
+    auto firstThreeOutputs = std::views::iota(0, 3) |
                              std::views::transform([&outputs](auto i) { return outputs[i]; });
     if (std::ranges::any_of(firstThreeOutputs, [](const auto& o) { return o.values.size() != 1; }))
     {

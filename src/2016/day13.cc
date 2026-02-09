@@ -18,10 +18,10 @@ struct Path
     int steps;
 };
 
-bool valid(Coord coords, size_t seed)
+bool valid(Coord coords, int seed)
 {
     auto [x, y] = coords;
-    return x >= 0 && y >= 0 && std::popcount(x * x + 3 * x + 2 * x * y + y + y * y + seed) % 2 == 0;
+    return x >= 0 && y >= 0 && std::popcount(static_cast<uint32_t>(x * x + 3 * x + 2 * x * y + y + y * y + seed)) % 2 == 0;
 }
 
 Coord operator+(const Coord& l, const Coord& r)
@@ -31,9 +31,9 @@ Coord operator+(const Coord& l, const Coord& r)
 
 constexpr auto DIRS = std::array<Coord, 4>{{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}};
 
-int part1(size_t seed)
+int part1(int seed)
 {
-    constexpr auto TARGET = std::make_pair(31UL, 39UL);
+    constexpr auto TARGET = std::make_pair(31, 39);
     std::set<Coord> seen;
     std::deque<Path> frontier;
     Coord start = {1, 1};
@@ -63,9 +63,9 @@ int part1(size_t seed)
     return 0;
 }
 
-int part2(size_t seed)
+int part2(int seed)
 {
-    constexpr auto MAX_STEPS = 50L;
+    constexpr auto MAX_STEPS = 50;
     std::set<Coord> seen;
     std::deque<Path> frontier;
     Coord start = {1, 1};
@@ -99,7 +99,7 @@ int part2(size_t seed)
 } // namespace
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
-    size_t seed{};
+    int seed{};
     input >> seed;
 
     return {part1(seed), part2(seed)};

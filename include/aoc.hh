@@ -89,7 +89,7 @@ inline std::string_view trim(std::string_view s)
     return s.substr(start, end - start + 1);
 }
 
-inline std::string toHex(ssize_t n)
+inline std::string toHex(auto n)
 {
     std::ostringstream ss;
     ss << std::hex << n;

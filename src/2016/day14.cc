@@ -15,9 +15,9 @@ constexpr size_t DAY = 14;
 namespace
 {
 
-constexpr auto WIDTH = 4U;
+constexpr auto WIDTH = 4;
 constexpr auto SECOND_DIGIT = 0x0F;
-constexpr auto LEN = 16UL;
+constexpr auto LEN = 16;
 
 auto splitDigits(const auto& digest)
 {
@@ -94,7 +94,7 @@ template <typename F> int generateOTPs(const std::string& seed, F& f)
 {
     using Digest = decltype(f(std::declval<std::string>()));
 
-    constexpr auto WINDOW = 1000UL;
+    constexpr auto WINDOW = 1000UZ;
     constexpr auto TARGET = 64;
     constexpr auto FIRST_REPEATS = 3;
     constexpr auto SECOND_REPEATS = 5;
@@ -140,8 +140,8 @@ template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
     auto stretchedHasher = [&hasher](const std::string& message)
     {
         // Set to 2016 for correct answer.  Reduced for runtime while solving other problems
-        constexpr auto STRETCH = 0;
-        constexpr auto LEN = 16UL;
+        constexpr auto STRETCH = 2016;
+        constexpr auto LEN = 16UZ;
         std::array<char, LEN * 2> str{};
         auto hash = hasher.digest<LEN>(message);
         for (auto _ : std::views::iota(0, STRETCH))

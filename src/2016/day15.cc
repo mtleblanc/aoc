@@ -23,10 +23,10 @@ struct Disc
 {
     constexpr auto PAT = ctll::fixed_string(
         R"(Disc #(\d+) has (\d+) positions; at time=(\d+), it is at position (\d+).)");
-    constexpr auto ID = 1UL;
-    constexpr auto MOD = 2UL;
-    constexpr auto START_TIME = 3UL;
-    constexpr auto START_POS = 4UL;
+    constexpr auto ID = 1;
+    constexpr auto MOD = 2;
+    constexpr auto START_TIME = 3;
+    constexpr auto START_POS = 4;
     std::string line;
     std::getline(is, line);
     if (auto m = ctre::match<PAT>(line))
@@ -59,12 +59,12 @@ class ChineseRemainder
         }
         if (n == 0)
         {
-            return std::make_pair(0L, 1L);
+            return std::make_pair(0, 1);
         }
         auto r = m % n;
         if (r == 0)
         {
-            return std::make_pair(0L, 1L);
+            return std::make_pair(0, 1);
         }
         auto d = m / n;
         auto [x, y] = euler(n, r);

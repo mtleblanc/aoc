@@ -52,8 +52,8 @@ template <> struct SolutionType<YEAR, DAY>
 
 template <> StringSolution solve<YEAR, DAY>(std::istream& input)
 {
-    constexpr auto PART1_DISK = 272UL;
-    constexpr auto PART2_DISK = 35651584UL;
+    constexpr auto PART1_DISK = 272UZ;
+    constexpr auto PART2_DISK = 35651584UZ;
     std::string seed;
     input >> seed;
     return {expandAndCheck<PART1_DISK>(seed), expandAndCheck<PART2_DISK>(seed)};

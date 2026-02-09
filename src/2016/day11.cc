@@ -3,6 +3,7 @@
 #include <cassert>
 #include <functional>
 #include <queue>
+#include <ranges>
 #include <set>
 #include <utility>
 
@@ -15,38 +16,39 @@ constexpr size_t DAY = 11;
 
 namespace
 {
-constexpr auto FLOORS = 4UL;
+constexpr auto FLOORS = 4;
 
-template <size_t N> struct ArrayState
+template <int N> struct ArrayState
 {
-    using Rep = std::array<uint8_t, 2 * N + 1>;
+    using Item = uint8_t;
+    using Rep = std::array<Item, 2 * N + 1>;
     // generator i at floors[2*i], chip at floors[2*i + 1], elevator at floors[2*N]
     Rep floors;
     int steps{};
 
-    [[nodiscard]] constexpr uint8_t& elevator()
+    [[nodiscard]] constexpr Item& elevator()
     {
         return floors.back();
     }
 
-    [[nodiscard]] constexpr const uint8_t& elevator() const
+    [[nodiscard]] constexpr const Item& elevator() const
     {
         return floors.back();
     }
 
-    [[nodiscard]] constexpr uint8_t& chip(int i)
+    [[nodiscard]] constexpr Item& chip(int i)
     {
         return floors[2 * i + 1];
     }
-    [[nodiscard]] constexpr const uint8_t& chip(int i) const
+    [[nodiscard]] constexpr const Item& chip(int i) const
     {
         return floors[2 * i + 1];
     }
-    [[nodiscard]] constexpr uint8_t& gen(int i)
+    [[nodiscard]] constexpr Item& gen(int i)
     {
         return floors[2 * i];
     }
-    [[nodiscard]] constexpr const uint8_t& gen(int i) const
+    [[nodiscard]] constexpr const Item& gen(int i) const
     {
         return floors[2 * i];
     }
@@ -59,8 +61,8 @@ template <size_t N> struct ArrayState
         // net movement of the elevator is FLOORS - elevator, so factoring that out to subtract
         // later, each items up move also generates a down move for net 0
         auto elevatorNet = FLOORS - elevator();
-        auto chipNGenMoves = FLOORS * (4 * N) -
-                             2 * (std::ranges::fold_left(floors, 0UL, std::plus<>()) - elevator());
+        auto chipNGenMoves =
+            FLOORS * (4 * N) - 2 * (std::ranges::fold_left(floors, 0, std::plus<>()) - elevator());
         // but we are carrying one element permanently and overcounted it, which can be any item
         // from the elevator's starting floor, i.e. another elevatorNet*2
         // there's an edgecase if only one item is on the elevator's floor and no items are below
@@ -80,13 +82,13 @@ template <size_t N> struct ArrayState
 
     [[nodiscard]] constexpr bool isValid() const
     {
-        for (size_t i{}; i < N; ++i)
+        for (auto i : std::views::iota(0, N))
         {
             if (chip(i) == gen(i))
             {
                 continue;
             }
-            for (size_t j{}; j < N; ++j)
+            for (auto j : std::views::iota(0, N))
             {
                 if (chip(i) == gen(j))
                 {
@@ -107,7 +109,7 @@ template <size_t N> struct ArrayState
             {
                 continue;
             }
-            for (size_t idx{}; idx < floors.size() - 1; ++idx)
+            for (auto idx : std::views::iota(0, 2 * N))
             {
                 if (floors[idx] != elevator())
                 {
@@ -124,7 +126,7 @@ template <size_t N> struct ArrayState
                 // intuitively we should never move down with 2 items, but I can't prove that.  On
                 // my input, only doing this check for dir = 1 still gives the correct answer and
                 // runs more than 2x as fast, but leaving it in unless I can prove correctness
-                for (size_t idx2{idx + 1}; idx2 < floors.size() - 1; ++idx2)
+                for (auto idx2 : std::views::iota(idx + 1, 2 * N))
                 {
                     if (floors[idx2] != elevator())
                     {
@@ -175,7 +177,7 @@ template <typename St> int solve(St s)
     return 0;
 }
 
-template <size_t N> int arraySolve([[maybe_unused]] const std::vector<uint8_t>& start)
+template <int N> int arraySolve([[maybe_unused]] const std::vector<uint8_t>& start)
 {
     if (start.size() % 2 == 0)
     {
@@ -203,7 +205,7 @@ template <> int arraySolve<0>([[maybe_unused]] const std::vector<uint8_t>& start
 
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
-    constexpr size_t MAX_CHIPS = 10;
+    constexpr int MAX_CHIPS = 10;
     (void)input;
     auto part1 = arraySolve<MAX_CHIPS>({1, 1, 1, 2, 1, 2, 3, 3, 3, 3, 1});
     auto part2 = arraySolve<MAX_CHIPS>({1, 1, 1, 2, 1, 2, 3, 3, 3, 3, 1, 1, 1, 1, 1});

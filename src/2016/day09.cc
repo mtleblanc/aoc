@@ -11,7 +11,7 @@ constexpr size_t DAY = 9;
 namespace
 {
 GeneralSolution<int64_t> decompress(std::istream& input,
-                                    ssize_t limit = std::numeric_limits<ssize_t>::max())
+                                    int64_t limit = std::numeric_limits<int64_t>::max())
 {
     GeneralSolution<int64_t> sz{};
     auto before = input.tellg();
@@ -24,8 +24,8 @@ GeneralSolution<int64_t> decompress(std::istream& input,
             continue;
         }
 
-        ssize_t len{};
-        ssize_t rep{};
+        int64_t len{};
+        int rep{};
         char c2{};
         if (!(input >> len >> c >> rep >> c2) || c != 'x' || c2 != ')')
         {

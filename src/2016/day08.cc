@@ -16,20 +16,20 @@ namespace
 {
 struct RotateRowCommand
 {
-    size_t row;
-    size_t amount;
+    int row;
+    int amount;
 };
 
 struct RotateColumnCommand
 {
-    size_t col;
-    size_t amount;
+    int col;
+    int amount;
 };
 
 struct RectCommand
 {
-    size_t rows;
-    size_t columns;
+    int rows;
+    int columns;
 };
 
 using Command = std::variant<RectCommand, RotateRowCommand, RotateColumnCommand>;
@@ -45,8 +45,7 @@ using Command = std::variant<RectCommand, RotateRowCommand, RotateColumnCommand>
 
     if (auto m = ctre::match<RECT>(text))
     {
-        com = RectCommand{.rows = std::stoul(std::string(m.get<2>())),
-                          .columns = std::stoul(std::string(m.get<1>()))};
+        com = RectCommand{.rows = toNum<int>(m.get<2>()), .columns = toNum<int>(m.get<1>())};
         if (std::get<RectCommand>(com).rows <= 0 || std::get<RectCommand>(com).columns <= 0)
         {
             throw std::invalid_argument("Rectangle dimensions must be positive");
@@ -55,8 +54,7 @@ using Command = std::variant<RectCommand, RotateRowCommand, RotateColumnCommand>
     }
     if (auto m = ctre::match<ROTATE_ROW>(text))
     {
-        com = RotateRowCommand{.row = std::stoul(std::string(m.get<1>())),
-                               .amount = std::stoul(std::string(m.get<2>()))};
+        com = RotateRowCommand{.row = toNum<int>(m.get<1>()), .amount = toNum<int>(m.get<2>())};
         if (std::get<RotateRowCommand>(com).amount <= 0)
         {
             throw std::invalid_argument("Rotate amount must be positive");
@@ -65,8 +63,7 @@ using Command = std::variant<RectCommand, RotateRowCommand, RotateColumnCommand>
     }
     if (auto m = ctre::match<ROTATE_COLUMN>(text))
     {
-        com = RotateColumnCommand{.col = std::stoul(std::string(m.get<1>())),
-                                  .amount = std::stoul(std::string(m.get<2>()))};
+        com = RotateColumnCommand{.col = toNum<int>(m.get<1>()), .amount = toNum<int>(m.get<2>())};
         if (std::get<RotateColumnCommand>(com).amount <= 0)
         {
             throw std::invalid_argument("Rotate amount must be positive");
@@ -102,8 +99,8 @@ template <typename T> struct ColumnIterator
     using value_type = T;
     using reference = T&;
     std::vector<std::vector<T>>* base;
-    size_t column{};
-    size_t row{};
+    int column{};
+    int row{};
 
     ColumnIterator& operator++()
     {
@@ -129,14 +126,14 @@ template <typename T> struct ColumnIterator
     }
 };
 
-template <size_t ROWS, size_t COLS> int part1(const std::vector<Command>& commands)
+template <int ROWS, int COLS> int part1(const std::vector<Command>& commands)
 {
     std::vector<std::vector<char>> grid(ROWS, std::vector<char>(COLS));
     auto rect = [&grid](RectCommand c)
     {
-        for (auto row : std::views::iota(0UL, c.rows))
+        for (auto row : std::views::iota(0, c.rows))
         {
-            for (auto col : std::views::iota(0UL, c.columns))
+            for (auto col : std::views::iota(0, c.columns))
             {
                 grid[row][col] = 1;
             }
@@ -164,8 +161,8 @@ template <size_t ROWS, size_t COLS> int part1(const std::vector<Command>& comman
 
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
-    constexpr size_t ROWS = 6;
-    constexpr size_t COLS = 50;
+    constexpr int ROWS = 6;
+    constexpr int COLS = 50;
     auto commands = readAll<Command>(input);
     // part2 is just printed out during part1, Solution doesn't take strings anyway
     return {part1<ROWS, COLS>(commands)};
