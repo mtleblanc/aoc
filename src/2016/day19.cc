@@ -1,6 +1,7 @@
 #include "aoc.hh"
 #include "util.hh"
 #include <bit>
+#include <cassert>
 #include <iostream>
 #include <list>
 #include <ranges>
@@ -14,7 +15,7 @@ constexpr size_t DAY = 19;
 
 namespace
 {
-[[maybe_unused]] constexpr int josephus(int size)
+constexpr int josephus(int size)
 {
     // assume zero based indices and just add 1 at the end
     //
@@ -47,22 +48,37 @@ namespace
 
 // the target moves forward by two spots every other turn due to the circle getting smaller
 // renumber the players so that player 1 is the first victim.  we don't need to keep track of who's
-// doing the stealing.  Say we start with the double advance.  So player 1 is out, then 3, then 4,
-// then 6, then 7, etc, every 3rd player survives.  We can do the recursion in base 3
-constexpr int josephusKill2(int size, int remainder)
+// doing the stealing, in fact we can reimagine it as each person stealing from the next two
+// so we can do the recursion in base 3 instead of binary.  unfortunately it's not quite as clean
+//
+// 1) need to special case 4 - with 0,1,2,3 and 0 surviving, we kill 1 and 2, then 3 survives.  to
+// recurse we want to wrap to a survivor, but that would kill both 0 and 3 and give the wrong answer
+//
+// 2) the kill-1 case can reduce to size/2 each time, we remove ceil(size/2) in one round, leaving
+// floor(size/2) but with kill-2, we remove 2*ceil(size/3), so we never change parity.  Perhaps we
+// can do a recursion with stopping at size/3 but possibly not at a survivor, it would be nice if
+// there's a nice ternary solution
+constexpr int josephusKill2(int size)
 {
-    constexpr std::array<int, 6> BASE = {{0, 0, 0, 0, 3, 3}};
-    if (size < std::ssize(BASE))
+    if (size == 4)
     {
-        return remainder + BASE[size];
+        return 3;
     }
-    auto rec = josephusKill2(size - (size + 2) / 3 * 2, mod(-size, 3));
-    return rec * 3 + remainder;
+    if (size < 4)
+    {
+        return 0;
+    }
+    auto rec = josephusKill2(size - (size + 2) / 3 * 2) + mod(-size, 3);
+    return rec * 3;
 }
 
+// translating to the kill-2 version.  perform 1 or 2 steals to get to a survivor and rotate so that
+// they are numbered 0
 [[maybe_unused]] constexpr int josephusCross(int size)
 {
-    return mod(josephusKill2(size - 2 + size % 2, size / 2 + 3 - size % 2) - 1, size) + 1;
+    auto shift = size / 2 + 3 - size % 2;
+    auto startSize = size - 2 + size % 2;
+    return mod(josephusKill2(startSize) + shift - 1, size) + 1;
 }
 
 // linear time but clear, just need to get the starting point correct then it's just erase 2 skip 1
@@ -95,10 +111,12 @@ constexpr int josephusKill2(int size, int remainder)
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     // For testing
-    // for (int i = 23; i < 36; ++i)
+    // for (int i = 3; i < 1000; ++i)
     // {
-    //     std::cout << i << ": " << (josephusCrossBrute(i) + i - i / 2 - 1) % i + 1 << " ("
-    //               << josephusCrossBrute(i) << " - " << josephusCross(i) << ")" << '\n';
+    //     assert(josephusCrossBrute(i) == josephusCross(i));
+    // }
+    // for(int i = 1; i < 28;++i ) {
+    //     std::cout << i << ":" << josephusKill2(i) << std::endl;
     // }
     int size{};
     input >> size;
