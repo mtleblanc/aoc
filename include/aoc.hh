@@ -1,3 +1,4 @@
+#include <charconv>
 #include <ios>
 #include <istream>
 #include <sstream>
@@ -78,6 +79,13 @@ inline std::string toHex(ssize_t n)
     std::ostringstream ss;
     ss << std::hex << n;
     return ss.str();
+}
+
+template <typename T> T toNum(std::string_view sv)
+{
+    T val{};
+    std::from_chars(sv.data(), std::next(sv.data(), std::ssize(sv), val));
+    return val;
 }
 
 template <size_t Y, size_t D> Solution_t<Y, D> solve(std::istream& input)
