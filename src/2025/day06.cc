@@ -14,10 +14,10 @@ constexpr size_t DAY = 6;
 namespace
 {
 
-uint64_t part2(std::vector<std::string> v)
+ssize_t part2(std::vector<std::string> v)
 {
-    uint64_t accum{0};
-    uint64_t cur{0};
+    ssize_t accum{0};
+    ssize_t cur{0};
     bool isMult = false;
     size_t opIdx = v.size() - 1;
     for (size_t x = 0; x < v[0].size(); x++)
@@ -41,8 +41,8 @@ uint64_t part2(std::vector<std::string> v)
             throw std::invalid_argument("Unexpected symbol in input");
         }
         }
-        uint64_t val{0};
-        constexpr uint64_t BASE = 10;
+        ssize_t val{0};
+        constexpr ssize_t BASE = 10;
         for (size_t y = 0; y < opIdx; y++)
         {
             char c = v[y][x];
@@ -66,7 +66,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto lines = readAllLines(input);
 
     std::vector<bool> isMult;
-    std::vector<uint64_t> results;
+    std::vector<ssize_t> results;
     std::istringstream ss{lines.back()};
     char c = 0;
     while (ss >> c)
@@ -87,17 +87,17 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     }
     for (const auto& l : std::ranges::subrange(lines.begin(), lines.end() - 1))
     {
-        uint64_t cur = 0;
+        ssize_t cur = 0;
         std::istringstream ss{l};
         size_t i = 0;
         while (ss >> cur)
         {
             results[i] = isMult[i] ? results[i] * cur : results[i] + cur;
-            i++;
+            ++i;
         }
         assert(i == isMult.size());
     }
-    uint64_t accum{};
+    ssize_t accum{};
     for (auto v : results)
     {
         accum += v;

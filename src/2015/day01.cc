@@ -16,7 +16,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     std::vector<int> floors;
     std::partial_sum(v.begin(), v.end(), back_inserter(floors));
     auto firstBasement = std::ranges::find(floors, -1);
-    return {static_cast<size_t>(floors.back()),
-            static_cast<size_t>(firstBasement - floors.begin() + 1)};
+    return {floors.back(), firstBasement - floors.begin() + 1};
 }
 } // namespace aoc

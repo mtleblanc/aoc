@@ -202,7 +202,7 @@ template <resource_t DEGEN> struct ActionPoint
     }
 };
 
-template <resource_t DEGEN> size_t optimize(ActionPoint<DEGEN> g)
+template <resource_t DEGEN> ssize_t optimize(ActionPoint<DEGEN> g)
 {
     g.playerHealth -= DEGEN;
     std::priority_queue<ActionPoint<DEGEN>, std::deque<ActionPoint<DEGEN>>, std::greater<>> dijk;
@@ -219,7 +219,7 @@ template <resource_t DEGEN> size_t optimize(ActionPoint<DEGEN> g)
         }
         cur.forEachAction([&dijk](auto x) { dijk.push(x); });
     }
-    return std::numeric_limits<size_t>::max();
+    return std::numeric_limits<ssize_t>::max();
 }
 } // namespace
 

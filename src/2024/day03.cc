@@ -35,8 +35,8 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
             on = (*rit)[3].length() == 2;
             continue;
         }
-        size_t lhs{};
-        size_t rhs{};
+        ssize_t lhs{};
+        ssize_t rhs{};
         auto lm = (*rit)[1];
         auto rm = (*rit)[2];
         std::from_chars(&*lm.first, &*lm.second, lhs);

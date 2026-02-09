@@ -82,7 +82,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         dist[fi][ti] = dist[ti][fi] = distance;
     }
 
-    return {static_cast<size_t>(tsp(dist, [](auto r) { return std::ranges::min(r); })),
-            static_cast<size_t>(tsp(dist, [](auto r) { return std::ranges::max(r); }))};
+    return {tsp(dist, [](auto r) { return std::ranges::min(r); }),
+            tsp(dist, [](auto r) { return std::ranges::max(r); })};
 }
 } // namespace aoc

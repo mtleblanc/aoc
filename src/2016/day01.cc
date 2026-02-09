@@ -23,7 +23,7 @@ struct ComplexHash
     }
 };
 
-size_t taxicab(std::complex<int> z)
+ssize_t taxicab(std::complex<int> z)
 {
     return std::abs(z.imag()) + std::abs(z.real());
 }

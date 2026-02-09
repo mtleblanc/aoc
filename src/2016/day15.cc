@@ -126,6 +126,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto part1 = cr.solve(remainders);
     cr.addModulus(PART2_DISC);
     remainders.push_back(PART2_DISC - (std::ssize(remainders) + 1) % PART2_DISC);
-    return {static_cast<size_t>(part1), static_cast<size_t>(cr.solve(remainders))};
+    return {part1, cr.solve(remainders)};
 }
 } // namespace aoc

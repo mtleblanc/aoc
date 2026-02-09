@@ -53,9 +53,9 @@ bool canRemove(Grid& g, size_t x, size_t y)
     return around < MAX_ROLLS;
 }
 
-size_t part1(Grid g)
+ssize_t part1(Grid g)
 {
-    size_t canBeRemoved{};
+    ssize_t canBeRemoved{};
     for (size_t x = 0; x < g.width(); x++)
     {
         for (size_t y = 0; y < g.height(); y++)
@@ -69,9 +69,9 @@ size_t part1(Grid g)
     return canBeRemoved;
 }
 
-size_t update(Grid& g)
+ssize_t update(Grid& g)
 {
-    size_t removed{};
+    ssize_t removed{};
     for (size_t x = 0; x < g.width(); x++)
     {
         for (size_t y = 0; y < g.height(); y++)
@@ -86,10 +86,10 @@ size_t update(Grid& g)
     return removed;
 }
 
-size_t part2(Grid g)
+ssize_t part2(Grid g)
 {
-    size_t accum{0};
-    size_t removed{};
+    ssize_t accum{0};
+    ssize_t removed{};
     while ((removed = update(g)) > 0)
     {
         accum += removed;

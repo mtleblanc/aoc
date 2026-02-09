@@ -129,7 +129,7 @@ template <typename T> struct ColumnIterator
     }
 };
 
-template <size_t ROWS, size_t COLS> size_t part1(const std::vector<Command>& commands)
+template <size_t ROWS, size_t COLS> ssize_t part1(const std::vector<Command>& commands)
 {
     std::vector<std::vector<char>> grid(ROWS, std::vector<char>(COLS));
     auto rect = [&grid](RectCommand c)

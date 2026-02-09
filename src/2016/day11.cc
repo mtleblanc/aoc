@@ -22,7 +22,7 @@ template <size_t N> struct ArrayState
     using Rep = std::array<uint8_t, 2 * N + 1>;
     // generator i at floors[2*i], chip at floors[2*i + 1], elevator at floors[2*N]
     Rep floors;
-    size_t steps{};
+    ssize_t steps{};
 
     [[nodiscard]] constexpr uint8_t& elevator()
     {
@@ -34,25 +34,25 @@ template <size_t N> struct ArrayState
         return floors.back();
     }
 
-    [[nodiscard]] constexpr uint8_t& chip(size_t i)
+    [[nodiscard]] constexpr uint8_t& chip(ssize_t i)
     {
         return floors[2 * i + 1];
     }
-    [[nodiscard]] constexpr const uint8_t& chip(size_t i) const
+    [[nodiscard]] constexpr const uint8_t& chip(ssize_t i) const
     {
         return floors[2 * i + 1];
     }
-    [[nodiscard]] constexpr uint8_t& gen(size_t i)
+    [[nodiscard]] constexpr uint8_t& gen(ssize_t i)
     {
         return floors[2 * i];
     }
-    [[nodiscard]] constexpr const uint8_t& gen(size_t i) const
+    [[nodiscard]] constexpr const uint8_t& gen(ssize_t i) const
     {
         return floors[2 * i];
     }
 
     // using A* improves runtime over dijkstra by 20x
-    [[nodiscard]] constexpr size_t aStarDistance() const
+    [[nodiscard]] constexpr ssize_t aStarDistance() const
     {
         // To find min moves, consider one item permanently in the elevator, and each other item
         // only moves up. Then each item starting on floor f accounts for FLOORS - f up-moves.  The
@@ -149,7 +149,7 @@ template <size_t N> struct ArrayState
     }
 };
 
-template <typename St> size_t solve(St s)
+template <typename St> ssize_t solve(St s)
 {
     std::set<typename St::Sig> seen;
     std::priority_queue<St, std::vector<St>, std::greater<>> frontier;
@@ -175,7 +175,7 @@ template <typename St> size_t solve(St s)
     return 0;
 }
 
-template <size_t N> size_t arraySolve([[maybe_unused]] const std::vector<uint8_t>& start)
+template <size_t N> ssize_t arraySolve([[maybe_unused]] const std::vector<uint8_t>& start)
 {
     if (start.size() % 2 == 0)
     {
@@ -194,7 +194,7 @@ template <size_t N> size_t arraySolve([[maybe_unused]] const std::vector<uint8_t
     return arraySolve<N - 1>(start);
 }
 
-template <> size_t arraySolve<0>([[maybe_unused]] const std::vector<uint8_t>& start)
+template <> ssize_t arraySolve<0>([[maybe_unused]] const std::vector<uint8_t>& start)
 {
     throw std::invalid_argument("Must be at least 1 type of chip");
 }

@@ -10,16 +10,16 @@ constexpr size_t DAY = 2;
 
 namespace
 {
-size_t gridAt(size_t x, size_t y)
+ssize_t gridAt(ssize_t x, ssize_t y)
 {
     // NOLINTNEXTLINE (cppcoreguidelines-avoid-magic-numbers)
     return 7 + x - 3 * y;
 }
-size_t part1(std::vector<std::string> const& movements)
+ssize_t part1(std::vector<std::string> const& movements)
 {
     int x{1};
     int y{1};
-    size_t code{};
+    ssize_t code{};
     for (auto const& m : movements)
     {
         for (auto c : m)
@@ -58,14 +58,14 @@ size_t part1(std::vector<std::string> const& movements)
   A B C
     D
 */
-size_t part2(std::vector<std::string> const& movements)
+ssize_t part2(std::vector<std::string> const& movements)
 {
-    constexpr size_t N = 7;
-    constexpr size_t HOME_X = 1;
-    constexpr size_t HOME_Y = 3;
+    constexpr ssize_t N = 7;
+    constexpr ssize_t HOME_X = 1;
+    constexpr ssize_t HOME_Y = 3;
     // 0 represents OOB
     // clang-format off
-    constexpr std::array<size_t, N*N> GRID {
+    constexpr std::array<ssize_t, N*N> GRID {
         0, 0, 0, 0, 0, 0, 0,
         0, 0, 0,13, 0, 0, 0,
         0, 0,10,11,12, 0, 0,
@@ -74,10 +74,10 @@ size_t part2(std::vector<std::string> const& movements)
         0, 0, 0, 1, 0, 0, 0
     };
     // clang-format on
-    auto at = [GRID](size_t x, size_t y) { return GRID[x + N * y]; };
-    size_t x{HOME_X};
-    size_t y{HOME_Y};
-    size_t code{};
+    auto at = [GRID](ssize_t x, ssize_t y) { return GRID[x + N * y]; };
+    ssize_t x{HOME_X};
+    ssize_t y{HOME_Y};
+    ssize_t code{};
     for (auto const& m : movements)
     {
         for (auto c : m)

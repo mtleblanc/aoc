@@ -95,7 +95,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         }
     }
 
-    return {static_cast<size_t>(std::ranges::fold_left(g1.lights, 0, std::plus<>())),
-            static_cast<size_t>(std::ranges::fold_left(g2.lights, 0, std::plus<>()))};
+    return {std::ranges::fold_left(g1.lights, 0, std::plus<>()),
+            std::ranges::fold_left(g2.lights, 0, std::plus<>())};
 }
 } // namespace aoc

@@ -54,6 +54,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto part1Result = std::ranges::fold_left(view, Locations<1>{}, step<1>);
     auto part2Result = std::ranges::fold_left(view, Locations<2>{}, step<2>);
 
-    return {part1Result.visited.size(), part2Result.visited.size()};
+    return {std::ssize(part1Result.visited), std::ssize(part2Result.visited)};
 }
 } // namespace aoc

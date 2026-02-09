@@ -10,9 +10,9 @@ constexpr size_t YEAR = 2025;
 constexpr size_t DAY = 7;
 namespace
 {
-uint64_t part1(const std::vector<std::string>& v)
+ssize_t part1(const std::vector<std::string>& v)
 {
-    uint64_t splits{0};
+    ssize_t splits{0};
     std::string oldRow{v[0]};
     for (const auto& cur : v | std::views::drop(1))
     {
@@ -45,14 +45,14 @@ uint64_t part1(const std::vector<std::string>& v)
     return splits;
 }
 
-uint64_t part2(const std::vector<std::string>& v)
+ssize_t part2(const std::vector<std::string>& v)
 {
-    std::vector<uint64_t> oldRow(v[0].size());
+    std::vector<ssize_t> oldRow(v[0].size());
     size_t start = v[0].find('S');
     oldRow[start] = 1;
     for (const auto& cur : v | std::views::drop(1))
     {
-        std::vector<uint64_t> newRow(oldRow.size());
+        std::vector<ssize_t> newRow(oldRow.size());
         for (size_t x = 0; x < v[0].size(); x++)
         {
             if (cur[x] == '.')
@@ -73,7 +73,7 @@ uint64_t part2(const std::vector<std::string>& v)
         }
         oldRow = std::move(newRow);
     }
-    uint64_t accum{0};
+    ssize_t accum{0};
     for (auto v : oldRow)
     {
         accum += v;

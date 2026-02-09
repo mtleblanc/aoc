@@ -16,10 +16,10 @@ struct Node
 {
     std::string id;
     std::vector<std::string> outputs;
-    std::optional<uint64_t> paths;
-    std::optional<uint64_t> pathsNoDac;
-    std::optional<uint64_t> pathsNoFft;
-    std::optional<uint64_t> pathsNeither;
+    std::optional<ssize_t> paths;
+    std::optional<ssize_t> pathsNoDac;
+    std::optional<ssize_t> pathsNoFft;
+    std::optional<ssize_t> pathsNeither;
 };
 
 std::istream& operator>>(std::istream& is, Node& n)
@@ -76,7 +76,7 @@ void countPaths(const std::string& source, auto& m)
     // }
 }
 
-size_t part1(std::vector<Node>& ns)
+ssize_t part1(std::vector<Node>& ns)
 {
     std::map<std::string, Node> m;
     for (const auto& n : ns)
@@ -88,7 +88,7 @@ size_t part1(std::vector<Node>& ns)
     return m["you"].paths.value();
 }
 
-size_t part2(std::vector<Node>& ns)
+ssize_t part2(std::vector<Node>& ns)
 {
     std::map<std::string, Node> m;
     for (const auto& n : ns)
@@ -100,17 +100,17 @@ size_t part2(std::vector<Node>& ns)
     mt["fft"].paths = 1;
     mt["out"].paths = 0;
     countPaths("svr", mt);
-    size_t svrToDac = mt["svr"].paths.value();
+    ssize_t svrToDac = mt["svr"].paths.value();
     mt = m;
     mt["dac"].paths = 1;
     mt["out"].paths = 0;
     countPaths("fft", mt);
-    size_t dacToFft = mt["fft"].paths.value();
+    ssize_t dacToFft = mt["fft"].paths.value();
     mt = m;
 
     mt["out"].paths = 1;
     countPaths("dac", mt);
-    size_t fftToOut = mt["dac"].paths.value();
+    ssize_t fftToOut = mt["dac"].paths.value();
     return svrToDac * dacToFft * fftToOut;
 
     // m["out"].paths = 1;
@@ -141,6 +141,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         v.emplace_back();
         iss >> v.back();
     }
-    return Solution{part1(v), part2(v)};
+    return {part1(v), part2(v)};
 }
 } // namespace aoc

@@ -86,7 +86,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto rss = readAllLines(input);
     std::vector<std::vector<int>> rsi;
     std::ranges::transform(rss, back_inserter(rsi), toVec);
-    return {static_cast<size_t>(std::ranges::count_if(rsi, isGradual)),
-            static_cast<size_t>(std::ranges::count_if(rsi, isSemiGradual))};
+    return {std::ranges::count_if(rsi, isGradual),
+            std::ranges::count_if(rsi, isSemiGradual)};
 }
 } // namespace aoc

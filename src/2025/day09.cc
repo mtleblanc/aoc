@@ -13,11 +13,11 @@ namespace
 {
 struct Corner
 {
-    int64_t x;
-    int64_t y;
+    ssize_t x;
+    ssize_t y;
 };
 
-uint64_t area(const Corner& c1, const Corner& c2)
+ssize_t area(const Corner& c1, const Corner& c2)
 {
     return (std::abs(c1.x - c2.x) + 1) * (std::abs(c1.y - c2.y) + 1);
 }
@@ -33,9 +33,9 @@ std::istream& operator>>(std::istream& is, Corner& corner)
     return is >> corner.x >> c >> corner.y;
 }
 
-uint64_t part1(const std::vector<Corner>& v)
+ssize_t part1(const std::vector<Corner>& v)
 {
-    uint64_t accum{};
+    ssize_t accum{};
     for (size_t i = 0; i < v.size(); i++)
     {
         for (size_t j = 0; j < i; j++)
@@ -74,9 +74,9 @@ bool intersects(const Corner c1, const Corner c2, const Corner e1, const Corner 
     return true;
 }
 
-uint64_t part2(const std::vector<Corner>& v)
+ssize_t part2(const std::vector<Corner>& v)
 {
-    uint64_t accum{};
+    ssize_t accum{};
     for (size_t i = 0; i < v.size(); i++)
     {
         for (size_t j = 0; j < i; j++)

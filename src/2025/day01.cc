@@ -29,8 +29,8 @@ inline auto mod(auto m, auto d)
 template <class T, T N> class Dial
 {
     T val;
-    size_t passZero{0};
-    size_t finishZero{0};
+    ssize_t passZero{0};
+    ssize_t finishZero{0};
 
   public:
     Dial(T start) : val{start} {}

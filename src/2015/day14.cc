@@ -14,11 +14,11 @@ namespace
 {
 struct Reindeer
 {
-    size_t speed{};
-    size_t time{};
-    size_t rest{};
-    size_t current{};
-    size_t points{};
+    ssize_t speed{};
+    ssize_t time{};
+    ssize_t rest{};
+    ssize_t current{};
+    ssize_t points{};
 };
 std::istream& operator>>(std::istream& is, Reindeer& r)
 {
@@ -33,14 +33,14 @@ std::istream& operator>>(std::istream& is, Reindeer& r)
         is.setstate(std::ios_base::failbit);
         return is;
     }
-    r.speed = stoul(match[1]);
-    r.time = stoul(match[2]);
-    r.rest = stoul(match[3]);
+    r.speed = stol(match[1]);
+    r.time = stol(match[2]);
+    r.rest = stol(match[3]);
     return is;
 }
 
 // leader's distance after RACE_DURATION seconds
-template <size_t RACE_DURATION> auto distance(const Reindeer& r)
+template <ssize_t RACE_DURATION> auto distance(const Reindeer& r)
 {
     auto lapDistance = r.speed * r.time;
     auto lapTime = r.time + r.rest;
@@ -51,14 +51,14 @@ template <size_t RACE_DURATION> auto distance(const Reindeer& r)
 }
 
 // longest time spect leading over RACE_DURATION seconds
-template <size_t RACE_DURATION> size_t race(std::vector<Reindeer>& deer)
+template <ssize_t RACE_DURATION> ssize_t race(std::vector<Reindeer>& deer)
 {
     auto isMoving = [](auto i)
     { return [i](const auto& d) { return i % (d.time + d.rest) < d.time; }; };
     auto move = [](auto& d) { d.current += d.speed; };
     auto isLeading = [](auto x) { return [x](const auto& d) { return d.current == x; }; };
     auto score = [](auto& d) { ++d.points; };
-    for (size_t i = 0; i < RACE_DURATION; ++i)
+    for (ssize_t i = 0; i < RACE_DURATION; ++i)
     {
         std::ranges::for_each(deer | std::views::filter(isMoving(i)), move);
         auto leadDistance = std::ranges::max(deer, {}, &Reindeer::current).current;
@@ -70,7 +70,7 @@ template <size_t RACE_DURATION> size_t race(std::vector<Reindeer>& deer)
 } // namespace
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    constexpr size_t RACE_DURATION = 2503;
+    constexpr ssize_t RACE_DURATION = 2503;
     std::vector<Reindeer> deer;
     for (Reindeer r; input >> r;)
     {

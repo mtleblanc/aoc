@@ -118,15 +118,15 @@ std::istream& operator>>(std::istream& is, Problem& p)
 template <typename T> struct Node
 {
     std::vector<T> value;
-    size_t idx;
-    size_t cnt;
-    Node(std::vector<T> value, size_t idx, size_t cnt)
+    ssize_t idx;
+    ssize_t cnt;
+    Node(std::vector<T> value, ssize_t idx, ssize_t cnt)
         : value{std::forward<std::vector<T>>(value)}, idx{idx}, cnt{cnt}
     {
     }
 };
 
-uint64_t bfs1(Problem& p)
+ssize_t bfs1(Problem& p)
 {
     std::deque<Node<bool>> horizon;
     Node<bool> start{p.target, 0, 0};
@@ -135,7 +135,7 @@ uint64_t bfs1(Problem& p)
     {
         Node<bool> cur = horizon.front();
         horizon.pop_front();
-        for (; cur.idx < p.moves.size(); cur.idx++)
+        for (; cur.idx < std::ssize(p.moves); cur.idx++)
         {
             Node<bool> next{cur.value, cur.idx + 1, cur.cnt + 1};
             std::vector<size_t> move = p.moves[cur.idx];
@@ -153,9 +153,9 @@ uint64_t bfs1(Problem& p)
     return 0;
 }
 
-uint64_t part1(std::vector<Problem>& v)
+ssize_t part1(std::vector<Problem>& v)
 {
-    uint64_t accum{};
+    ssize_t accum{};
     for (auto& p : v)
     {
         accum += bfs1(p);
@@ -272,9 +272,9 @@ template <typename T = Q> auto minPresses(Matrix<T>& m)
     return presses;
 }
 
-uint64_t part2(std::vector<Problem>& v)
+ssize_t part2(std::vector<Problem>& v)
 {
-    uint64_t accum{};
+    ssize_t accum{};
     // int count = 0;
     for (auto& p : v)
     {
@@ -300,6 +300,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         v.emplace_back();
         iss >> v.back();
     }
-    return Solution{part1(v), part2(v)};
+    return {part1(v), part2(v)};
 }
 } // namespace aoc

@@ -59,13 +59,13 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         lookAndSay(sequence, next);
         std::swap(next, sequence);
     }
-    size_t part1 = sequence.size();
+    auto part1 = std::ssize(sequence);
     for (size_t i = ROUNDS_1; i < ROUNDS_2; i++)
     {
         lookAndSay(sequence, next);
         std::swap(next, sequence);
     }
 
-    return {part1, sequence.size()};
+    return {part1, std::ssize(sequence)};
 }
 } // namespace aoc

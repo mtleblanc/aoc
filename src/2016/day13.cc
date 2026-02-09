@@ -15,7 +15,7 @@ using Coord = std::pair<ssize_t, ssize_t>;
 struct Path
 {
     Coord c;
-    size_t steps;
+    ssize_t steps;
 };
 
 bool valid(Coord coords, size_t seed)
@@ -31,7 +31,7 @@ Coord operator+(const Coord& l, const Coord& r)
 
 constexpr auto DIRS = std::array<Coord, 4>{{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}};
 
-size_t part1(size_t seed)
+ssize_t part1(size_t seed)
 {
     constexpr auto TARGET = std::make_pair(31UL, 39UL);
     std::set<Coord> seen;
@@ -63,9 +63,9 @@ size_t part1(size_t seed)
     return 0;
 }
 
-size_t part2(size_t seed)
+ssize_t part2(size_t seed)
 {
-    constexpr auto MAX_STEPS = 50UL;
+    constexpr auto MAX_STEPS = 50L;
     std::set<Coord> seen;
     std::deque<Path> frontier;
     Coord start = {1, 1};
@@ -75,6 +75,10 @@ size_t part2(size_t seed)
     {
         auto [c, s] = frontier.front();
         frontier.pop_front();
+        if (s == MAX_STEPS)
+        {
+            continue;
+        }
         ++s;
         for (auto d : DIRS)
         {
@@ -90,7 +94,7 @@ size_t part2(size_t seed)
             }
         }
     }
-    return seen.size();
+    return std::ssize(seen);
 }
 } // namespace
 template <> Solution solve<YEAR, DAY>(std::istream& input)

@@ -12,25 +12,25 @@ namespace
 {
 
 using json = nlohmann::json;
-double part1(const json& data)
+ssize_t part1(const json& data)
 {
     if (data.is_number())
     {
-        return data.get<double>();
+        return data.get<ssize_t>();
     }
     if (!data.is_array() && !data.is_object())
     {
         return 0;
     }
-    return std::ranges::fold_left(data | std::views::transform(part1), 0., std::plus<>());
+    return std::ranges::fold_left(data | std::views::transform(part1), 0L, std::plus<>());
 }
 
-double part2(const json& data)
+ssize_t part2(const json& data)
 {
 
     if (data.is_number())
     {
-        return data.get<double>();
+        return data.get<ssize_t>();
     }
     if (!data.is_array() && !data.is_object())
     {
@@ -44,7 +44,7 @@ double part2(const json& data)
         }
     }
 
-    return std::ranges::fold_left(data | std::views::transform(part2), 0., std::plus<>());
+    return std::ranges::fold_left(data | std::views::transform(part2), 0L, std::plus<>());
 }
 
 } // namespace
@@ -53,6 +53,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     using json = nlohmann::json;
     json data = json::parse(input);
-    return {static_cast<size_t>(part1(data)), static_cast<size_t>(part2(data))};
+    return {part1(data), part2(data)};
 }
 } // namespace aoc

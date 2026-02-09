@@ -42,7 +42,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto blank = std::ranges::find(lines, "");
     std::copy(lines.begin(), blank, std::back_inserter(v));
     long test{};
-    size_t accum{0};
+    ssize_t accum{0};
     for (; blank != lines.end(); blank++)
     {
         std::istringstream iss{*blank};
@@ -74,7 +74,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     // we need the sorting for the first effect anyway
     std::sort(es.begin(), es.end(), [](const Event& a, const Event& b)
               { return a.id < b.id || (a.id == b.id && a.effect > b.effect); });
-    size_t accum2{0};
+    ssize_t accum2{0};
     long start{};
     long on{0};
     for (auto& e : es)

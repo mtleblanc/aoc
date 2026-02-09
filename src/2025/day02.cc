@@ -9,7 +9,7 @@ constexpr size_t YEAR = 2025;
 constexpr size_t DAY = 2;
 namespace
 {
-constexpr auto BASE = 10ULL;
+constexpr auto BASE = 10L;
 template <typename T> T ipow(T base, T exp)
 {
     T result = 1;
@@ -31,30 +31,30 @@ template <typename T> T ipow(T base, T exp)
 }
 
 // will overflow by 16 digits, possibly at 14
-Solution improvedHelper(uint64_t from, uint64_t to, uint64_t digits)
+Solution improvedHelper(ssize_t from, ssize_t to, ssize_t digits)
 {
-    uint64_t lim = ipow(BASE, digits);
+    ssize_t lim = ipow(BASE, digits);
     assert(from < to);
     assert(from >= lim / BASE);
     assert(to < lim);
     Solution accum;
-    constexpr std::array<uint64_t, 6> POS{2, 3, 5, 7, 11, 13}; // NOLINT(*-magic-numbers)
-    constexpr std::array<uint64_t, 4> NEG{6, 10, 14, 15};      // NOLINT(*-magic-numbers)
+    constexpr std::array<ssize_t, 6> POS{2, 3, 5, 7, 11, 13}; // NOLINT(*-magic-numbers)
+    constexpr std::array<ssize_t, 4> NEG{6, 10, 14, 15};      // NOLINT(*-magic-numbers)
     for (auto it : POS)
     {
         if (digits % it)
         {
             continue;
         }
-        uint64_t replength = digits / it;
-        uint64_t div = ipow(BASE, digits - replength);
-        uint64_t mul = (lim - 1) / (ipow(BASE, replength) - 1);
-        uint64_t min = from / div;
+        ssize_t replength = digits / it;
+        ssize_t div = ipow(BASE, digits - replength);
+        ssize_t mul = (lim - 1) / (ipow(BASE, replength) - 1);
+        ssize_t min = from / div;
         if (min * mul < from)
         {
             min++;
         }
-        uint64_t max = to / div;
+        ssize_t max = to / div;
         if (max * mul > to)
         {
             max--;
@@ -63,7 +63,7 @@ Solution improvedHelper(uint64_t from, uint64_t to, uint64_t digits)
         {
             continue;
         }
-        uint64_t sum = max * (max + 1) / 2 - min * (min - 1) / 2;
+        ssize_t sum = max * (max + 1) / 2 - min * (min - 1) / 2;
         accum.part2 += sum * mul;
         if (it == 2)
         {
@@ -76,15 +76,15 @@ Solution improvedHelper(uint64_t from, uint64_t to, uint64_t digits)
         {
             continue;
         }
-        uint64_t replength = digits / it;
-        uint64_t div = ipow(BASE, digits - replength);
-        uint64_t mul = (lim - 1) / (ipow(BASE, replength) - 1);
-        uint64_t min = from / div;
+        ssize_t replength = digits / it;
+        ssize_t div = ipow(BASE, digits - replength);
+        ssize_t mul = (lim - 1) / (ipow(BASE, replength) - 1);
+        ssize_t min = from / div;
         if (min * mul < from)
         {
             min++;
         }
-        uint64_t max = to / div;
+        ssize_t max = to / div;
         if (max * mul > to)
         {
             max--;
@@ -93,16 +93,16 @@ Solution improvedHelper(uint64_t from, uint64_t to, uint64_t digits)
         {
             continue;
         }
-        uint64_t sum = max * (max + 1) / 2 - min * (min - 1) / 2;
+        ssize_t sum = max * (max + 1) / 2 - min * (min - 1) / 2;
         accum.part2 -= sum * mul;
     }
     return accum;
 }
 
-Solution improved(uint64_t from, uint64_t to)
+Solution improved(ssize_t from, ssize_t to)
 {
-    uint64_t digits = 1;
-    uint64_t pow = BASE;
+    ssize_t digits = 1;
+    ssize_t pow = BASE;
     Solution accum;
     while (from < to)
     {
@@ -119,13 +119,13 @@ Solution improved(uint64_t from, uint64_t to)
 } // namespace
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    uint64_t maxmax{};
+    ssize_t maxmax{};
     Solution accum;
 
     while (input)
     {
-        uint64_t from{};
-        uint64_t to{};
+        ssize_t from{};
+        ssize_t to{};
         char c{};
         char c1{};
         input >> from >> c >> to >> c1;

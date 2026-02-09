@@ -8,10 +8,10 @@ constexpr size_t YEAR = 2025;
 constexpr size_t DAY = 3;
 namespace
 {
-template <int N> size_t solveFor(const std::vector<std::string>& lines)
+template <int N> ssize_t solveFor(const std::vector<std::string>& lines)
 {
     constexpr uint64_t BASE = 10;
-    uint64_t accum{};
+    ssize_t accum{};
     std::array<char, N> maxes{};
     for (const auto& s : lines)
     {
@@ -42,7 +42,7 @@ template <int N> size_t solveFor(const std::vector<std::string>& lines)
                 std::swap(c, maxes[i]);
             }
         }
-        uint64_t best{0};
+        ssize_t best{0};
         for (int i = 0; i < N; i++)
         {
             best *= BASE;

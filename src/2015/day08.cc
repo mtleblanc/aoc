@@ -12,9 +12,9 @@ constexpr size_t DAY = 8;
 
 namespace
 {
-size_t storedSavings(const std::string& literal)
+ssize_t storedSavings(const std::string& literal)
 {
-    size_t excess = 2; // Start and end quotes
+    ssize_t excess = 2; // Start and end quotes
     for (size_t idx = 0; idx < literal.size(); ++idx)
     {
         if (literal[idx] == '\\')
@@ -37,7 +37,7 @@ size_t storedSavings(const std::string& literal)
     return excess;
 }
 
-size_t encodeCost(const std::string& literal)
+ssize_t encodeCost(const std::string& literal)
 {
     return 2 + std::ranges::count_if(literal, [](auto c) { return c == '\"' || c == '\\'; });
 }

@@ -64,7 +64,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     auto strings = readAllLines(input);
 
-    return {static_cast<size_t>(std::ranges::count_if(strings, isNicePart1)),
-            static_cast<size_t>(std::ranges::count_if(strings, isNicePart2))};
+    return {std::ranges::count_if(strings, isNicePart1),
+            std::ranges::count_if(strings, isNicePart2)};
 }
 } // namespace aoc

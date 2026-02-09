@@ -20,27 +20,27 @@ struct Output;
 
 struct Dest
 {
-    using ReportCB = std::function<void(size_t, size_t, size_t)>;
+    using ReportCB = std::function<void(ssize_t, ssize_t, ssize_t)>;
     virtual ~Dest() = default;
     Dest(const Dest&) = default;
     Dest& operator=(const Dest&) = default;
     Dest(Dest&&) = default;
     Dest& operator=(Dest&&) = default;
-    virtual void accept(size_t v, [[maybe_unused]] const ReportCB& report) = 0;
+    virtual void accept(ssize_t v, [[maybe_unused]] const ReportCB& report) = 0;
 
   protected:
     Dest() = default;
 };
 struct Bot : public Dest
 {
-    size_t id{};
-    std::optional<size_t> value;
+    ssize_t id{};
+    std::optional<ssize_t> value;
     Dest* low{};
     Dest* high{};
 
     Bot() = default;
 
-    void accept(size_t v, [[maybe_unused]] const ReportCB& report) override
+    void accept(ssize_t v, [[maybe_unused]] const ReportCB& report) override
     {
         if (!value)
         {
@@ -62,11 +62,11 @@ struct Bot : public Dest
 
 struct Output : public Dest
 {
-    std::vector<size_t> values;
+    std::vector<ssize_t> values;
 
     Output() = default;
 
-    void accept(size_t v, [[maybe_unused]] const ReportCB& report) override
+    void accept(ssize_t v, [[maybe_unused]] const ReportCB& report) override
     {
         values.push_back(v);
     }
@@ -74,24 +74,24 @@ struct Output : public Dest
 
 struct Input
 {
-    size_t value;
+    ssize_t value;
     Dest* dest;
 };
 
 Solution simulate(const std::vector<std::string>& descs)
 {
-    size_t part1{};
-    auto report = [&part1](size_t bot, size_t low, size_t high)
+    ssize_t part1{};
+    auto report = [&part1](ssize_t bot, ssize_t low, ssize_t high)
     {
-        constexpr size_t LOW = 17;
-        constexpr size_t HIGH = 61;
+        constexpr ssize_t LOW = 17;
+        constexpr ssize_t HIGH = 61;
         if (low == LOW && high == HIGH)
         {
             part1 = bot;
         }
     };
-    std::map<size_t, Bot> bots;
-    std::map<size_t, Output> outputs;
+    std::map<ssize_t, Bot> bots;
+    std::map<ssize_t, Output> outputs;
     std::vector<Input> inputs;
     for (const auto& desc : descs)
     {
@@ -107,23 +107,23 @@ Solution simulate(const std::vector<std::string>& descs)
         constexpr auto INPUT_ID = 2;
         if (auto m = ctre::match<BOT_PAT>(desc))
         {
-            auto id = std::stoul(std::string(m.get<BOT_ID>()));
+            auto id = std::stol(std::string(m.get<BOT_ID>()));
             auto& bot = bots[id];
             bot.id = id;
 
             auto isBot = std::string(m.get<BOT_LOW_IS_BOT>()) == "bot";
-            auto destId = std::stoul(std::string(m.get<BOT_LOW_ID>()));
+            auto destId = std::stol(std::string(m.get<BOT_LOW_ID>()));
             bot.low =
                 isBot ? static_cast<Dest*>(&bots[destId]) : static_cast<Dest*>(&outputs[destId]);
             isBot = std::string(m.get<BOT_HIGH_IS_BOT>()) == "bot";
-            destId = std::stoul(std::string(m.get<BOT_HIGH_ID>()));
+            destId = std::stol(std::string(m.get<BOT_HIGH_ID>()));
             bot.high =
                 isBot ? static_cast<Dest*>(&bots[destId]) : static_cast<Dest*>(&outputs[destId]);
         }
         else if (auto m = ctre::match<INPUT_PAT>(desc))
         {
-            auto val = std::stoul(std::string(m.get<INPUT_VAL>()));
-            auto id = std::stoul(std::string(m.get<INPUT_ID>()));
+            auto val = std::stol(std::string(m.get<INPUT_VAL>()));
+            auto id = std::stol(std::string(m.get<INPUT_ID>()));
             inputs.emplace_back(val, &bots[id]);
         }
         else
@@ -143,7 +143,7 @@ Solution simulate(const std::vector<std::string>& descs)
         throw std::runtime_error("Outputs 0-2 did not each have a single element");
     }
     auto part2 = std::ranges::fold_left(
-        firstThreeOutputs | std::views::transform([](auto o) { return o.values[0]; }), 1UL,
+        firstThreeOutputs | std::views::transform([](auto o) { return o.values[0]; }), 1L,
         std::multiplies<>());
     return {part1, part2};
 }

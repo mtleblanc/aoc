@@ -75,7 +75,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
 
-    return {static_cast<size_t>(std::ranges::count_if(lines, supportsTLS)),
-            static_cast<size_t>(std::ranges::count_if(lines, supportsSLS))};
+    return {std::ranges::count_if(lines, supportsTLS), std::ranges::count_if(lines, supportsSLS)};
 }
 } // namespace aoc

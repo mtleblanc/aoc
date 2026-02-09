@@ -7,15 +7,15 @@
  */
 namespace aoc
 {
-constexpr size_t YEAR = 2015;
+constexpr ssize_t YEAR = 2015;
 constexpr size_t DAY = 16;
 
 namespace
 {
 struct Sue
 {
-    size_t id{};
-    std::map<std::string, std::size_t> owns;
+    ssize_t id{};
+    std::map<std::string, ssize_t> owns;
 };
 
 std::istream& operator>>(std::istream& is, Sue& s)
@@ -42,7 +42,7 @@ std::istream& operator>>(std::istream& is, Sue& s)
     {
         std::istringstream itemStream{item};
         std::string name;
-        size_t amount{};
+        ssize_t amount{};
         itemStream >> name >> amount;
         if (name.empty() || name.back() != ':')
         {
@@ -64,8 +64,8 @@ class Matcher
         LT,
         GT
     };
-    Matcher(size_t compareTo, Op op) : compareTo{compareTo}, op{op} {}
-    [[nodiscard]] bool operator()(size_t o) const
+    Matcher(ssize_t compareTo, Op op) : compareTo{compareTo}, op{op} {}
+    [[nodiscard]] bool operator()(ssize_t o) const
     {
         switch (op)
         {
@@ -78,25 +78,25 @@ class Matcher
         }
     }
 
-    [[nodiscard]] bool eq(size_t o) const
+    [[nodiscard]] bool eq(ssize_t o) const
     {
         return o == compareTo;
     }
 
   private:
-    size_t compareTo;
+    ssize_t compareTo;
     Op op;
 };
 
-Matcher eq(size_t value)
+Matcher eq(ssize_t value)
 {
     return Matcher{value, Matcher::Op::EQ};
 }
-Matcher lt(size_t value)
+Matcher lt(ssize_t value)
 {
     return Matcher{value, Matcher::Op::LT};
 }
-Matcher gt(size_t value)
+Matcher gt(ssize_t value)
 {
     return Matcher{value, Matcher::Op::GT};
 }

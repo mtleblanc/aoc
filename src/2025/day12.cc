@@ -16,9 +16,9 @@ namespace
 {
 struct Problem
 {
-    size_t l{};
-    size_t w{};
-    std::vector<size_t> presents;
+    ssize_t l{};
+    ssize_t w{};
+    std::vector<ssize_t> presents;
 };
 
 std::istream& operator>>(std::istream& is, Problem& n)
@@ -28,7 +28,7 @@ std::istream& operator>>(std::istream& is, Problem& n)
     is >> c;
     is >> n.w;
     is >> c;
-    size_t s{};
+    ssize_t s{};
     while (is >> s)
     {
         n.presents.push_back(s);
@@ -36,19 +36,19 @@ std::istream& operator>>(std::istream& is, Problem& n)
     return is;
 }
 
-size_t part1(std::vector<Problem>& ns)
+ssize_t part1(std::vector<Problem>& ns)
 {
-    constexpr std::array<size_t, 6> SIZES = {7, 7, 7, 7, 6, 5};
-    std::vector<size_t> fits;
+    constexpr std::array<ssize_t, 6> SIZES = {7, 7, 7, 7, 6, 5};
+    std::vector<ssize_t> fits;
     std::ranges::transform(ns, back_inserter(fits),
                            [&SIZES](auto& p)
                            {
                                return std::inner_product(SIZES.begin(), SIZES.end(),
-                                                         p.presents.begin(), size_t{}) < p.l * p.w
+                                                         p.presents.begin(), 0L) < p.l * p.w
                                           ? 1
                                           : 0;
                            });
-    return std::accumulate(fits.begin(), fits.end(), size_t{});
+    return std::accumulate(fits.begin(), fits.end(), 0L);
 }
 } // namespace
 template <> Solution solve<YEAR, DAY>(std::istream& input)

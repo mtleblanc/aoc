@@ -13,7 +13,7 @@ namespace
 
 // Seems to be fastest with uint64_t, but difference is negligible, might matter if grid size were
 // larger.  Use at least uint16_t so that count() doesn't need to cast
-using Cell = uint64_t;
+using Cell = int64_t;
 
 struct LifeGrid
 {
@@ -132,16 +132,16 @@ struct LifeGrid
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    constexpr size_t ITERATIONS = 100;
+    constexpr ssize_t ITERATIONS = 100;
     auto lines = readAllLines(input);
     LifeGrid life{lines};
     LifeGrid sticky{life};
-    for (size_t i{}; i < ITERATIONS; ++i)
+    for (ssize_t i{}; i < ITERATIONS; ++i)
     {
         life.update();
     }
     sticky.stickCorners();
-    for (size_t i{}; i < ITERATIONS; ++i)
+    for (ssize_t i{}; i < ITERATIONS; ++i)
     {
         sticky.update();
         sticky.stickCorners();

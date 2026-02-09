@@ -17,12 +17,12 @@ namespace
 struct Room
 {
     std::string name;
-    size_t id{};
+    ssize_t id{};
     std::string checksum;
 
     [[nodiscard]] bool isValid() const
     {
-        constexpr size_t CHECKSUM_LENGTH = 5;
+        constexpr ssize_t CHECKSUM_LENGTH = 5;
         if (checksum.size() != CHECKSUM_LENGTH)
         {
             return false;
@@ -46,7 +46,7 @@ struct Room
 
     [[nodiscard]] std::string decrypt() const
     {
-        constexpr size_t PERIOD = 26;
+        constexpr ssize_t PERIOD = 26;
         // assumes input is only [a-z\-]
         auto decryptLetter = [this](auto c) -> char
         {
@@ -73,7 +73,7 @@ struct Room
     if (auto m = ctre::match<PAT>(line))
     {
         r.name = m.get<1>();
-        r.id = std::stoul(std::string(m.get<2>()));
+        r.id = std::stol(std::string(m.get<2>()));
         r.checksum = m.get<3>();
     }
     return is;
@@ -85,7 +85,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto rooms = readAll<Room>(input);
     auto valid = rooms | std::views::filter(&Room::isValid);
     auto part1 =
-        std::ranges::fold_left(valid | std::views::transform(&Room::id), 0UL, std::plus<>());
+        std::ranges::fold_left(valid | std::views::transform(&Room::id), 0L, std::plus<>());
     const std::string target = "northpole object storage";
     auto part2 = std::ranges::find(valid, target, &Room::decrypt)->id;
     return {part1, part2};

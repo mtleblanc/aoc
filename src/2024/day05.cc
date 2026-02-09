@@ -32,9 +32,9 @@ namespace
 {
 struct OrderRule
 {
-    size_t first{};
-    size_t second{};
-    OrderRule(size_t first, size_t second) : first{first}, second{second} {};
+    ssize_t first{};
+    ssize_t second{};
+    OrderRule(ssize_t first, ssize_t second) : first{first}, second{second} {};
     explicit OrderRule(const std::string& s);
 
     [[maybe_unused]] friend auto operator<=>(const OrderRule& lhs, const OrderRule& rhs) noexcept
@@ -59,10 +59,10 @@ OrderRule::OrderRule(const std::string& s)
     iss >> *this;
 }
 
-std::istream& operator>>(std::istream& is, std::vector<size_t>& seq)
+std::istream& operator>>(std::istream& is, std::vector<ssize_t>& seq)
 {
     char c{};
-    size_t t{};
+    ssize_t t{};
     while (is >> t)
     {
         seq.push_back(t);
@@ -76,10 +76,10 @@ std::istream& operator>>(std::istream& is, std::vector<size_t>& seq)
     return is;
 }
 
-std::pair<bool, std::multimap<size_t, size_t>> inOrder(const std::vector<size_t>& seq,
+std::pair<bool, std::multimap<ssize_t, ssize_t>> inOrder(const std::vector<ssize_t>& seq,
                                              const std::set<OrderRule>& lu)
 {
-    std::multimap<size_t, size_t> applicableRules;
+    std::multimap<ssize_t, ssize_t> applicableRules;
     bool result{true};
     for (auto oit = seq.begin(); oit != seq.end(); ++oit)
     {
@@ -99,8 +99,8 @@ std::pair<bool, std::multimap<size_t, size_t>> inOrder(const std::vector<size_t>
     return {result, applicableRules};
 }
 
-void topSortHelper(const size_t n, std::multimap<size_t, size_t>& edges, auto& outIt,
-                   std::set<size_t>& seen)
+void topSortHelper(const ssize_t n, std::multimap<ssize_t, ssize_t>& edges, auto& outIt,
+                   std::set<ssize_t>& seen)
 {
     for (auto [cur, end] = edges.equal_range(n); cur != end; ++cur)
     {
@@ -113,9 +113,9 @@ void topSortHelper(const size_t n, std::multimap<size_t, size_t>& edges, auto& o
     *outIt++ = n;
 }
 
-void topSort(const std::vector<size_t>& nodes, std::multimap<size_t, size_t>& edges, auto&& outIt)
+void topSort(const std::vector<ssize_t>& nodes, std::multimap<ssize_t, ssize_t>& edges, auto&& outIt)
 {
-    std::set<size_t> seen;
+    std::set<ssize_t> seen;
     for (auto n : nodes)
     {
         if (!seen.contains(n))
@@ -126,7 +126,7 @@ void topSort(const std::vector<size_t>& nodes, std::multimap<size_t, size_t>& ed
 }
 
 Solution solve(const std::vector<OrderRule>& rules,
-               const std::vector<std::vector<size_t>>& sequences)
+               const std::vector<std::vector<ssize_t>>& sequences)
 {
     Solution s;
     std::set<OrderRule> lu{rules.begin(), rules.end()};
@@ -139,7 +139,7 @@ Solution solve(const std::vector<OrderRule>& rules,
         }
         else
         {
-            std::vector<size_t> sorted;
+            std::vector<ssize_t> sorted;
             sorted.reserve(seq.size());
             topSort(seq, rules, std::back_inserter(sorted));
             s.part2 += sorted[sorted.size() / 2];
@@ -160,7 +160,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     {
         rules.emplace_back(*it);
     }
-    std::vector<std::vector<size_t>> sequences;
+    std::vector<std::vector<ssize_t>> sequences;
     for (auto it = blank + 1; it != lines.end(); ++it)
     {
         std::istringstream iss{*it};

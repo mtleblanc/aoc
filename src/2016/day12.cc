@@ -230,9 +230,9 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     Machine cm{.program = std::move(program)};
     cm.run();
     auto part1 = cm.a;
-    cm.reset(0,0,1,0);
+    cm.reset(0, 0, 1, 0);
     cm.run();
 
-    return {static_cast<size_t>(part1), static_cast<size_t>(cm.a)};
+    return {part1, cm.a};
 }
 } // namespace aoc

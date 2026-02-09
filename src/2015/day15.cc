@@ -70,14 +70,14 @@ std::istream& operator>>(std::istream& is, Ingredient& i)
     return is;
 }
 
-size_t score(const std::vector<Ingredient>& ingredients, const std::vector<long>& amounts)
+ssize_t score(const std::vector<Ingredient>& ingredients, const std::vector<long>& amounts)
 {
     return std::inner_product(ingredients.begin(), ingredients.end(), amounts.begin(), Ingredient{})
         .score();
 }
 
 template <long CALORIES>
-size_t scoreCalories(const std::vector<Ingredient>& ingredients, const std::vector<long>& amounts)
+ssize_t scoreCalories(const std::vector<Ingredient>& ingredients, const std::vector<long>& amounts)
 {
     auto amalgum =
         std::inner_product(ingredients.begin(), ingredients.end(), amounts.begin(), Ingredient{});
@@ -88,10 +88,10 @@ size_t scoreCalories(const std::vector<Ingredient>& ingredients, const std::vect
 // as amounts for the first d-1 ingredients, then putting the difference in the last ingredient
 // Most of the time this will use more than CAPACITY for the first d-1, but the total iterations on
 // the problem input are only 1 million, so it's still more than fast enough
-template <long CAPACITY> std::vector<long> partitionFor(long n, size_t d)
+template <long CAPACITY> std::vector<long> partitionFor(long n, ssize_t d)
 {
     std::vector<long> amounts;
-    for (size_t i = 0; i < d - 1; ++i)
+    for (ssize_t i = 0; i < d - 1; ++i)
     {
         amounts.push_back(n % CAPACITY);
         n /= CAPACITY;
@@ -103,10 +103,10 @@ template <long CAPACITY> std::vector<long> partitionFor(long n, size_t d)
 template <long CAPACITY, long CALORIES>
 Solution optimize(const std::vector<Ingredient>& ingredients)
 {
-    size_t bestPart1{};
-    size_t bestPart2{};
-    size_t maxCount = std::pow(CAPACITY, ingredients.size() - 1);
-    for (size_t i = 0; i < maxCount; ++i)
+    ssize_t bestPart1{};
+    ssize_t bestPart2{};
+    ssize_t maxCount = std::pow(CAPACITY, ingredients.size() - 1);
+    for (ssize_t i = 0; i < maxCount; ++i)
     {
         auto amounts = partitionFor<CAPACITY>(i, ingredients.size());
         if (amounts.back() < 0)

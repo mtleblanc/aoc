@@ -20,7 +20,7 @@ auto part1(const std::multimap<std::string, std::string, std::less<>>& productio
 {
     std::set<std::string> seen;
 
-    for (size_t i{}; i < target.size(); ++i)
+    for (ssize_t i{}; i < std::ssize(target); ++i)
     {
         auto search = std::string_view{&target[i], 1};
         auto ps = productions.equal_range(search);
@@ -32,7 +32,7 @@ auto part1(const std::multimap<std::string, std::string, std::less<>>& productio
             produced.append(target.substr(i + 1));
             seen.insert(std::move(produced));
         }
-        if (i + 1 < target.size())
+        if (i + 1 < std::ssize(target))
         {
             auto search = std::string_view{&target[i], 2};
             auto ps = productions.equal_range(search);
@@ -47,16 +47,16 @@ auto part1(const std::multimap<std::string, std::string, std::less<>>& productio
             }
         }
     }
-    return seen.size();
+    return std::ssize(seen);
 }
 
 struct EarleyState
 {
     using Production = const std::pair<const std::string, std::string>;
-    size_t origin{};
+    ssize_t origin{};
     Production* production;
-    size_t progress{};
-    size_t depth{1};
+    ssize_t progress{};
+    ssize_t depth{1};
 
     auto operator<=>(const EarleyState& o) const
     {
@@ -71,24 +71,24 @@ struct EarleyState
 
     [[nodiscard]] auto isComplete() const
     {
-        return progress == production->second.size();
+        return progress == std::ssize(production->second);
     }
     [[nodiscard]] std::string next() const
     {
         return production->second.substr(progress, 1);
     }
 
-    EarleyState(Production& production, size_t origin = 0, size_t progress = 0, size_t depth = 1)
+    EarleyState(Production& production, ssize_t origin = 0, ssize_t progress = 0, ssize_t depth = 1)
         : origin{origin}, production{&production}, progress{progress}, depth{depth}
     {
     }
 
-    EarleyState(Production* production, size_t origin = 0, size_t progress = 0, size_t depth = 1)
+    EarleyState(Production* production, ssize_t origin = 0, ssize_t progress = 0, ssize_t depth = 1)
         : origin{origin}, production{production}, progress{progress}, depth{depth}
     {
     }
 
-    [[nodiscard]] EarleyState scan(size_t d = 0) const
+    [[nodiscard]] EarleyState scan(ssize_t d = 0) const
     {
         (void)d;
         return EarleyState{production, origin, progress + 1, depth + d};
@@ -115,7 +115,7 @@ struct EarleyParser
     {
     }
 
-    auto add(EarleyState state, size_t k)
+    auto add(EarleyState state, ssize_t k)
     {
         if (std::ranges::contains(states[k], state))
         {
@@ -126,7 +126,7 @@ struct EarleyParser
         return true;
     };
 
-    auto predict(EarleyState state, size_t k)
+    auto predict(EarleyState state, ssize_t k)
     {
         if (state.isComplete())
         {
@@ -140,7 +140,7 @@ struct EarleyParser
             add(predicted, k);
         }
     };
-    auto scan(auto state, size_t k)
+    auto scan(auto state, ssize_t k)
     {
         if (state.isComplete())
         {
@@ -161,7 +161,7 @@ struct EarleyParser
             return;
         }
         auto n = state.production->first;
-        for (size_t i{}; i < states[state.origin].size(); ++i)
+        for (ssize_t i{}; i < std::ssize(states[state.origin]); ++i)
         {
             auto s = states[state.origin][i];
             if (s.isComplete())
@@ -186,13 +186,13 @@ struct EarleyParser
             states[0].push_back(state);
         }
 
-        for (size_t k{}; k < states.size(); ++k)
+        for (ssize_t k{}; k < std::ssize(states); ++k)
         {
-            for (size_t current{}; current < states[k].size(); ++current)
+            for (ssize_t current{}; current < std::ssize(states[k]); ++current)
             {
                 auto state = states[k][current];
                 predict(state, k);
-                if (k + 1 < states.size())
+                if (k + 1 < std::ssize(states))
                 {
                     scan(state, k);
                 }
@@ -203,7 +203,7 @@ struct EarleyParser
                                    { return s.production->first == "e" && s.isComplete(); });
     }
 
-    size_t depth()
+    ssize_t depth()
     {
         auto parses =
             states.back() |

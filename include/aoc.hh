@@ -5,18 +5,21 @@
 
 namespace aoc
 {
-struct Solution
+
+template <typename T = ssize_t> struct GeneralSolution
 {
-    size_t part1;
-    size_t part2;
-    Solution(size_t part1 = 0, size_t part2 = 0) : part1{part1}, part2{part2} {}
-    Solution& operator+=(const Solution& other)
+    T part1;
+    T part2;
+    GeneralSolution(T part1 = 0, T part2 = 0) : part1{part1}, part2{part2} {}
+    GeneralSolution& operator+=(const GeneralSolution& other)
     {
         part1 += other.part1;
         part2 += other.part2;
         return *this;
     }
 };
+
+using Solution = GeneralSolution<>;
 
 inline std::vector<std::string> readAllLines(std::istream& input)
 {

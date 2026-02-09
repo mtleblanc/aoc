@@ -15,10 +15,10 @@ namespace
 {
 struct Box
 {
-    int64_t x;
-    int64_t y;
-    int64_t z;
-    size_t sz{1};
+    ssize_t x;
+    ssize_t y;
+    ssize_t z;
+    ssize_t sz{1};
     Box* parent{nullptr};
     [[nodiscard]] int64_t distanceSquare(const Box& other) const
     {
@@ -45,7 +45,7 @@ struct Box
         {
             return;
         }
-        size_t newSz = p1->sz + p2->sz;
+        ssize_t newSz = p1->sz + p2->sz;
         o.rep()->parent = rep();
         rep()->sz = newSz;
     }
@@ -85,15 +85,15 @@ template <typename T> void print(std::vector<T>& v)
     std::cout << std::endl;
 }
 
-uint64_t part1(const std::vector<std::string>& v, size_t connections)
+ssize_t part1(const std::vector<std::string>& v, size_t connections)
 {
     std::vector<std::shared_ptr<Box>> boxes{};
     std::priority_queue<Wire> wires{};
     for (const auto& in : v)
     {
-        int64_t x = 0;
-        int64_t y = 0;
-        int64_t z = 0;
+        ssize_t x = 0;
+        ssize_t y = 0;
+        ssize_t z = 0;
         char c = 0;
         std::istringstream ss{in};
         ss >> x >> c >> y >> c >> z;
@@ -116,8 +116,8 @@ uint64_t part1(const std::vector<std::string>& v, size_t connections)
         // std::cout << "Joined" << std::endl;
         w.b1->join(*w.b2);
     }
-    uint64_t accum{1};
-    std::priority_queue<uint64_t> sizes{};
+    ssize_t accum{1};
+    std::priority_queue<ssize_t> sizes{};
     for (auto& b : boxes)
     {
         if (b->parent == nullptr)
@@ -133,15 +133,15 @@ uint64_t part1(const std::vector<std::string>& v, size_t connections)
     return accum;
 }
 
-uint64_t part2(const std::vector<std::string>& v)
+ssize_t part2(const std::vector<std::string>& v)
 {
     std::vector<std::shared_ptr<Box>> boxes{};
     std::priority_queue<Wire> wires{};
     for (const auto& in : v)
     {
-        int64_t x = 0;
-        int64_t y = 0;
-        int64_t z = 0;
+        ssize_t x = 0;
+        ssize_t y = 0;
+        ssize_t z = 0;
         char c = 0;
         std::istringstream ss{in};
         ss >> x >> c >> y >> c >> z;
@@ -153,7 +153,7 @@ uint64_t part2(const std::vector<std::string>& v)
         boxes.push_back(b);
     }
     Wire w;
-    while (boxes[0]->rep()->sz < boxes.size())
+    while (boxes[0]->rep()->sz < std::ssize(boxes))
     {
         w = wires.top();
         wires.pop();

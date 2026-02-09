@@ -57,6 +57,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     iss = std::istringstream{inp};
     auto part2Tris = parseColumns(iss);
     auto part2 = std::ranges::count_if(part2Tris, &Triangle::isValid);
-    return {static_cast<size_t>(part1), static_cast<size_t>(part2)};
+    return {part1, part2};
 }
 } // namespace aoc

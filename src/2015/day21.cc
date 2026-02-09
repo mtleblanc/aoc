@@ -37,10 +37,10 @@ namespace
 {
 struct Item
 {
-    size_t cost;
+    ssize_t cost;
     int damage;
     int armor;
-    Item(size_t cost, int damage, int armor) : cost{cost}, damage{damage}, armor{armor} {}
+    Item(ssize_t cost, int damage, int armor) : cost{cost}, damage{damage}, armor{armor} {}
 };
 
 const std::vector<Item> weapons = {{8, 4, 0}, {10, 5, 0}, {25, 6, 0}, {40, 7, 0}, {74, 8, 0}};
@@ -56,7 +56,7 @@ struct Stats
     int hp;
     int damage;
     int armor;
-    size_t spent{};
+    ssize_t spent{};
     Stats(int hp, int damage, int armor) : hp{hp}, damage{damage}, armor{armor} {}
 
     class EquipmentGuard
@@ -115,10 +115,10 @@ bool playerWins(const Stats& player, const Stats& monster)
            rounds(monster.damage - player.armor, player.hp);
 }
 
-size_t part1(const Stats& monster)
+ssize_t part1(const Stats& monster)
 {
     constexpr int PLAYER_HEALTH = 100;
-    size_t minCost = std::numeric_limits<size_t>::max();
+    ssize_t minCost = std::numeric_limits<ssize_t>::max();
     Stats player{PLAYER_HEALTH, 0, 0};
     auto equip = [&player](auto item) { return player.equip(item); };
 
@@ -147,10 +147,10 @@ size_t part1(const Stats& monster)
     return minCost;
 }
 
-size_t part2(const Stats& monster)
+ssize_t part2(const Stats& monster)
 {
     constexpr int PLAYER_HEALTH = 100;
-    size_t maxCost = std::numeric_limits<size_t>::min();
+    ssize_t maxCost = std::numeric_limits<ssize_t>::min();
     Stats player{PLAYER_HEALTH, 0, 0};
     auto equip = [&player](auto item) { return player.equip(item); };
     for (auto weapon : weapons | std::views::transform(equip))

@@ -10,7 +10,7 @@ constexpr size_t DAY = 23;
 
 namespace
 {
-using register_t = uint64_t;
+using register_t = int64_t;
 
 struct CollatzMachine;
 struct IncInstruction

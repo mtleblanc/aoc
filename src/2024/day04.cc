@@ -138,10 +138,10 @@ constexpr auto diagonalMoves()
     return deltas;
 }
 
-size_t part1(const WordSearch& ws)
+ssize_t part1(const WordSearch& ws)
 {
     constexpr std::string TARGET = "XMAS";
-    size_t accum{};
+    ssize_t accum{};
     constexpr auto DELTAS = kingMoves();
 
     for (auto it = ws.begin(); it != ws.end(); ++it)
@@ -157,10 +157,10 @@ size_t part1(const WordSearch& ws)
     return accum;
 }
 
-size_t part2(const WordSearch& ws)
+ssize_t part2(const WordSearch& ws)
 {
     constexpr auto DELTAS = diagonalMoves();
-    size_t accum{};
+    ssize_t accum{};
     for (size_t y{1}; y < ws.height() - 1; ++y)
     {
         for (size_t x{1}; x < ws.width() - 1; ++x)

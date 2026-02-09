@@ -37,7 +37,8 @@ auto toHexChars(const auto& digest)
 {
     static constexpr std::string_view DIGITS = "0123456789abcdef";
     std::array<char, LEN * 2> res{};
-    std::ranges::copy(splitDigits(digest) | std::views::transform([](auto c) { return DIGITS[c]; }), res.begin());
+    std::ranges::copy(splitDigits(digest) | std::views::transform([](auto c) { return DIGITS[c]; }),
+                      res.begin());
     return res;
 }
 
@@ -89,25 +90,25 @@ template <size_t REP> auto findRepeats(const auto& digest)
     return repeats;
 }
 
-template <typename F> size_t generateOTPs(const std::string& seed, F& f)
+template <typename F> ssize_t generateOTPs(const std::string& seed, F& f)
 {
     using Digest = decltype(f(std::declval<std::string>()));
 
     constexpr auto WINDOW = 1000UL;
-    constexpr auto TARGET = 64UL;
+    constexpr auto TARGET = 64L;
     constexpr auto FIRST_REPEATS = 3;
     constexpr auto SECOND_REPEATS = 5;
 
     auto appendN = [&seed](auto n) { return seed + std::to_string(n); };
     std::deque<Digest> hashes;
     std::deque<uint16_t> repeats;
-    size_t otps{};
+    ssize_t otps{};
     for (size_t n{}; hashes.size() < WINDOW;)
     {
         hashes.push_back(f(appendN(n++)));
         repeats.push_back(findRepeats<SECOND_REPEATS>(hashes.back()));
     }
-    for (size_t idx{}; otps < TARGET; ++idx)
+    for (ssize_t idx{}; otps < TARGET; ++idx)
     {
         auto h = hashes.front();
         hashes.pop_front();
@@ -139,11 +140,11 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto stretchedHasher = [&hasher](const std::string& message)
     {
         // Set to 2016 for correct answer.  Reduced for runtime while solving other problems
-        constexpr auto STRETCH = 0UL;
+        constexpr auto STRETCH = 0L;
         constexpr auto LEN = 16UL;
         std::array<char, LEN * 2> str{};
         auto hash = hasher.digest<LEN>(message);
-        for (auto _ : std::views::iota(0UL, STRETCH))
+        for (auto _ : std::views::iota(0L, STRETCH))
         {
             str = toHexChars(hash);
             hash = hasher.digest<LEN>(std::string_view{str.begin(), str.end()});
