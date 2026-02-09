@@ -11,11 +11,11 @@ constexpr size_t DAY = 13;
 
 namespace
 {
-using Coord = std::pair<ssize_t, ssize_t>;
+using Coord = std::pair<int, int>;
 struct Path
 {
     Coord c;
-    ssize_t steps;
+    int steps;
 };
 
 bool valid(Coord coords, size_t seed)
@@ -31,7 +31,7 @@ Coord operator+(const Coord& l, const Coord& r)
 
 constexpr auto DIRS = std::array<Coord, 4>{{{1, 0}, {-1, 0}, {0, 1}, {0, -1}}};
 
-ssize_t part1(size_t seed)
+int part1(size_t seed)
 {
     constexpr auto TARGET = std::make_pair(31UL, 39UL);
     std::set<Coord> seen;
@@ -63,7 +63,7 @@ ssize_t part1(size_t seed)
     return 0;
 }
 
-ssize_t part2(size_t seed)
+int part2(size_t seed)
 {
     constexpr auto MAX_STEPS = 50L;
     std::set<Coord> seen;
@@ -94,10 +94,10 @@ ssize_t part2(size_t seed)
             }
         }
     }
-    return std::ssize(seen);
+    return static_cast<int>(seen.size());
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     size_t seed{};
     input >> seed;

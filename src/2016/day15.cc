@@ -7,16 +7,16 @@
  */
 namespace aoc
 {
-constexpr ssize_t YEAR = 2016;
-constexpr ssize_t DAY = 15;
+constexpr int YEAR = 2016;
+constexpr int DAY = 15;
 
 namespace
 {
 struct Disc
 {
-    ssize_t mod;
-    ssize_t start;
-    ssize_t id;
+    int mod;
+    int start;
+    int id;
 };
 
 [[maybe_unused]] std::istream& operator>>(std::istream& is, Disc& d)
@@ -31,10 +31,10 @@ struct Disc
     std::getline(is, line);
     if (auto m = ctre::match<PAT>(line))
     {
-        d.id = std::stol(std::string(m.get<ID>()));
-        d.mod = std::stol(std::string(m.get<MOD>()));
-        auto startTime = std::stol(std::string(m.get<START_TIME>())) % d.mod;
-        auto startPos = std::stol(std::string(m.get<START_POS>())) % d.mod;
+        d.id = toNum<int>(m.get<ID>());
+        d.mod = toNum<int>(m.get<MOD>());
+        auto startTime = toNum<int>(m.get<START_TIME>()) % d.mod;
+        auto startPos = toNum<int>(m.get<START_POS>()) % d.mod;
         d.start = (startPos + d.mod - startTime) % d.mod;
         return is;
     }
@@ -44,13 +44,13 @@ struct Disc
 
 class ChineseRemainder
 {
-    std::vector<ssize_t> moduli;
+    std::vector<int> moduli;
     // M = \prod moduli
-    ssize_t M{1};
+    int M{1};
     // characters[i] % moduli[j] = delta_ij
-    std::vector<ssize_t> characters;
+    std::vector<int> characters;
 
-    static constexpr std::pair<ssize_t, ssize_t> euler(ssize_t m, ssize_t n)
+    static constexpr std::pair<int, int> euler(int m, int n)
     {
         if (m < n)
         {
@@ -73,9 +73,10 @@ class ChineseRemainder
 
   public:
     ChineseRemainder() = default;
-    void addModulus(ssize_t modulus)
+    void addModulus(int modulus)
     {
-        if(modulus < 0) {
+        if (modulus < 0)
+        {
             addModulus(-modulus);
             return;
         }
@@ -89,7 +90,7 @@ class ChineseRemainder
             auto nextM = (M * modulus);
             x = x % nextM + nextM;
         }
-        auto character = x * M % (M * modulus);
+        int character = static_cast<int>(int64_t{x} * M % (int64_t{M} * modulus));
         M *= modulus;
         for (auto& c : characters)
         {
@@ -99,25 +100,24 @@ class ChineseRemainder
         characters.push_back(character);
     }
 
-    ssize_t solve(const std::vector<ssize_t>& remainders)
+    int solve(const std::vector<int>& remainders)
     {
         if (remainders.size() != moduli.size())
         {
             throw std::invalid_argument("Remainders don't match moduli");
         }
-        return std::inner_product(characters.begin(), characters.end(), remainders.begin(), 0L) %
-               M;
+        return std::inner_product(characters.begin(), characters.end(), remainders.begin(), 0) % M;
     }
 };
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
-    constexpr auto PART2_DISC = 11L;
+    constexpr auto PART2_DISC = 11;
     auto discs = readAll<Disc>(input);
     ChineseRemainder cr;
-    std::vector<ssize_t> remainders;
+    std::vector<int> remainders;
     for (auto d : discs)
     {
         cr.addModulus(d.mod);
@@ -125,7 +125,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     }
     auto part1 = cr.solve(remainders);
     cr.addModulus(PART2_DISC);
-    remainders.push_back(PART2_DISC - (std::ssize(remainders) + 1) % PART2_DISC);
+    remainders.push_back(PART2_DISC - (static_cast<int>(remainders.size()) + 1) % PART2_DISC);
     return {part1, cr.solve(remainders)};
 }
 } // namespace aoc

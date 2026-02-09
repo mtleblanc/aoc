@@ -98,7 +98,7 @@ template <class... Ts> struct Overloaded : Ts...
 
 template <typename T> struct ColumnIterator
 {
-    using difference_type = ssize_t;
+    using difference_type = int;
     using value_type = T;
     using reference = T&;
     std::vector<std::vector<T>>* base;
@@ -129,7 +129,7 @@ template <typename T> struct ColumnIterator
     }
 };
 
-template <size_t ROWS, size_t COLS> ssize_t part1(const std::vector<Command>& commands)
+template <size_t ROWS, size_t COLS> int part1(const std::vector<Command>& commands)
 {
     std::vector<std::vector<char>> grid(ROWS, std::vector<char>(COLS));
     auto rect = [&grid](RectCommand c)
@@ -162,7 +162,7 @@ template <size_t ROWS, size_t COLS> ssize_t part1(const std::vector<Command>& co
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     constexpr size_t ROWS = 6;
     constexpr size_t COLS = 50;

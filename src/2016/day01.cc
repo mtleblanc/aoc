@@ -23,12 +23,12 @@ struct ComplexHash
     }
 };
 
-ssize_t taxicab(std::complex<int> z)
+int taxicab(std::complex<int> z)
 {
     return std::abs(z.imag()) + std::abs(z.real());
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     static constexpr auto PAT = ctll::fixed_string(R"(([LR])(\d+))");
 

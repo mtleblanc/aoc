@@ -20,27 +20,27 @@ struct Output;
 
 struct Dest
 {
-    using ReportCB = std::function<void(ssize_t, ssize_t, ssize_t)>;
+    using ReportCB = std::function<void(int, int, int)>;
     virtual ~Dest() = default;
     Dest(const Dest&) = default;
     Dest& operator=(const Dest&) = default;
     Dest(Dest&&) = default;
     Dest& operator=(Dest&&) = default;
-    virtual void accept(ssize_t v, [[maybe_unused]] const ReportCB& report) = 0;
+    virtual void accept(int v, [[maybe_unused]] const ReportCB& report) = 0;
 
   protected:
     Dest() = default;
 };
 struct Bot : public Dest
 {
-    ssize_t id{};
-    std::optional<ssize_t> value;
+    int id{};
+    std::optional<int> value;
     Dest* low{};
     Dest* high{};
 
     Bot() = default;
 
-    void accept(ssize_t v, [[maybe_unused]] const ReportCB& report) override
+    void accept(int v, [[maybe_unused]] const ReportCB& report) override
     {
         if (!value)
         {
@@ -62,11 +62,11 @@ struct Bot : public Dest
 
 struct Output : public Dest
 {
-    std::vector<ssize_t> values;
+    std::vector<int> values;
 
     Output() = default;
 
-    void accept(ssize_t v, [[maybe_unused]] const ReportCB& report) override
+    void accept(int v, [[maybe_unused]] const ReportCB& report) override
     {
         values.push_back(v);
     }
@@ -74,24 +74,24 @@ struct Output : public Dest
 
 struct Input
 {
-    ssize_t value;
+    int value;
     Dest* dest;
 };
 
-Solution simulate(const std::vector<std::string>& descs)
+Solution_t<YEAR, DAY> simulate(const std::vector<std::string>& descs)
 {
-    ssize_t part1{};
-    auto report = [&part1](ssize_t bot, ssize_t low, ssize_t high)
+    int part1{};
+    auto report = [&part1](int bot, int low, int high)
     {
-        constexpr ssize_t LOW = 17;
-        constexpr ssize_t HIGH = 61;
+        constexpr int LOW = 17;
+        constexpr int HIGH = 61;
         if (low == LOW && high == HIGH)
         {
             part1 = bot;
         }
     };
-    std::map<ssize_t, Bot> bots;
-    std::map<ssize_t, Output> outputs;
+    std::map<int, Bot> bots;
+    std::map<int, Output> outputs;
     std::vector<Input> inputs;
     for (const auto& desc : descs)
     {
@@ -107,23 +107,23 @@ Solution simulate(const std::vector<std::string>& descs)
         constexpr auto INPUT_ID = 2;
         if (auto m = ctre::match<BOT_PAT>(desc))
         {
-            auto id = std::stol(std::string(m.get<BOT_ID>()));
+            auto id = toNum<int>(m.get<BOT_ID>());
             auto& bot = bots[id];
             bot.id = id;
 
             auto isBot = std::string(m.get<BOT_LOW_IS_BOT>()) == "bot";
-            auto destId = std::stol(std::string(m.get<BOT_LOW_ID>()));
+            auto destId = toNum<int>(m.get<BOT_LOW_ID>());
             bot.low =
                 isBot ? static_cast<Dest*>(&bots[destId]) : static_cast<Dest*>(&outputs[destId]);
             isBot = std::string(m.get<BOT_HIGH_IS_BOT>()) == "bot";
-            destId = std::stol(std::string(m.get<BOT_HIGH_ID>()));
+            destId = toNum<int>(m.get<BOT_HIGH_ID>());
             bot.high =
                 isBot ? static_cast<Dest*>(&bots[destId]) : static_cast<Dest*>(&outputs[destId]);
         }
         else if (auto m = ctre::match<INPUT_PAT>(desc))
         {
-            auto val = std::stol(std::string(m.get<INPUT_VAL>()));
-            auto id = std::stol(std::string(m.get<INPUT_ID>()));
+            auto val = toNum<int>(m.get<INPUT_VAL>());
+            auto id = toNum<int>(m.get<INPUT_ID>());
             inputs.emplace_back(val, &bots[id]);
         }
         else
@@ -143,13 +143,13 @@ Solution simulate(const std::vector<std::string>& descs)
         throw std::runtime_error("Outputs 0-2 did not each have a single element");
     }
     auto part2 = std::ranges::fold_left(
-        firstThreeOutputs | std::views::transform([](auto o) { return o.values[0]; }), 1L,
+        firstThreeOutputs | std::views::transform([](auto o) { return o.values[0]; }), 1,
         std::multiplies<>());
     return {part1, part2};
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     auto descs = readAllLines(input);
     return simulate(descs);

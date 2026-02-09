@@ -5,19 +5,24 @@ namespace aoc
 {
 
 // NOLINTBEGIN (cppcoreguidelines-avoid-magic-numbers)
-template <> struct SolutionType<2016, 02>
+template <> struct SolutionType<2016, 2>
 {
     using type = StringSolution;
 };
 
-template <> struct SolutionType<2016, 05>
+template <> struct SolutionType<2016, 5>
 {
     using type = StringSolution;
 };
 
-template <> struct SolutionType<2016, 06>
+template <> struct SolutionType<2016, 6>
 {
     using type = StringSolution;
+};
+
+template <> struct SolutionType<2016, 9>
+{
+    using type = GeneralSolution<int64_t>;
 };
 
 template <> struct SolutionType<2016, 16>

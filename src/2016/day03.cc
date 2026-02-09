@@ -47,7 +47,7 @@ std::vector<Triangle> parseColumns(std::istream& is)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     auto inp = slurp(input);
     auto iss = std::istringstream{inp};
@@ -57,6 +57,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     iss = std::istringstream{inp};
     auto part2Tris = parseColumns(iss);
     auto part2 = std::ranges::count_if(part2Tris, &Triangle::isValid);
-    return {part1, part2};
+    return {static_cast<int>(part1), static_cast<int>(part2)};
 }
 } // namespace aoc

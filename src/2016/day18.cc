@@ -34,7 +34,7 @@ template <int ROWS> int countSafe(std::string row)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     constexpr auto PART1_ROWS = 40;
     constexpr auto PART2_ROWS = 400000;

@@ -7,7 +7,7 @@ namespace aoc
 constexpr size_t YEAR = 2016;
 constexpr size_t DAY = 22;
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     (void)input;
     return {};

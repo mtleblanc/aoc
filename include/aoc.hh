@@ -8,7 +8,7 @@
 namespace aoc
 {
 
-template <typename T = ssize_t> struct GeneralSolution
+template <typename T = int> struct GeneralSolution
 {
     T part1;
     T part2;
@@ -21,13 +21,28 @@ template <typename T = ssize_t> struct GeneralSolution
     }
 };
 
-using Solution = GeneralSolution<>;
+using Solution = GeneralSolution<ssize_t>;
 using StringSolution = GeneralSolution<std::string>;
 
 template <size_t Y, size_t D> struct SolutionType
 {
+    using type = GeneralSolution<>;
+};
+
+// NOLINTBEGIN (cppcoreguidelines-avoid-magic-numbers)
+template <size_t D> struct SolutionType<2015, D>
+{
     using type = Solution;
 };
+template <size_t D> struct SolutionType<2024, D>
+{
+    using type = Solution;
+};
+template <size_t D> struct SolutionType<2025, D>
+{
+    using type = Solution;
+};
+// NOLINTEND
 
 template <size_t Y, size_t D> using Solution_t = typename SolutionType<Y, D>::type;
 
@@ -84,7 +99,7 @@ inline std::string toHex(ssize_t n)
 template <typename T> T toNum(std::string_view sv)
 {
     T val{};
-    std::from_chars(sv.data(), std::next(sv.data(), std::ssize(sv), val));
+    std::from_chars(sv.begin(), sv.end(), val);
     return val;
 }
 

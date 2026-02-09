@@ -12,11 +12,11 @@ constexpr size_t DAY = 5;
 
 namespace
 {
-template <size_t N> bool hasStartingZeros(const std::vector<uint8_t>& md5)
+template <int N> bool hasStartingZeros(const std::vector<uint8_t>& md5)
 {
     if constexpr (N % 2 == 1)
     {
-        constexpr uint8_t FIRST_DIGIT = 0xF0;
+        constexpr auto FIRST_DIGIT = 0xF0;
         if (md5[N / 2] & FIRST_DIGIT)
         {
             return false;
@@ -26,28 +26,28 @@ template <size_t N> bool hasStartingZeros(const std::vector<uint8_t>& md5)
     return std::ranges::all_of(view, [](auto c) { return c == 0; });
 }
 
-template <size_t LEADING_ZEROS> StringSolution crack(const std::string& prefix)
+template <int LEADING_ZEROS> StringSolution crack(const std::string& prefix)
 {
     auto hasher = Hash::Hasher::md5Hasher();
     auto appendN = [&prefix](auto n) { return prefix + std::to_string(n); };
     {
         using namespace std::views;
-        constexpr uint8_t SECOND_DIGIT = 0x0F;
-        constexpr size_t PASSWORD_LENGTH = 8;
-        constexpr size_t BASE = 16;
+        constexpr auto SECOND_DIGIT = 0x0F;
+        constexpr int PASSWORD_LENGTH = 8;
+        constexpr int BASE = 16;
         auto view = iota(0) | transform(appendN) |
                     transform([&hasher](const std::string& s) { return hasher(s); }) |
                     filter(hasStartingZeros<LEADING_ZEROS>) |
                     transform(
-                        [](auto md5) -> std::pair<size_t, size_t>
+                        [](auto md5) -> std::pair<int, int>
                         {
                             return std::make_pair(md5[LEADING_ZEROS / 2] & SECOND_DIGIT,
                                                   md5[LEADING_ZEROS / 2 + 1] >> 4);
                         });
         std::bitset<PASSWORD_LENGTH> seen;
-        ssize_t part1{};
-        ssize_t part2{};
-        for (size_t i{}; auto [d1, d2] : view)
+        int part1{};
+        int part2{};
+        for (int i{}; auto [d1, d2] : view)
         {
             if (i++ < PASSWORD_LENGTH)
             {
@@ -80,7 +80,7 @@ template <> StringSolution solve<YEAR, DAY>(std::istream& input)
 {
     std::string seed;
     input >> seed;
-    // Set to 5 for answer, lower so this runs quickly when working on later problems
+    // Set to 5 for correct answer, lower so this runs quickly when working on later problems
     constexpr auto ZEROS = 1U;
     return crack<ZEROS>(seed);
 }

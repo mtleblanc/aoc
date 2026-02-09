@@ -10,7 +10,7 @@ constexpr size_t DAY = 12;
 
 namespace
 {
-using register_t = int64_t;
+using register_t = int;
 
 struct Machine;
 
@@ -42,14 +42,14 @@ struct DecInstruction
 
 struct JnzInstruction
 {
-    ssize_t offset;
+    int offset;
     char reg;
     void apply(Machine& cm) const;
 };
 
 struct JmpInstruction
 {
-    ssize_t offset;
+    int offset;
     void apply(Machine& cm) const;
 };
 
@@ -161,7 +161,7 @@ std::istream& operator>>(std::istream& is, Instruction& ci)
     }
     char dest{};
     char src{};
-    ssize_t offset{};
+    int offset{};
     register_t imm{};
     if (buf == "cpy")
     {
@@ -219,7 +219,7 @@ std::istream& operator>>(std::istream& is, Instruction& ci)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     std::vector<Instruction> program;
     for (Instruction ci; input >> ci;)

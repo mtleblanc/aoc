@@ -21,7 +21,7 @@ constexpr auto LEN = 16UL;
 
 auto splitDigits(const auto& digest)
 {
-    size_t idx{};
+    int idx{};
     std::array<uint8_t, LEN * 2> res{};
     for (auto h : digest)
     {
@@ -43,10 +43,10 @@ auto toHexChars(const auto& digest)
 }
 
 // using splitDigits instead of unrolling the nibbles is marginally slower but cleaner
-template <size_t REP> std::optional<uint8_t> findRepeat(const auto& digest)
+template <int REP> std::optional<uint8_t> findRepeat(const auto& digest)
 {
     uint8_t c{};
-    size_t cnt{};
+    int cnt{};
     for (auto d : splitDigits(digest))
     {
         if (d == c)
@@ -66,11 +66,11 @@ template <size_t REP> std::optional<uint8_t> findRepeat(const auto& digest)
     return {};
 }
 
-template <size_t REP> auto findRepeats(const auto& digest)
+template <int REP> auto findRepeats(const auto& digest)
 {
     uint16_t repeats{};
     uint8_t c{};
-    size_t cnt{};
+    int cnt{};
     for (auto d : splitDigits(digest))
     {
         if (d == c)
@@ -90,25 +90,25 @@ template <size_t REP> auto findRepeats(const auto& digest)
     return repeats;
 }
 
-template <typename F> ssize_t generateOTPs(const std::string& seed, F& f)
+template <typename F> int generateOTPs(const std::string& seed, F& f)
 {
     using Digest = decltype(f(std::declval<std::string>()));
 
     constexpr auto WINDOW = 1000UL;
-    constexpr auto TARGET = 64L;
+    constexpr auto TARGET = 64;
     constexpr auto FIRST_REPEATS = 3;
     constexpr auto SECOND_REPEATS = 5;
 
     auto appendN = [&seed](auto n) { return seed + std::to_string(n); };
     std::deque<Digest> hashes;
     std::deque<uint16_t> repeats;
-    ssize_t otps{};
-    for (size_t n{}; hashes.size() < WINDOW;)
+    int otps{};
+    for (int n{}; hashes.size() < WINDOW;)
     {
         hashes.push_back(f(appendN(n++)));
         repeats.push_back(findRepeats<SECOND_REPEATS>(hashes.back()));
     }
-    for (ssize_t idx{}; otps < TARGET; ++idx)
+    for (int idx{}; otps < TARGET; ++idx)
     {
         auto h = hashes.front();
         hashes.pop_front();
@@ -132,7 +132,7 @@ template <typename F> ssize_t generateOTPs(const std::string& seed, F& f)
     return 0;
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     std::string seed;
     input >> seed;
@@ -140,11 +140,11 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto stretchedHasher = [&hasher](const std::string& message)
     {
         // Set to 2016 for correct answer.  Reduced for runtime while solving other problems
-        constexpr auto STRETCH = 0L;
+        constexpr auto STRETCH = 0;
         constexpr auto LEN = 16UL;
         std::array<char, LEN * 2> str{};
         auto hash = hasher.digest<LEN>(message);
-        for (auto _ : std::views::iota(0L, STRETCH))
+        for (auto _ : std::views::iota(0, STRETCH))
         {
             str = toHexChars(hash);
             hash = hasher.digest<LEN>(std::string_view{str.begin(), str.end()});

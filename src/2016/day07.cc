@@ -71,10 +71,10 @@ bool supportsSLS(const std::string& ip)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
 
-    return {std::ranges::count_if(lines, supportsTLS), std::ranges::count_if(lines, supportsSLS)};
+    return {static_cast<int>(std::ranges::count_if(lines, supportsTLS)), static_cast<int>(std::ranges::count_if(lines, supportsSLS))};
 }
 } // namespace aoc
