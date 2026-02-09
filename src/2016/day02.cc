@@ -120,10 +120,14 @@ ssize_t part2(std::vector<std::string> const& movements)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> struct SolutionType<YEAR, DAY>
+{
+    using type = aoc::StringSolution;
+};
+
+template <> StringSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto movements = readAllLines(input);
-    // NB part2 has to be converted to hex
-    return {part1(movements), part2(movements)};
+    return {std::to_string(part1(movements)), toHex(part2(movements))};
 }
 } // namespace aoc

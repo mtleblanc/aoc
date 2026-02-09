@@ -11,7 +11,12 @@ namespace aoc
 constexpr size_t YEAR = 2016;
 constexpr size_t DAY = 6;
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> struct SolutionType<YEAR, DAY>
+{
+    using type = aoc::StringSolution;
+};
+
+template <> StringSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     std::string password1;
@@ -25,7 +30,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         password2.push_back(
             std::ranges::min_element(counts, {}, &std::pair<const char, size_t>::second)->first);
     }
-    std::cout << password1 << ", " << password2 << std::endl;
-    return {};
+    return {password1, password2};
 }
 } // namespace aoc

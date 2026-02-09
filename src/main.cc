@@ -1,4 +1,4 @@
-#include "aoc.hh"
+#include "solutions.hh"
 #include <chrono>
 #include <fstream>
 #include <iostream>
@@ -41,6 +41,6 @@ template <size_t Y> struct YearPrinter
 int main()
 {
     constexpr auto YEAR = 2016;
-    constexpr auto DAYS = 15;
+    constexpr auto DAYS = 25;
     YearPrinter<YEAR>{}.printAll<DAYS>(false);
 }

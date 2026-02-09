@@ -26,7 +26,7 @@ template <size_t N> bool hasStartingZeros(const std::vector<uint8_t>& md5)
     return std::ranges::all_of(view, [](auto c) { return c == 0; });
 }
 
-template <size_t LEADING_ZEROS> Solution crack(const std::string& prefix)
+template <size_t LEADING_ZEROS> StringSolution crack(const std::string& prefix)
 {
     auto hasher = Hash::Hasher::md5Hasher();
     auto appendN = [&prefix](auto n) { return prefix + std::to_string(n); };
@@ -45,19 +45,20 @@ template <size_t LEADING_ZEROS> Solution crack(const std::string& prefix)
                                                   md5[LEADING_ZEROS / 2 + 1] >> 4);
                         });
         std::bitset<PASSWORD_LENGTH> seen;
-        Solution s;
+        ssize_t part1{};
+        ssize_t part2{};
         for (size_t i{}; auto [d1, d2] : view)
         {
             if (i++ < PASSWORD_LENGTH)
             {
-                s.part1 = s.part1 * BASE + d1;
+                part1 = part1 * BASE + d1;
             }
 
             if (d1 < PASSWORD_LENGTH && !seen[d1])
             {
                 seen.set(d1);
                 // d1 = 0 means shift 7 nibbles, d1 = 7 means shift 0
-                s.part2 |= d2 << ((PASSWORD_LENGTH - 1 - d1) * 4);
+                part2 |= d2 << ((PASSWORD_LENGTH - 1 - d1) * 4);
             }
 
             if (seen.all())
@@ -65,17 +66,22 @@ template <size_t LEADING_ZEROS> Solution crack(const std::string& prefix)
                 break;
             }
         }
-        return s;
+        return {toHex(part1), toHex(part2)};
     }
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> struct SolutionType<YEAR, DAY>
+{
+    using type = aoc::StringSolution;
+};
+
+template <> StringSolution solve<YEAR, DAY>(std::istream& input)
 {
     std::string seed;
     input >> seed;
-    // NB need to convert answers to hex, change template to 5 for actual answer, less for faster
-    // execution while working on other days
-    return crack<1>(seed);
+    // Set to 5 for answer, lower so this runs quickly when working on later problems
+    constexpr auto ZEROS = 1U;
+    return crack<ZEROS>(seed);
 }
 } // namespace aoc

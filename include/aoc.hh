@@ -1,5 +1,6 @@
 #include <ios>
 #include <istream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -10,7 +11,7 @@ template <typename T = ssize_t> struct GeneralSolution
 {
     T part1;
     T part2;
-    GeneralSolution(T part1 = 0, T part2 = 0) : part1{part1}, part2{part2} {}
+    GeneralSolution(T part1 = T{}, T part2 = T{}) : part1{part1}, part2{part2} {}
     GeneralSolution& operator+=(const GeneralSolution& other)
     {
         part1 += other.part1;
@@ -20,6 +21,14 @@ template <typename T = ssize_t> struct GeneralSolution
 };
 
 using Solution = GeneralSolution<>;
+using StringSolution = GeneralSolution<std::string>;
+
+template <size_t Y, size_t D> struct SolutionType
+{
+    using type = Solution;
+};
+
+template <size_t Y, size_t D> using Solution_t = typename SolutionType<Y, D>::type;
 
 inline std::vector<std::string> readAllLines(std::istream& input)
 {
@@ -64,103 +73,17 @@ inline std::string_view trim(std::string_view s)
     return s.substr(start, end - start + 1);
 }
 
-template <size_t Y, size_t D> Solution solve(std::istream& input)
+inline std::string toHex(ssize_t n)
+{
+    std::ostringstream ss;
+    ss << std::hex << n;
+    return ss.str();
+}
+
+template <size_t Y, size_t D> Solution_t<Y, D> solve(std::istream& input)
 {
     (void)input;
     return {};
 }
-
-// NOLINTBEGIN (cppcoreguidelines-avoid-magic-numbers)
-template <> Solution solve<2015, 1>(std::istream& input);
-template <> Solution solve<2015, 2>(std::istream& input);
-template <> Solution solve<2015, 3>(std::istream& input);
-template <> Solution solve<2015, 4>(std::istream& input);
-template <> Solution solve<2015, 5>(std::istream& input);
-template <> Solution solve<2015, 6>(std::istream& input);
-template <> Solution solve<2015, 7>(std::istream& input);
-template <> Solution solve<2015, 8>(std::istream& input);
-template <> Solution solve<2015, 9>(std::istream& input);
-template <> Solution solve<2015, 10>(std::istream& input);
-template <> Solution solve<2015, 11>(std::istream& input);
-template <> Solution solve<2015, 12>(std::istream& input);
-template <> Solution solve<2015, 13>(std::istream& input);
-template <> Solution solve<2015, 14>(std::istream& input);
-template <> Solution solve<2015, 15>(std::istream& input);
-template <> Solution solve<2015, 16>(std::istream& input);
-template <> Solution solve<2015, 17>(std::istream& input);
-template <> Solution solve<2015, 18>(std::istream& input);
-template <> Solution solve<2015, 19>(std::istream& input);
-template <> Solution solve<2015, 20>(std::istream& input);
-template <> Solution solve<2015, 21>(std::istream& input);
-template <> Solution solve<2015, 22>(std::istream& input);
-template <> Solution solve<2015, 23>(std::istream& input);
-template <> Solution solve<2015, 24>(std::istream& input);
-template <> Solution solve<2015, 25>(std::istream& input);
-
-template <> Solution solve<2016, 1>(std::istream& input);
-template <> Solution solve<2016, 2>(std::istream& input);
-template <> Solution solve<2016, 3>(std::istream& input);
-template <> Solution solve<2016, 4>(std::istream& input);
-template <> Solution solve<2016, 5>(std::istream& input);
-template <> Solution solve<2016, 6>(std::istream& input);
-template <> Solution solve<2016, 7>(std::istream& input);
-template <> Solution solve<2016, 8>(std::istream& input);
-template <> Solution solve<2016, 9>(std::istream& input);
-template <> Solution solve<2016, 10>(std::istream& input);
-template <> Solution solve<2016, 11>(std::istream& input);
-template <> Solution solve<2016, 12>(std::istream& input);
-template <> Solution solve<2016, 13>(std::istream& input);
-template <> Solution solve<2016, 14>(std::istream& input);
-template <> Solution solve<2016, 15>(std::istream& input);
-template <> Solution solve<2016, 16>(std::istream& input);
-template <> Solution solve<2016, 17>(std::istream& input);
-template <> Solution solve<2016, 18>(std::istream& input);
-template <> Solution solve<2016, 19>(std::istream& input);
-template <> Solution solve<2016, 20>(std::istream& input);
-template <> Solution solve<2016, 21>(std::istream& input);
-template <> Solution solve<2016, 22>(std::istream& input);
-template <> Solution solve<2016, 23>(std::istream& input);
-template <> Solution solve<2016, 24>(std::istream& input);
-template <> Solution solve<2016, 25>(std::istream& input);
-
-template <> Solution solve<2024, 1>(std::istream& input);
-template <> Solution solve<2024, 2>(std::istream& input);
-template <> Solution solve<2024, 3>(std::istream& input);
-template <> Solution solve<2024, 4>(std::istream& input);
-template <> Solution solve<2024, 5>(std::istream& input);
-template <> Solution solve<2024, 6>(std::istream& input);
-template <> Solution solve<2024, 7>(std::istream& input);
-template <> Solution solve<2024, 8>(std::istream& input);
-template <> Solution solve<2024, 9>(std::istream& input);
-template <> Solution solve<2024, 10>(std::istream& input);
-template <> Solution solve<2024, 11>(std::istream& input);
-template <> Solution solve<2024, 12>(std::istream& input);
-template <> Solution solve<2024, 13>(std::istream& input);
-template <> Solution solve<2024, 14>(std::istream& input);
-template <> Solution solve<2024, 15>(std::istream& input);
-template <> Solution solve<2024, 16>(std::istream& input);
-template <> Solution solve<2024, 17>(std::istream& input);
-template <> Solution solve<2024, 18>(std::istream& input);
-template <> Solution solve<2024, 19>(std::istream& input);
-template <> Solution solve<2024, 20>(std::istream& input);
-template <> Solution solve<2024, 21>(std::istream& input);
-template <> Solution solve<2024, 22>(std::istream& input);
-template <> Solution solve<2024, 23>(std::istream& input);
-template <> Solution solve<2024, 24>(std::istream& input);
-template <> Solution solve<2024, 25>(std::istream& input);
-
-template <> Solution solve<2025, 1>(std::istream& input);
-template <> Solution solve<2025, 2>(std::istream& input);
-template <> Solution solve<2025, 3>(std::istream& input);
-template <> Solution solve<2025, 4>(std::istream& input);
-template <> Solution solve<2025, 5>(std::istream& input);
-template <> Solution solve<2025, 6>(std::istream& input);
-template <> Solution solve<2025, 7>(std::istream& input);
-template <> Solution solve<2025, 8>(std::istream& input);
-template <> Solution solve<2025, 9>(std::istream& input);
-template <> Solution solve<2025, 10>(std::istream& input);
-template <> Solution solve<2025, 11>(std::istream& input);
-template <> Solution solve<2025, 12>(std::istream& input);
-// NOLINTEND
 
 } // namespace aoc
