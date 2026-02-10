@@ -19,12 +19,22 @@ struct Range
     int64_t high;
 };
 
-struct EP
+struct Endpoint
 {
     int64_t val;
     int nest;
 
-    auto operator<=>(const EP& o) const = default;
+    auto operator<=>(const Endpoint& o) const = default;
+
+    static Endpoint open(const Range& r)
+    {
+        return {.val = r.low, .nest = -1};
+    }
+
+    static Endpoint close(const Range& r)
+    {
+        return {.val = r.high, .nest = 1};
+    }
 };
 
 [[maybe_unused]] std::istream& operator>>(std::istream& is, Range& r)
@@ -42,14 +52,9 @@ struct EP
 
 GeneralSolution<int64_t> processBlacklist(const std::vector<Range>& ranges)
 {
-    // NB - range converted to [low, high)
-    std::vector<EP> endpoints;
-    endpoints.reserve(ranges.size() * 2);
-    std::ranges::copy(
-        ranges |
-            std::views::transform([](auto r) { return std::array{EP{r.low, -1}, EP{r.high, 1}}; }) |
-            std::views::join,
-        std::back_inserter(endpoints));
+    std::vector<Endpoint> endpoints;
+    endpoints.insert_range(endpoints.end(), std::views::transform(ranges, Endpoint::open));
+    endpoints.insert_range(endpoints.end(), std::views::transform(ranges, Endpoint::close));
     std::ranges::sort(endpoints);
     std::optional<int64_t> lowest;
     int64_t whitelistCount{};
