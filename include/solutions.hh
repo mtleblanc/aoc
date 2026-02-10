@@ -35,6 +35,11 @@ template <> struct SolutionType<2016, 17>
     using type = StringSolution;
 };
 
+template <> struct SolutionType<2016, 20>
+{
+    using type = GeneralSolution<int64_t>;
+};
+
 template <> Solution_t<2015, 1> solve<2015, 1>(std::istream& input);
 template <> Solution_t<2015, 2> solve<2015, 2>(std::istream& input);
 template <> Solution_t<2015, 3> solve<2015, 3>(std::istream& input);
