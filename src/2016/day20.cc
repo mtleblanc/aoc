@@ -11,77 +11,72 @@ constexpr size_t DAY = 20;
 
 namespace
 {
+
+// Half-open range
 struct Range
 {
     int64_t low;
     int64_t high;
 };
 
+struct EP
+{
+    int64_t val;
+    int nest;
+
+    auto operator<=>(const EP& o) const = default;
+};
+
 [[maybe_unused]] std::istream& operator>>(std::istream& is, Range& r)
 {
     char c{};
     is >> r.low >> c >> r.high;
-    if (c != '-')
+    // change from endpoint inclusive to half-open
+    ++r.high;
+    if (!is || c != '-' || r.low > r.high)
     {
         is.setstate(std::ios_base::failbit);
-    }
-    if (r.low > r.high)
-    {
-        throw std::invalid_argument("Blacklist range has low > high");
     }
     return is;
 }
 
 GeneralSolution<int64_t> processBlacklist(const std::vector<Range>& ranges)
 {
-    std::vector<std::pair<int64_t, int>> endpoints;
+    // NB - range converted to [low, high)
+    std::vector<EP> endpoints;
     endpoints.reserve(ranges.size() * 2);
-    std::ranges::copy(ranges |
-                          std::views::transform(
-                              [](auto r)
-                              {
-                                  return std::array<std::pair<int64_t, int>, 2>{
-                                      {std::make_pair(r.low, -1), std::make_pair(r.high, 1)}};
-                              }) |
-                          std::views::join,
-                      std::back_inserter(endpoints));
-    std::ranges::make_heap(endpoints, std::greater<>());
+    std::ranges::copy(
+        ranges |
+            std::views::transform([](auto r) { return std::array{EP{r.low, -1}, EP{r.high, 1}}; }) |
+            std::views::join,
+        std::back_inserter(endpoints));
+    std::ranges::sort(endpoints);
     std::optional<int64_t> lowest;
     int64_t whitelistCount{};
-    // my input has 0 and uint32::max both blacklisted, so this and the end count aren't necessary,
-    // but are kept in for correctness
-    if (endpoints.front().first != 0)
+    // my input has 0 and uint32::max both blacklisted, so this isn't necessary,
+    // but is kept in for correctness
+    if (endpoints.front().val != 0)
     {
         lowest = 0;
-        whitelistCount += endpoints.front().first;
     }
+    whitelistCount += endpoints.front().val;
+    whitelistCount += std::numeric_limits<uint32_t>::max() + 1L - endpoints.back().val;
     int nesting{};
-    // stop 1 early, it's guaranteed to be the highest blacklisted number and we want it available
-    // outside the loop to count IPs up to uint32::max.  Not required for my input, but kept for
-    // correctness
-    while (endpoints.size() > 1)
+    for (auto [cur, next] : std::views::zip(endpoints, endpoints | std::views::drop(1)))
     {
-        auto next = endpoints.front();
-        std::ranges::pop_heap(endpoints, std::greater<>());
-        endpoints.pop_back();
-        nesting += next.second;
-        // endpoints are ordered so the opening of a block is before a closing of another block at
-        // the same IP.  So in those cases, we won't hit nesting == 0.  This
-        // saves a check that blockSize is non-negative.  It also guarantees that at nesting == 0,
-        // the next endpoint is a opening, which, though not required, makes it easier to reason
-        // about
+        // NB ordering of half open endpoints has opening of new block before closing of previous.
+        // Along with input validation that high > low, this guarantees that when nesting == 0, we
+        // have cur is a closing, next an opening, and next.first > cur.first
+        nesting += cur.nest;
         if (nesting == 0)
         {
-            auto blockStart = next.first + 1;
-            auto blockSize = endpoints.front().first - blockStart;
-            if (blockSize && !lowest)
+            if (!lowest)
             {
-                lowest = blockStart;
+                lowest = cur.val;
             }
-            whitelistCount += blockSize;
+            whitelistCount += next.val - cur.val;
         }
     }
-    whitelistCount += std::numeric_limits<uint32_t>::max() - endpoints.front().first;
     return {lowest.value_or(-1), whitelistCount};
 }
 } // namespace
