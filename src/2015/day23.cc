@@ -31,7 +31,7 @@ struct TplInstruction
     void apply(CollatzMachine& cm) const;
 };
 
-struct JmpInstruction
+struct JnzImmInstruction
 {
     ssize_t offset;
     void apply(CollatzMachine& cm) const;
@@ -51,7 +51,7 @@ struct JioInstruction
     void apply(CollatzMachine& cm) const;
 };
 
-using Instruction = std::variant<IncInstruction, HlfInstruction, TplInstruction, JmpInstruction,
+using Instruction = std::variant<IncInstruction, HlfInstruction, TplInstruction, JnzImmInstruction,
                                  JieInstruction, JioInstruction>;
 struct CollatzMachine
 {
@@ -105,7 +105,7 @@ void TplInstruction::apply(CollatzMachine& cm) const
     cm.reg(reg) *= 3;
     ++cm.ip;
 }
-void JmpInstruction::apply(CollatzMachine& cm) const
+void JnzImmInstruction::apply(CollatzMachine& cm) const
 {
     cm.ip += offset;
 }
@@ -163,7 +163,7 @@ std::istream& operator>>(std::istream& is, Instruction& ci)
     if (buf == "jmp")
     {
         is >> offset;
-        ci = JmpInstruction{offset};
+        ci = JnzImmInstruction{offset};
         return is;
     }
     if (buf == "jie")
