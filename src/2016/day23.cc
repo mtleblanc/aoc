@@ -1,7 +1,6 @@
 #include "aoc.hh"
-#include <variant>
 
-/* https://adventofcode.com/2016/day/12
+/* https://adventofcode.com/2016/day/23
  */
 namespace aoc
 {
@@ -11,54 +10,59 @@ constexpr size_t DAY = 23;
 namespace
 {
 using register_t = int;
-using operand = std::variant<char, register_t>;
 
 struct Machine;
-struct IncInstruction;
-struct DecInstruction;
-struct JnzInstruction;
-struct CpyInstruction;
-struct TglInstruction;
-
-using Instruction =
-    std::variant<CpyInstruction, IncInstruction, DecInstruction, JnzInstruction, TglInstruction>;
-
-struct IncInstruction
+struct Instruction;
+struct Operand
 {
-    operand dest;
-    void apply(Machine& cm) const;
-    Instruction toggle();
+    char reg{};
+    register_t imm{};
+
+    register_t& reference(Machine& cm) const;
+    register_t value(Machine& cm) const;
+};
+struct Instruction
+{
+    // NOLINTNEXTLINE (performance-enum-size)
+    enum class Type
+    {
+        INC,
+        DEC,
+        CPY,
+        JNZ,
+        TGL
+    };
+    static constexpr Type toggleType(Type t)
+    {
+        switch (t)
+        {
+        case Type::INC:
+            return Type::DEC;
+        case Type::DEC:
+        case Type::TGL:
+            return Type::INC;
+        case Type::CPY:
+            return Type::JNZ;
+        case Type::JNZ:
+            return Type::CPY;
+        }
+    }
+    Type t{};
+    Operand src;
+    Operand dst;
+
+    void toggle()
+    {
+        t = toggleType(t);
+    }
+
+    void apply(Machine& m) const;
 };
 
-struct DecInstruction
+[[maybe_unused]] void apply(Instruction i, Machine& cm)
 {
-    operand dest;
-    void apply(Machine& cm) const;
-    Instruction toggle();
-};
-
-struct TglInstruction
-{
-    operand dest;
-    void apply(Machine& cm) const;
-    Instruction toggle();
-};
-
-struct CpyInstruction
-{
-    operand src;
-    operand dest;
-    void apply(Machine& cm) const;
-    Instruction toggle();
-};
-
-struct JnzInstruction
-{
-    operand src;
-    operand dest;
-    void apply(Machine& cm) const;
-    Instruction toggle();
-};
+    i.apply(cm);
+}
 
 struct Machine
 {
@@ -82,36 +86,19 @@ struct Machine
             return c;
         case 'd':
             return d;
+        case '\0':
+            return z;
         default:
             throw std::invalid_argument{"no such register"};
         }
     }
 
-    register_t& reference(operand o)
-    {
-        if (std::holds_alternative<char>(o))
-        {
-            return reg(std::get<char>(o));
-        }
-        return z;
-    }
-
-    register_t value(operand o)
-    {
-        if (std::holds_alternative<char>(o))
-        {
-            return reg(std::get<char>(o));
-        }
-        return std::get<register_t>(o);
-    }
-
     void run()
     {
-        while (ip < std::ssize(program))
+        // the loop is rather small, 0 <= ip && ip < std::ssize(program) makes runtime 15% longer!
+        while (static_cast<size_t>(ip) < program.size())
         {
-            // copy so that tgl can modify program
-            auto inst = program[ip];
-            std::visit([this](auto&& arg) { arg.apply(*this); }, inst);
+            apply(program[ip], *this);
         }
     }
 
@@ -125,87 +112,67 @@ struct Machine
     }
 };
 
-void CpyInstruction::apply(Machine& cm) const
+register_t& Operand::reference(Machine& cm) const
 {
-
-    cm.reference(dest) = cm.value(src);
-    ++cm.ip;
+    return cm.reg(reg);
 }
-
-void IncInstruction::apply(Machine& cm) const
+register_t Operand::value(Machine& cm) const
 {
-    ++cm.reference(dest);
-    ++cm.ip;
-}
-
-void DecInstruction::apply(Machine& cm) const
-{
-    --cm.reference(dest);
-    ++cm.ip;
-}
-
-void JnzInstruction::apply(Machine& cm) const
-{
-    if (cm.value(src) != 0)
+    if (reg)
     {
-        cm.ip += cm.value(dest);
+        return cm.reg(reg);
     }
-    else
-    {
-        ++cm.ip;
-    }
+    return imm;
 }
 
-void TglInstruction::apply(Machine& cm) const
+void Instruction::apply(Machine& cm) const
 {
-    auto addr = cm.ip + cm.value(dest);
-    if (addr >= 0 && addr < std::ssize(cm.program))
+    switch (t)
     {
-        cm.program[addr] = std::visit([](auto instr) { return instr.toggle(); }, cm.program[addr]);
+    case Type::INC:
+        src.reference(cm)++;
+        break;
+    case Type::DEC:
+        src.reference(cm)--;
+        break;
+    case Type::CPY:
+        dst.reference(cm) = src.value(cm);
+        break;
+    case Type::JNZ:
+        if (src.value(cm) != 0)
+        {
+            cm.ip += dst.value(cm);
+            return;
+        }
+        break;
+    case Type::TGL:
+        auto addr = cm.ip + src.value(cm);
+        if (addr >= 0 && addr < std::ssize(cm.program))
+        {
+            cm.program[addr].toggle();
+        }
     }
     ++cm.ip;
 }
 
-Instruction DecInstruction::toggle()
-{
-    return IncInstruction{dest};
-}
-Instruction IncInstruction::toggle()
-{
-    return DecInstruction{dest};
-}
-Instruction TglInstruction::toggle()
-{
-    return IncInstruction{dest};
-}
-Instruction CpyInstruction::toggle()
-{
-    return JnzInstruction{.src = src, .dest = dest};
-}
-Instruction JnzInstruction::toggle()
-{
-    return CpyInstruction{.src = src, .dest = dest};
-}
-
-std::istream& operator>>(std::istream& is, operand& op)
+[[maybe_unused]] std::istream& operator>>(std::istream& is, Operand& op)
 {
     char reg{};
-    register_t val{};
     is >> reg;
     if (std::isalpha(reg))
     {
-        op = reg;
+        op.reg = reg;
     }
     else
     {
+        op.reg = '\0';
         is.putback(reg);
-        is >> val;
-        op = val;
+        is >> op.imm;
     }
     return is;
 }
 
-std::istream& operator>>(std::istream& is, Instruction& ci)
+[[maybe_unused]] std::istream& operator>>(std::istream& is, Instruction& ci)
 {
     std::string buf;
     if (!(is >> buf))
@@ -214,42 +181,34 @@ std::istream& operator>>(std::istream& is, Instruction& ci)
     }
     if (buf == "cpy")
     {
-        CpyInstruction instr;
-        is >> instr.src;
-        is >> instr.dest;
-        ci = instr;
-        return is;
+        ci.t = Instruction::Type::CPY;
     }
-    if (buf == "inc")
+    else if (buf == "inc")
     {
-        IncInstruction instr;
-        is >> instr.dest;
-        ci = instr;
-        return is;
+        ci.t = Instruction::Type::INC;
     }
-    if (buf == "dec")
+    else if (buf == "dec")
     {
-        DecInstruction instr;
-        is >> instr.dest;
-        ci = instr;
-        return is;
+        ci.t = Instruction::Type::DEC;
     }
-    if (buf == "jnz")
+    else if (buf == "jnz")
     {
-        JnzInstruction instr;
-        is >> instr.src;
-        is >> instr.dest;
-        ci = instr;
-        return is;
+        ci.t = Instruction::Type::JNZ;
     }
-    if (buf == "tgl")
+    else if (buf == "tgl")
     {
-        TglInstruction instr;
-        is >> instr.dest;
-        ci = instr;
+        ci.t = Instruction::Type::TGL;
+    }
+    else
+    {
+        is.setstate(std::ios_base::failbit);
         return is;
     }
-    is.setstate(std::ios_base::failbit);
+    is >> ci.src;
+    if (ci.t == Instruction::Type::JNZ || ci.t == Instruction::Type::CPY)
+    {
+        is >> ci.dst;
+    }
     return is;
 }
 
@@ -257,19 +216,14 @@ std::istream& operator>>(std::istream& is, Instruction& ci)
 
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
-    std::vector<Instruction> program;
-    for (Instruction ci; input >> ci;)
-    {
-        program.push_back(ci);
-    }
+    auto flatProgram = readAll<Instruction>(input);
     constexpr auto PART1_INPUT = 7;
     constexpr auto PART2_INPUT = 12;
-    Machine cm{.a = PART1_INPUT, .program = program};
+    Machine cm{.a = PART1_INPUT, .program = flatProgram};
     cm.run();
     auto part1 = cm.a;
-    cm = {.a = PART2_INPUT, .program = std::move(program)};
+    cm = {.a = PART2_INPUT, .program = std::move(flatProgram)};
     cm.run();
-
     return {part1, cm.a};
 }
 } // namespace aoc
