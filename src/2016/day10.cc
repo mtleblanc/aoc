@@ -107,23 +107,23 @@ Solution_t<YEAR, DAY> simulate(const std::vector<std::string>& descs)
         constexpr auto INPUT_ID = 2;
         if (auto m = ctre::match<BOT_PAT>(desc))
         {
-            auto id = toNum<int>(m.get<BOT_ID>());
+            auto id = m.get<BOT_ID>().to_number();
             auto& bot = bots[id];
             bot.id = id;
 
-            auto isBot = std::string(m.get<BOT_LOW_IS_BOT>()) == "bot";
-            auto destId = toNum<int>(m.get<BOT_LOW_ID>());
+            auto isBot = m.get<BOT_LOW_IS_BOT>() == "bot";
+            auto destId = m.get<BOT_LOW_ID>().to_number();
             bot.low =
                 isBot ? static_cast<Dest*>(&bots[destId]) : static_cast<Dest*>(&outputs[destId]);
-            isBot = std::string(m.get<BOT_HIGH_IS_BOT>()) == "bot";
-            destId = toNum<int>(m.get<BOT_HIGH_ID>());
+            isBot = m.get<BOT_HIGH_IS_BOT>() == "bot";
+            destId = m.get<BOT_HIGH_ID>().to_number();
             bot.high =
                 isBot ? static_cast<Dest*>(&bots[destId]) : static_cast<Dest*>(&outputs[destId]);
         }
         else if (auto m = ctre::match<INPUT_PAT>(desc))
         {
-            auto val = toNum<int>(m.get<INPUT_VAL>());
-            auto id = toNum<int>(m.get<INPUT_ID>());
+            auto val = m.get<INPUT_VAL>().to_number();
+            auto id = m.get<INPUT_ID>().to_number();
             inputs.emplace_back(val, &bots[id]);
         }
         else
@@ -136,8 +136,8 @@ Solution_t<YEAR, DAY> simulate(const std::vector<std::string>& descs)
         input.dest->accept(input.value, report);
     }
 
-    auto firstThreeOutputs = std::views::iota(0, 3) |
-                             std::views::transform([&outputs](auto i) { return outputs[i]; });
+    auto firstThreeOutputs =
+        std::views::iota(0, 3) | std::views::transform([&outputs](auto i) { return outputs[i]; });
     if (std::ranges::any_of(firstThreeOutputs, [](const auto& o) { return o.values.size() != 1; }))
     {
         throw std::runtime_error("Outputs 0-2 did not each have a single element");

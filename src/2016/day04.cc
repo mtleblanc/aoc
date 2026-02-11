@@ -73,7 +73,7 @@ struct Room
     if (auto m = ctre::match<PAT>(line))
     {
         r.name = m.get<1>();
-        r.id = toNum<int>(m.get<2>());
+        r.id = m.get<2>().to_number();
         r.checksum = m.get<3>();
     }
     return is;

@@ -31,10 +31,10 @@ struct Disc
     std::getline(is, line);
     if (auto m = ctre::match<PAT>(line))
     {
-        d.id = toNum<int>(m.get<ID>());
-        d.mod = toNum<int>(m.get<MOD>());
-        auto startTime = toNum<int>(m.get<START_TIME>()) % d.mod;
-        auto startPos = toNum<int>(m.get<START_POS>()) % d.mod;
+        d.id = m.get<ID>().to_number();
+        d.mod = m.get<MOD>().to_number();
+        auto startTime = m.get<START_TIME>().to_number() % d.mod;
+        auto startPos = m.get<START_POS>().to_number() % d.mod;
         d.start = (startPos + d.mod - startTime) % d.mod;
         return is;
     }

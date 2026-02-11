@@ -45,7 +45,7 @@ using Command = std::variant<RectCommand, RotateRowCommand, RotateColumnCommand>
 
     if (auto m = ctre::match<RECT>(text))
     {
-        com = RectCommand{.rows = toNum<int>(m.get<2>()), .columns = toNum<int>(m.get<1>())};
+        com = RectCommand{.rows = m.get<2>().to_number(), .columns = m.get<1>().to_number()};
         if (std::get<RectCommand>(com).rows <= 0 || std::get<RectCommand>(com).columns <= 0)
         {
             throw std::invalid_argument("Rectangle dimensions must be positive");
@@ -54,7 +54,7 @@ using Command = std::variant<RectCommand, RotateRowCommand, RotateColumnCommand>
     }
     if (auto m = ctre::match<ROTATE_ROW>(text))
     {
-        com = RotateRowCommand{.row = toNum<int>(m.get<1>()), .amount = toNum<int>(m.get<2>())};
+        com = RotateRowCommand{.row = m.get<1>().to_number(), .amount = m.get<2>().to_number()};
         if (std::get<RotateRowCommand>(com).amount <= 0)
         {
             throw std::invalid_argument("Rotate amount must be positive");
@@ -63,7 +63,7 @@ using Command = std::variant<RectCommand, RotateRowCommand, RotateColumnCommand>
     }
     if (auto m = ctre::match<ROTATE_COLUMN>(text))
     {
-        com = RotateColumnCommand{.col = toNum<int>(m.get<1>()), .amount = toNum<int>(m.get<2>())};
+        com = RotateColumnCommand{.col = m.get<1>().to_number(), .amount = m.get<2>().to_number()};
         if (std::get<RotateColumnCommand>(com).amount <= 0)
         {
             throw std::invalid_argument("Rotate amount must be positive");
