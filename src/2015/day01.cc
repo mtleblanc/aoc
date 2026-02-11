@@ -9,7 +9,7 @@ namespace aoc
 constexpr size_t YEAR = 2015;
 constexpr size_t DAY = 1;
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto steps = slurp(input);
     auto v = steps | std::views::transform([](auto c) { return c == '(' ? 1 : -1; });

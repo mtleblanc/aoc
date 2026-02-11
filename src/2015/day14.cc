@@ -68,7 +68,7 @@ template <ssize_t RACE_DURATION> ssize_t race(std::vector<Reindeer>& deer)
 }
 
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     constexpr ssize_t RACE_DURATION = 2503;
     std::vector<Reindeer> deer;

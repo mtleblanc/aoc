@@ -10,10 +10,10 @@ constexpr size_t DAY = 9;
 
 namespace
 {
-GeneralSolution<int64_t> decompress(std::istream& input,
+LongSolution decompress(std::istream& input,
                                     int64_t limit = std::numeric_limits<int64_t>::max())
 {
-    GeneralSolution<int64_t> sz{};
+    LongSolution sz{};
     auto before = input.tellg();
     for (char c{}; input.tellg() - before < limit && input >> c;)
     {
@@ -44,7 +44,7 @@ GeneralSolution<int64_t> decompress(std::istream& input,
 
 template <> struct SolutionType<YEAR, DAY>
 {
-    using type = GeneralSolution<int64_t>;
+    using type = LongSolution;
 };
 
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)

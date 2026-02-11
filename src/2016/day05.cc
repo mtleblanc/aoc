@@ -1,5 +1,6 @@
 #include "aoc.hh"
 #include "hash.hh"
+#include "util.hh"
 #include <algorithm>
 #include <ranges>
 

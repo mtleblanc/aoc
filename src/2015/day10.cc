@@ -44,7 +44,7 @@ void lookAndSay(const std::vector<Digit>& in, std::vector<Digit>& out)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     std::vector<Digit> sequence;
     for (char c{}; input >> c;)

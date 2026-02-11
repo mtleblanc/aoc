@@ -35,7 +35,7 @@ ssize_t part2(std::span<ssize_t> containers, ssize_t target, ssize_t n)
            (containers.front() > target ? 0 : part2(next, target - containers.front(), n - 1));
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     constexpr ssize_t TARGET_SIZE = 150;
     std::vector<ssize_t> containers;

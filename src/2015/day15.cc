@@ -101,7 +101,7 @@ template <long CAPACITY> std::vector<long> partitionFor(long n, ssize_t d)
 }
 
 template <long CAPACITY, long CALORIES>
-Solution optimize(const std::vector<Ingredient>& ingredients)
+SsizeSolution optimize(const std::vector<Ingredient>& ingredients)
 {
     ssize_t bestPart1{};
     ssize_t bestPart2{};
@@ -121,7 +121,7 @@ Solution optimize(const std::vector<Ingredient>& ingredients)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     constexpr long CAPACITY = 100;
     constexpr long CALORIES = 500;

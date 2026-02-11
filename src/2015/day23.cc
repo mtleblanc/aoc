@@ -190,7 +190,7 @@ std::istream& operator>>(std::istream& is, Instruction& ci)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     std::vector<Instruction> program;
     for (Instruction ci; input >> ci;)

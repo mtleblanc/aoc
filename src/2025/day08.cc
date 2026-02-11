@@ -168,12 +168,12 @@ ssize_t part2(const std::vector<std::string>& v)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     constexpr size_t SAMPLE_CONNECTIONS = 10;
     constexpr size_t ACTUAL_CONNECTIONS = 1000;
-    return Solution{
+    return SsizeSolution{
         part1(lines, lines.size() < ACTUAL_CONNECTIONS ? SAMPLE_CONNECTIONS : ACTUAL_CONNECTIONS),
         part2(lines)};
 }

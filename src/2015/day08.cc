@@ -43,7 +43,7 @@ ssize_t encodeCost(const std::string& literal)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
 

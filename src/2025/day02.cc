@@ -31,13 +31,13 @@ template <typename T> T ipow(T base, T exp)
 }
 
 // will overflow by 16 digits, possibly at 14
-Solution improvedHelper(ssize_t from, ssize_t to, ssize_t digits)
+SsizeSolution improvedHelper(ssize_t from, ssize_t to, ssize_t digits)
 {
     ssize_t lim = ipow(BASE, digits);
     assert(from < to);
     assert(from >= lim / BASE);
     assert(to < lim);
-    Solution accum;
+    SsizeSolution accum;
     constexpr std::array<ssize_t, 6> POS{2, 3, 5, 7, 11, 13}; // NOLINT(*-magic-numbers)
     constexpr std::array<ssize_t, 4> NEG{6, 10, 14, 15};      // NOLINT(*-magic-numbers)
     for (auto it : POS)
@@ -99,11 +99,11 @@ Solution improvedHelper(ssize_t from, ssize_t to, ssize_t digits)
     return accum;
 }
 
-Solution improved(ssize_t from, ssize_t to)
+SsizeSolution improved(ssize_t from, ssize_t to)
 {
     ssize_t digits = 1;
     ssize_t pow = BASE;
-    Solution accum;
+    SsizeSolution accum;
     while (from < to)
     {
         while (from >= pow)
@@ -117,10 +117,10 @@ Solution improved(ssize_t from, ssize_t to)
     return accum;
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     ssize_t maxmax{};
-    Solution accum;
+    SsizeSolution accum;
 
     while (input)
     {

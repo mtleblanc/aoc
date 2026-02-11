@@ -223,7 +223,7 @@ template <resource_t DEGEN> ssize_t optimize(ActionPoint<DEGEN> g)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto [hp, damage] =
         scn::scan<resource_t, stat_t>(slurp(input), "Hit Points: {}\nDamage: {}\n")->values();

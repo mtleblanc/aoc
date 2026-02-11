@@ -55,7 +55,7 @@ template <size_t GridSize> struct Grid
 };
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     constexpr size_t GRID_SIZE = 1000;
     auto lines = readAllLines(input);

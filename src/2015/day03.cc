@@ -30,7 +30,7 @@ template <size_t N> Locations<N> step(Locations<N> ls, typename Locations<N>::Lo
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto toMoves = [](auto c)
     {

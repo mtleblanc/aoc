@@ -102,7 +102,7 @@ Matcher gt(ssize_t value)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     // NOLINTBEGIN
     std::map<std::string, Matcher> search{{"children", eq(3UL)}, {"cats", gt(7UL)},

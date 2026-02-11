@@ -81,7 +81,7 @@ inline bool isSemiGradual(const std::vector<int>& v)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto rss = readAllLines(input);
     std::vector<std::vector<int>> rsi;

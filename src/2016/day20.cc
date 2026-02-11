@@ -50,7 +50,7 @@ struct Endpoint
     return is;
 }
 
-GeneralSolution<int64_t> processBlacklist(const std::vector<Range>& ranges)
+LongSolution processBlacklist(const std::vector<Range>& ranges)
 {
     std::vector<Endpoint> endpoints;
     endpoints.insert_range(endpoints.end(), std::views::transform(ranges, Endpoint::open));
@@ -88,7 +88,7 @@ GeneralSolution<int64_t> processBlacklist(const std::vector<Range>& ranges)
 
 template <> struct SolutionType<YEAR, DAY>
 {
-    using type = GeneralSolution<int64_t>;
+    using type = LongSolution;
 };
 
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)

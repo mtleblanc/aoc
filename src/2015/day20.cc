@@ -93,7 +93,7 @@ template <ssize_t LIM> ssize_t d1Limited(ssize_t n)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     constexpr ssize_t P1_MULT = 10;
     constexpr ssize_t P2_MULT = 11;

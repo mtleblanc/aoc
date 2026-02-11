@@ -189,7 +189,7 @@ ssize_t part2(const WordSearch& ws)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     WordSearch ws{slurp(input)};
     return {part1(ws), part2(ws)};

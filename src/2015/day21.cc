@@ -176,7 +176,7 @@ ssize_t part2(const Stats& monster)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
 
     auto [hp, damage, armor] =

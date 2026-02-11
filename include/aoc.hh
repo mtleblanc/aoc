@@ -1,7 +1,5 @@
-#include <charconv>
 #include <ios>
 #include <istream>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -21,7 +19,9 @@ template <typename T = int> struct GeneralSolution
     }
 };
 
-using Solution = GeneralSolution<ssize_t>;
+using SsizeSolution = GeneralSolution<ssize_t>;
+using Solution = GeneralSolution<int>;
+using LongSolution = GeneralSolution<int64_t>;
 using StringSolution = GeneralSolution<std::string>;
 
 template <size_t Y, size_t D> struct SolutionType
@@ -32,15 +32,15 @@ template <size_t Y, size_t D> struct SolutionType
 // NOLINTBEGIN (cppcoreguidelines-avoid-magic-numbers)
 template <size_t D> struct SolutionType<2015, D>
 {
-    using type = Solution;
+    using type = SsizeSolution;
 };
 template <size_t D> struct SolutionType<2024, D>
 {
-    using type = Solution;
+    using type = SsizeSolution;
 };
 template <size_t D> struct SolutionType<2025, D>
 {
-    using type = Solution;
+    using type = SsizeSolution;
 };
 // NOLINTEND
 
@@ -76,31 +76,6 @@ inline std::string slurp(std::istream& input)
     std::string ret("\0", end - cur);
     input.read(ret.data(), end - cur);
     return ret;
-}
-
-inline std::string_view trim(std::string_view s)
-{
-    auto start = s.find_first_not_of(" \t\n\r");
-    if (start == std::string_view::npos)
-    {
-        return {};
-    }
-    auto end = s.find_last_not_of(" \t\n\r");
-    return s.substr(start, end - start + 1);
-}
-
-inline std::string toHex(auto n)
-{
-    std::ostringstream ss;
-    ss << std::hex << n;
-    return ss.str();
-}
-
-template <typename T> T toNum(std::string_view sv)
-{
-    T val{};
-    std::from_chars(sv.begin(), sv.end(), val);
-    return val;
 }
 
 template <size_t Y, size_t D> Solution_t<Y, D> solve(std::istream& input)

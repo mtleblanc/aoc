@@ -61,7 +61,7 @@ ssize_t part2(std::vector<std::string> v)
     return accum;
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
 
@@ -102,6 +102,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     {
         accum += v;
     }
-    return Solution{accum, part2(lines)};
+    return SsizeSolution{accum, part2(lines)};
 }
 } // namespace aoc

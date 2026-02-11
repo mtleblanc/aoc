@@ -64,7 +64,7 @@ ssize_t pack(std::span<ssize_t> vals, ssize_t target)
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto boxes = readAll<ssize_t>(input);
     auto total = std::ranges::fold_left(boxes, 0, std::plus<>());

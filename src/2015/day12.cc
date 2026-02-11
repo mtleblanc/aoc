@@ -49,7 +49,7 @@ ssize_t part2(const json& data)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     using json = nlohmann::json;
     json data = json::parse(input);

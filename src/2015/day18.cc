@@ -130,7 +130,7 @@ struct LifeGrid
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     constexpr ssize_t ITERATIONS = 100;
     auto lines = readAllLines(input);

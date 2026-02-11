@@ -214,7 +214,7 @@ struct EarleyParser
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     std::string_view target{lines.back()};

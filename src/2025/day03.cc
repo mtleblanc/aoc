@@ -53,11 +53,11 @@ template <int N> ssize_t solveFor(const std::vector<std::string>& lines)
     return accum;
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     constexpr int PART1_N = 2;
     constexpr int PART2_N = 12;
-    return Solution{solveFor<PART1_N>(lines), solveFor<PART2_N>(lines)};
+    return SsizeSolution{solveFor<PART1_N>(lines), solveFor<PART2_N>(lines)};
 }
 } // namespace aoc

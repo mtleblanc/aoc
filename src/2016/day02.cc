@@ -1,4 +1,5 @@
 #include "aoc.hh"
+#include "util.hh"
 #include <algorithm>
 
 /* https://adventofcode.com/2016/day/2

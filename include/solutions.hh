@@ -22,7 +22,7 @@ template <> struct SolutionType<2016, 6>
 
 template <> struct SolutionType<2016, 9>
 {
-    using type = GeneralSolution<int64_t>;
+    using type = LongSolution;
 };
 
 template <> struct SolutionType<2016, 16>
@@ -37,7 +37,7 @@ template <> struct SolutionType<2016, 17>
 
 template <> struct SolutionType<2016, 20>
 {
-    using type = GeneralSolution<int64_t>;
+    using type = LongSolution;
 };
 
 template <> struct SolutionType<2016, 21>

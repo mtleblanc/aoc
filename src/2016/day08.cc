@@ -164,7 +164,7 @@ template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
     constexpr int ROWS = 6;
     constexpr int COLS = 50;
     auto commands = readAll<Command>(input);
-    // part2 is just printed out during part1, Solution doesn't take strings anyway
+    // part2 is just printed out during part1, SsizeSolution doesn't take strings anyway
     return {part1<ROWS, COLS>(commands)};
 }
 } // namespace aoc

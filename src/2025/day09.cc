@@ -103,7 +103,7 @@ ssize_t part2(const std::vector<Corner>& v)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     std::vector<Corner> v;
@@ -117,6 +117,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         v.emplace_back();
         iss >> v.back();
     }
-    return Solution{part1(v), part2(v)};
+    return SsizeSolution{part1(v), part2(v)};
 }
 } // namespace aoc

@@ -141,7 +141,7 @@ template <typename T> auto buildCircuit(const std::vector<std::string>& connecti
 }
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     auto circuit = buildCircuit<uint16_t>(lines);

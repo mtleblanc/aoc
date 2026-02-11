@@ -79,7 +79,7 @@ template <bool WRAP> long tsp(const std::vector<std::vector<long>>& distanceMatr
 }
 
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     std::vector<Distance> edges;
     for (Distance d; input >> d;)

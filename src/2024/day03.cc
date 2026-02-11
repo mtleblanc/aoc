@@ -21,10 +21,10 @@ namespace
 {
 const std::regex rgx(R"((?:mul\((\d{1,3}),(\d{1,3})\))|(do(?:n't)?))");
 }
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto in = slurp(input);
-    Solution s;
+    SsizeSolution s;
     bool on{true};
     for (auto rit = std::sregex_iterator(in.begin(), in.end(), rgx); rit != std::sregex_iterator();
          ++rit)

@@ -89,7 +89,7 @@ template <class T, T N> std::istream& operator>>(std::istream& is, Dial<T, N>& d
     return is;
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     constexpr auto N = 100;
     constexpr auto D = 50;
@@ -97,6 +97,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     while (input >> d)
     {
     }
-    return Solution{d.landedZero(), d.rotations()};
+    return SsizeSolution{d.landedZero(), d.rotations()};
 }
 } // namespace aoc

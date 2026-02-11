@@ -1,5 +1,6 @@
 #include "aoc.hh"
 #include "hash.hh"
+#include "util.hh"
 #include <algorithm>
 #include <ranges>
 #include <thread>
@@ -29,7 +30,7 @@ template <ssize_t N> bool hasStartingZeros(const std::vector<uint8_t>& md5)
 
 template <ssize_t N>
 std::optional<ssize_t> mineSlice(const std::string& prefix, ssize_t from, ssize_t count,
-                                Hash::Hasher& hasher)
+                                 Hash::Hasher& hasher)
 {
     auto appendN = [&prefix](auto n) { return prefix + std::to_string(n); };
 
@@ -88,7 +89,7 @@ template <ssize_t N> ssize_t parallelSolve(const std::string& prefix)
 
 } // namespace
 
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto prefix = std::string{trim(slurp(input))};
     constexpr ssize_t PART1_ZEROS = 5;

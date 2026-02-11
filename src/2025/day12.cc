@@ -51,7 +51,7 @@ ssize_t part1(std::vector<Problem>& ns)
     return std::accumulate(fits.begin(), fits.end(), 0L);
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     std::vector<Problem> v;
@@ -78,6 +78,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         }
     }
 
-    return Solution { part1(v)};
+    return SsizeSolution { part1(v)};
 }
 } // namespace aoc

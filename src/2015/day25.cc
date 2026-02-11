@@ -36,7 +36,7 @@ ssize_t pmod(ssize_t n)
     return res;
 }
 } // namespace
-template <> Solution solve<YEAR, DAY>(std::istream& input)
+template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
 {
     std::string in;
     std::getline(input, in);
