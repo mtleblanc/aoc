@@ -218,7 +218,8 @@ template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     auto flatProgram = readAll<Instruction>(input);
     constexpr auto PART1_INPUT = 7;
-    constexpr auto PART2_INPUT = 12;
+    // set to 12 for correct answer
+    constexpr auto PART2_INPUT = 7;
     Machine cm{.a = PART1_INPUT, .program = flatProgram};
     cm.run();
     auto part1 = cm.a;
