@@ -83,12 +83,18 @@ file(GLOB_RECURSE DAY_SOURCES "src/*/day*.cc")
 add_executable(aoc src/main.cc ${DAY_SOURCES})
 target_link_libraries(aoc PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json scn::scn ctre::ctre)
 
-# Enable warnings for main executable
-if(MSVC)
-    target_compile_options(aoc PRIVATE /W4 /WX)
-else()
-    target_compile_options(aoc PRIVATE -Wall -Wextra -Wpedantic -Werror)
-endif()
+# Verify executable for checking solutions against expected answers
+add_executable(verify src/verify.cc ${DAY_SOURCES})
+target_link_libraries(verify PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json scn::scn ctre::ctre)
+
+# Enable warnings for main executable and verify
+foreach(TARGET aoc verify)
+    if(MSVC)
+        target_compile_options(${TARGET} PRIVATE /W4 /WX)
+    else()
+        target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    endif()
+endforeach()
 
 # Enable testing
 enable_testing()
@@ -114,3 +120,7 @@ foreach(TEST_SOURCE ${TEST_SOURCES})
     # Register with CTest
     add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
 endforeach()
+
+# Register verify as a CTest test (runs from project root for answers.json access)
+add_test(NAME verify_solutions COMMAND verify)
+set_tests_properties(verify_solutions PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
