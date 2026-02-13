@@ -3,6 +3,7 @@
 #include <ctre.hpp>
 #include <iostream>
 #include <ranges>
+#include <sstream>
 #include <variant>
 
 /* https://adventofcode.com/2016/day/8
@@ -126,7 +127,7 @@ template <typename T> struct ColumnIterator
     }
 };
 
-template <int ROWS, int COLS> int part1(const std::vector<Command>& commands)
+template <int ROWS, int COLS> StringSolution part1(const std::vector<Command>& commands)
 {
     std::vector<std::vector<char>> grid(ROWS, std::vector<char>(COLS));
     auto rect = [&grid](RectCommand c)
@@ -152,12 +153,17 @@ template <int ROWS, int COLS> int part1(const std::vector<Command>& commands)
         std::visit(Overloaded{rect, rotateCol, rotateRow}, c);
     }
     // Part 2
-    std::cout << grid;
-    return std::ranges::fold_left(
+    std::ostringstream oss;
+    oss << grid;
+    return {std::to_string(std::ranges::fold_left(
         grid | std::views::transform([](auto r) { return std::ranges::count(r, 1); }), 0,
-        std::plus<>());
+        std::plus<>())), oss.str()};
 }
 } // namespace
+
+template<> struct SolutionType<YEAR, DAY> {
+    using type = StringSolution;
+};
 
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {

@@ -139,8 +139,7 @@ template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
     auto hasher = Hash::Hasher::md5Hasher();
     auto stretchedHasher = [&hasher](const std::string& message)
     {
-        // Set to 2016 for correct answer.  Reduced for runtime while solving other problems
-        constexpr auto STRETCH = 0;
+        constexpr auto STRETCH = 2016;
         constexpr auto LEN = 16UZ;
         std::array<char, LEN * 2> str{};
         auto hash = hasher.digest<LEN>(message);

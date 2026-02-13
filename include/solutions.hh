@@ -20,6 +20,11 @@ template <> struct SolutionType<2016, 6>
     using type = StringSolution;
 };
 
+template <> struct SolutionType<2016, 8>
+{
+    using type = StringSolution;
+};
+
 template <> struct SolutionType<2016, 9>
 {
     using type = LongSolution;
@@ -53,6 +58,9 @@ template <> struct IsSlow<2016, 5> : std::true_type
 {
 };
 template <> struct IsSlow<2016, 14> : std::true_type
+{
+};
+template <> struct IsSlow<2016, 23> : std::true_type
 {
 };
 

@@ -58,7 +58,7 @@ template <size_t Y> struct YearPrinter
 
 int main(int argc, char* argv[])
 {
-    constexpr auto YEAR = 2024;
+    constexpr auto YEAR = 2016;
     constexpr auto DAYS = 25;
 
     bool includeSlow = false;
