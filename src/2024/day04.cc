@@ -138,10 +138,10 @@ constexpr auto diagonalMoves()
     return deltas;
 }
 
-ssize_t part1(const WordSearch& ws)
+int part1(const WordSearch& ws)
 {
     constexpr std::string TARGET = "XMAS";
-    ssize_t accum{};
+    int accum{};
     constexpr auto DELTAS = kingMoves();
 
     for (auto it = ws.begin(); it != ws.end(); ++it)
@@ -157,10 +157,10 @@ ssize_t part1(const WordSearch& ws)
     return accum;
 }
 
-ssize_t part2(const WordSearch& ws)
+int part2(const WordSearch& ws)
 {
     constexpr auto DELTAS = diagonalMoves();
-    ssize_t accum{};
+    int accum{};
     for (size_t y{1}; y < ws.height() - 1; ++y)
     {
         for (size_t x{1}; x < ws.width() - 1; ++x)
@@ -189,7 +189,7 @@ ssize_t part2(const WordSearch& ws)
 }
 } // namespace
 
-template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR,DAY> solve<YEAR, DAY>(std::istream& input)
 {
     WordSearch ws{slurp(input)};
     return {part1(ws), part2(ws)};

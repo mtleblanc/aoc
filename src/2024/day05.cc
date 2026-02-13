@@ -125,10 +125,10 @@ void topSort(const std::vector<ssize_t>& nodes, std::multimap<ssize_t, ssize_t>&
     }
 }
 
-SsizeSolution solve(const std::vector<OrderRule>& rules,
+Solution_t<YEAR,DAY> solve(const std::vector<OrderRule>& rules,
                const std::vector<std::vector<ssize_t>>& sequences)
 {
-    SsizeSolution s;
+    Solution_t<YEAR,DAY> s;
     std::set<OrderRule> lu{rules.begin(), rules.end()};
     for (const auto& seq : sequences)
     {
@@ -150,7 +150,7 @@ SsizeSolution solve(const std::vector<OrderRule>& rules,
 
 } // namespace
 
-template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR,DAY> solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     auto blank = std::ranges::find(lines, "");

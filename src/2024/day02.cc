@@ -81,12 +81,12 @@ inline bool isSemiGradual(const std::vector<int>& v)
 
 } // namespace
 
-template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR,DAY> solve<YEAR, DAY>(std::istream& input)
 {
     auto rss = readAllLines(input);
     std::vector<std::vector<int>> rsi;
     std::ranges::transform(rss, back_inserter(rsi), toVec);
-    return {std::ranges::count_if(rsi, isGradual),
-            std::ranges::count_if(rsi, isSemiGradual)};
+    return {static_cast<int>(std::ranges::count_if(rsi, isGradual)),
+            static_cast<int>(std::ranges::count_if(rsi, isSemiGradual))};
 }
 } // namespace aoc

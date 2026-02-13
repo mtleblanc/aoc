@@ -20,7 +20,7 @@ namespace aoc
 constexpr size_t YEAR = 2024;
 constexpr size_t DAY = 1;
 
-template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     int l{};
     int r{};
@@ -33,7 +33,7 @@ template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
     }
     std::ranges::sort(left);
     std::ranges::sort(right);
-    SsizeSolution s;
+    Solution s;
     s.part1 = std::transform_reduce(left.begin(), left.end(), right.begin(), 0, std::plus<>(),
                                     [](auto l, auto r) { return std::abs(l - r); });
 

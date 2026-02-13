@@ -34,10 +34,6 @@ template <size_t D> struct SolutionType<2015, D>
 {
     using type = SsizeSolution;
 };
-template <size_t D> struct SolutionType<2024, D>
-{
-    using type = SsizeSolution;
-};
 template <size_t D> struct SolutionType<2025, D>
 {
     using type = SsizeSolution;
