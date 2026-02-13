@@ -45,6 +45,17 @@ template <> struct SolutionType<2016, 21>
     using type = StringSolution;
 };
 
+template <size_t Y, size_t D> struct IsSlow : std::false_type
+{
+};
+
+template <> struct IsSlow<2016, 5> : std::true_type
+{
+};
+template <> struct IsSlow<2016, 14> : std::true_type
+{
+};
+
 template <> Solution_t<2015, 1> solve<2015, 1>(std::istream& input);
 template <> Solution_t<2015, 2> solve<2015, 2>(std::istream& input);
 template <> Solution_t<2015, 3> solve<2015, 3>(std::istream& input);

@@ -1,11 +1,28 @@
 #include "solutions.hh"
 #include <chrono>
+#include <cstring>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
-template <size_t Y, size_t D> void printSolution(bool useSample)
+template <size_t Y, size_t D> void printSolution(bool useSample, bool includeSlow)
 {
+    if constexpr (aoc::IsSlow<Y, D>::value)
+    {
+        if (!includeSlow)
+        {
+            // NOLINTBEGIN
+            std::cout << Y << " Day " << std::setfill('0') << std::setw(2) << D
+                      << " part 1: " << std::setfill(' ') << std::setw(18) << "SKIP"
+                      << "\t"
+                      << " part 2: " << std::setfill(' ') << std::setw(18) << "SKIP"
+                      << "\t"
+                      << " (slow)\n";
+            // NOLINTEND
+            return;
+        }
+    }
+
     std::ostringstream oss{};
     oss << "inputs/" << Y << "/" << (useSample ? "sample" : "input") << std::setfill('0')
         << std::setw(2) << D;
@@ -26,21 +43,32 @@ template <size_t Y, size_t D> void printSolution(bool useSample)
 
 template <size_t Y> struct YearPrinter
 {
-    template <size_t D> void printAll(bool useSample)
+    template <size_t D> void printAll(bool useSample, bool includeSlow)
     {
-        printAll<D - 1>(useSample);
-        printSolution<Y, D>(useSample);
+        printAll<D - 1>(useSample, includeSlow);
+        printSolution<Y, D>(useSample, includeSlow);
     }
 
-    template <> void printAll<0>(bool useSample)
+    template <> void printAll<0>(bool useSample, bool includeSlow)
     {
         (void)useSample;
+        (void)includeSlow;
     }
 };
 
-int main()
+int main(int argc, char* argv[])
 {
     constexpr auto YEAR = 2024;
     constexpr auto DAYS = 25;
-    YearPrinter<YEAR>{}.printAll<DAYS>(false);
+
+    bool includeSlow = false;
+    for (int i = 1; i < argc; ++i)
+    {
+        if (std::string(argv[i]) == "--slow") // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        {
+            includeSlow = true;
+        }
+    }
+
+    YearPrinter<YEAR>{}.printAll<DAYS>(false, includeSlow);
 }
