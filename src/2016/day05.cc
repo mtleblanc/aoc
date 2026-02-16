@@ -2,6 +2,7 @@
 #include "hash.hh"
 #include "util.hh"
 #include <algorithm>
+#include <bitset>
 #include <ranges>
 
 /* https://adventofcode.com/2016/day/5
@@ -33,15 +34,14 @@ template <int LEADING_ZEROS> StringSolution crack(const std::string& prefix)
     auto appendN = [&prefix](auto n) { return prefix + std::to_string(n); };
     {
         using namespace std::views;
-        constexpr auto SECOND_DIGIT = 0x0F;
-        constexpr int PASSWORD_LENGTH = 8;
-        constexpr int BASE = 16;
+        [[maybe_unused]] constexpr auto SECOND_DIGIT = 0x0F;
+        [[maybe_unused]] constexpr int PASSWORD_LENGTH = 8;
+        [[maybe_unused]] constexpr int BASE = 16;
         auto view = iota(0) | transform(appendN) |
                     transform([&hasher](const std::string& s) { return hasher(s); }) |
                     filter(hasStartingZeros<LEADING_ZEROS>) |
                     transform(
-                        [](auto md5) -> std::pair<int, int>
-                        {
+                        [](auto md5) -> std::pair<int, int> {
                             return std::make_pair(md5[LEADING_ZEROS / 2] & SECOND_DIGIT,
                                                   md5[LEADING_ZEROS / 2 + 1] >> 4);
                         });

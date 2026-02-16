@@ -34,12 +34,12 @@ template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 
     using namespace std::complex_literals;
 
-    constexpr std::complex<int> L = 1i;
-    constexpr std::complex<int> R = -1i;
+    constexpr std::complex<int> L = {0, 1};
+    constexpr std::complex<int> R = {0, -1};
 
     auto dirs = slurp(input);
     std::complex<int> loc;
-    std::complex<int> direction = 1i;
+    std::complex<int> direction = {0, 1};
     std::optional<std::complex<int>> firstRepeat;
     std::unordered_set<std::complex<int>, ComplexHash> seen;
     for (auto match : ctre::search_all<PAT>(dirs))

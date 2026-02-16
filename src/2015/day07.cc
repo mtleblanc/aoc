@@ -4,6 +4,7 @@
 #include <optional>
 #include <ranges>
 #include <string>
+#include <utility>
 
 /* https://adventofcode.com/2015/day/7
  */
@@ -60,6 +61,7 @@ template <typename T> struct Wire
             value = input1->eval() >> input2->eval();
             return *value;
         }
+        std::unreachable();
     }
 };
 

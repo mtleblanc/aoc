@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <map>
 #include <sstream>
+#include <utility>
 
 /* https://adventofcode.com/2015/day/16
  */
@@ -76,6 +77,7 @@ class Matcher
         case Op::GT:
             return o > compareTo;
         }
+        std::unreachable();
     }
 
     [[nodiscard]] bool eq(ssize_t o) const

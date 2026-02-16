@@ -1,4 +1,5 @@
 #include "aoc.hh"
+#include <utility>
 
 /* https://adventofcode.com/2016/day/25
  */
@@ -49,6 +50,7 @@ struct Instruction
         case Type::OUT:
             return Type::INC;
         }
+        std::unreachable();
     }
     Type t{};
     Operand src;

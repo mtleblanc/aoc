@@ -131,7 +131,8 @@ struct AdjacentView : std::ranges::view_interface<AdjacentView<N, Rng>>
         }
 
       private:
-        template <size_t... Ns> reference refHelper(std::index_sequence<Ns...> _) const
+        template <size_t... Ns>
+        reference refHelper([[maybe_unused]] std::index_sequence<Ns...> _) const
         {
             return {*std::next(it_, Ns)...};
         }

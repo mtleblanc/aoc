@@ -5,6 +5,8 @@
 #include <iostream>
 #include <sstream>
 
+namespace
+{
 template <size_t Y, size_t D> void printSolution(bool useSample, bool includeSlow)
 {
     if constexpr (aoc::IsSlow<Y, D>::value)
@@ -13,10 +15,8 @@ template <size_t Y, size_t D> void printSolution(bool useSample, bool includeSlo
         {
             // NOLINTBEGIN
             std::cout << Y << " Day " << std::setfill('0') << std::setw(2) << D
-                      << " part 1: " << std::setfill(' ') << std::setw(18) << "SKIP"
-                      << "\t"
-                      << " part 2: " << std::setfill(' ') << std::setw(18) << "SKIP"
-                      << "\t"
+                      << " part 1: " << std::setfill(' ') << std::setw(18) << "SKIP" << "\t"
+                      << " part 2: " << std::setfill(' ') << std::setw(18) << "SKIP" << "\t"
                       << " (slow)\n";
             // NOLINTEND
             return;
@@ -36,8 +36,8 @@ template <size_t Y, size_t D> void printSolution(bool useSample, bool includeSlo
     // NOLINTBEGIN
     std::cout << Y << " Day " << std::setfill('0') << std::setw(2) << D
               << " part 1: " << std::setfill(' ') << std::setw(18) << solution.part1 << "\t"
-              << " part 2: " << std::setfill(' ') << std::setw(18) << solution.part2 << "\t"
-              << " (" << duration.count() << " μs)\n";
+              << " part 2: " << std::setfill(' ') << std::setw(18) << solution.part2 << "\t" << " ("
+              << duration.count() << " μs)\n";
     // NOLINTEND
 }
 
@@ -45,16 +45,14 @@ template <size_t Y> struct YearPrinter
 {
     template <size_t D> void printAll(bool useSample, bool includeSlow)
     {
-        printAll<D - 1>(useSample, includeSlow);
-        printSolution<Y, D>(useSample, includeSlow);
-    }
-
-    template <> void printAll<0>(bool useSample, bool includeSlow)
-    {
-        (void)useSample;
-        (void)includeSlow;
+        if constexpr (D > 0)
+        {
+            printAll<D - 1>(useSample, includeSlow);
+            printSolution<Y, D>(useSample, includeSlow);
+        }
     }
 };
+} // namespace
 
 int main(int argc, char* argv[])
 {
@@ -64,7 +62,8 @@ int main(int argc, char* argv[])
     bool includeSlow = false;
     for (int i = 1; i < argc; ++i)
     {
-        if (std::string(argv[i]) == "--slow") // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (std::string(argv[i]) ==
+            "--slow") // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         {
             includeSlow = true;
         }

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <deque>
+#include <limits>
 #include <numeric>
 #include <sstream>
 #include <string>
@@ -193,7 +194,7 @@ auto nextCoeffs(std::vector<Col>& cols, std::vector<Coeff>& coeffs, std::vector<
 
 template <typename T = Q> auto minPresses(Matrix<T>& m)
 {
-    int presses = INT_MAX;
+    int presses = std::numeric_limits<int>::max();
     Matrix<T> orig{m};
     // std::cout << m << std::endl;
     m.rowReduce();

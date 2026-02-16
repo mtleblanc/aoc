@@ -1,5 +1,6 @@
 #include "aoc.hh"
 #include <ranges>
+#include <string>
 
 /* https://adventofcode.com/2016/day/16
  */
@@ -16,7 +17,7 @@ void expand(std::string& base)
     std::string_view orig{base};
     auto tail = orig | std::views::reverse | std::views::transform([](auto c) { return c ^ 1; });
     base.push_back('0');
-    base.append_range(tail);
+    base.append(tail.begin(), tail.end());
 }
 
 // caller is responsible for ensuring str.size() is even.  If odd, last character will be ignored

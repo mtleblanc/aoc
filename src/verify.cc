@@ -152,17 +152,14 @@ template <size_t Y, bool Record> struct YearHandler
     template <size_t D>
     void handleAll(const std::filesystem::path& root, json& answers, Stats& stats)
     {
-        handleAll<D - 1>(root, answers, stats);
-        if constexpr (Record)
-            recordSolution<Y, D>(root, answers, stats);
-        else
-            verifySolution<Y, D>(root, answers, stats);
-    }
-
-    template <>
-    // NOLINTNEXTLINE
-    void handleAll<0>(const std::filesystem::path&, json&, Stats&)
-    {
+        if constexpr (D != 0)
+        {
+            handleAll<D - 1>(root, answers, stats);
+            if constexpr (Record)
+                recordSolution<Y, D>(root, answers, stats);
+            else
+                verifySolution<Y, D>(root, answers, stats);
+        }
     }
 };
 
@@ -215,8 +212,9 @@ int main(int argc, char* argv[])
             YearHandler<2025, false>{}.handleAll<DAYS>(root, answers, stats);
         // NOLINTEND
 
-        std::cout << "\n" << stats.passed << " passed, " << stats.failed << " failed, "
-                  << stats.skipped << " skipped\n";
+        std::cout << "\n"
+                  << stats.passed << " passed, " << stats.failed << " failed, " << stats.skipped
+                  << " skipped\n";
     }
 
     return stats.failed > 0 ? 1 : 0;

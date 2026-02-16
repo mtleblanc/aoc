@@ -30,8 +30,8 @@ class WordSearch
     using difference_type = std::string::difference_type;
     using const_iterator = std::string::const_iterator;
     using offset_type = std::pair<difference_type, difference_type>;
-    // NB: newlines aren't removed, so width includes them.  This lets us use w for stride length and
-    // doesn't affect searching since \n is just a mismatch like any other character
+    // NB: newlines aren't removed, so width includes them.  This lets us use w for stride length
+    // and doesn't affect searching since \n is just a mismatch like any other character
     explicit WordSearch(const std::string& s) : s{s}, w(s.find('\n') + 1), h(s.size() / w)
     {
         assert(w * h == s.size());
@@ -140,7 +140,7 @@ constexpr auto diagonalMoves()
 
 int part1(const WordSearch& ws)
 {
-    constexpr std::string TARGET = "XMAS";
+    static constexpr std::string TARGET = "XMAS";
     int accum{};
     constexpr auto DELTAS = kingMoves();
 
@@ -189,7 +189,7 @@ int part2(const WordSearch& ws)
 }
 } // namespace
 
-template <> Solution_t<YEAR,DAY> solve<YEAR, DAY>(std::istream& input)
+template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     WordSearch ws{slurp(input)};
     return {part1(ws), part2(ws)};

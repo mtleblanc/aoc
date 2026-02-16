@@ -53,8 +53,15 @@ struct Endpoint
 LongSolution processBlacklist(const std::vector<Range>& ranges)
 {
     std::vector<Endpoint> endpoints;
+#ifdef __cpp_lib_containers_ranges
     endpoints.insert_range(endpoints.end(), std::views::transform(ranges, Endpoint::open));
     endpoints.insert_range(endpoints.end(), std::views::transform(ranges, Endpoint::close));
+#else
+    auto opens = std::views::transform(ranges, Endpoint::open);
+    auto closes = std::views::transform(ranges, Endpoint::close);
+    endpoints.insert(endpoints.end(), opens.begin(), opens.end());
+    endpoints.insert(endpoints.end(), closes.begin(), closes.end());
+#endif
     std::ranges::sort(endpoints);
     std::optional<int64_t> lowest;
     int64_t whitelistCount{};

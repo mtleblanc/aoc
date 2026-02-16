@@ -1,4 +1,5 @@
 #include "aoc.hh"
+#include <utility>
 
 /* https://adventofcode.com/2016/day/23
  */
@@ -46,6 +47,7 @@ struct Instruction
         case Type::JNZ:
             return Type::CPY;
         }
+        std::unreachable();
     }
     Type t{};
     Operand src;

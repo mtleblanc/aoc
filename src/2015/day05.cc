@@ -17,18 +17,14 @@ namespace
 bool invalidPair(std::tuple<char, char> p)
 {
     auto [a, b] = p;
-    constexpr std::string BAD_STARTS = "acpx";
+    static constexpr std::string BAD_STARTS = "acpx";
     return BAD_STARTS.contains(a) && (b - a == 1);
 }
 
 bool isNicePart1(const std::string_view str)
 {
-    if (std::ranges::count_if(str,
-                              [](auto c)
-                              {
-                                  constexpr std::string VOWELS = "aeiou";
-                                  return VOWELS.contains(c);
-                              }) < 3)
+    static constexpr std::string VOWELS = "aeiou";
+    if (std::ranges::count_if(str, [](auto c) { return VOWELS.contains(c); }) < 3)
     {
         return false;
     }

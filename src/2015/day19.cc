@@ -221,11 +221,15 @@ template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
     auto toProduction = [](std::string s)
     {
         auto result = scn::scan<std::string, std::string>(s, "{} => {}");
-        return result->values();
+        auto [a, b] = result->values();
+        return std::pair{std::move(a), std::move(b)};
     };
-    auto productions = lines | std::views::take_while([](const auto& s) { return !s.empty(); }) |
-                       std::views::transform(toProduction) |
-                       std::ranges::to<std::multimap<std::string, std::string, std::less<>>>();
+    std::multimap<std::string, std::string, std::less<>> productions;
+    for (const auto& line : lines | std::views::take_while([](const auto& s) { return !s.empty(); }))
+    {
+        auto [a, b] = toProduction(line);
+        productions.emplace(std::move(a), std::move(b));
+    }
 
     EarleyParser parser{productions, target};
     parser.parse();

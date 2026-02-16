@@ -66,9 +66,9 @@ template <typename T> inline std::vector<T> readAll(std::istream& input)
 inline std::string slurp(std::istream& input)
 {
     auto cur = input.tellg();
-    input.seekg(0, std::ios_base::seekdir::end);
+    input.seekg(0, std::ios_base::end);
     auto end = input.tellg();
-    input.seekg(cur, std::ios_base::seekdir::beg);
+    input.seekg(cur, std::ios_base::beg);
     std::string ret("\0", end - cur);
     input.read(ret.data(), end - cur);
     return ret;

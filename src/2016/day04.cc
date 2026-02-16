@@ -46,7 +46,6 @@ struct Room
 
     [[nodiscard]] std::string decrypt() const
     {
-        constexpr int PERIOD = 26;
         // assumes input is only [a-z\-]
         auto decryptLetter = [this](auto c) -> char
         {
@@ -54,6 +53,7 @@ struct Room
             {
                 return ' ';
             }
+            constexpr int PERIOD = 26;
             return (c - 'a' + this->id) % PERIOD + 'a';
         };
         return name | std::views::transform(decryptLetter) | std::ranges::to<std::string>();

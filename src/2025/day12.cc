@@ -1,6 +1,6 @@
+#include <algorithm>
 #include <cassert>
 #include <iostream>
-#include <machine/limits.h>
 #include <numeric>
 #include <ranges>
 #include <sstream>
@@ -78,6 +78,6 @@ template <> SsizeSolution solve<YEAR, DAY>(std::istream& input)
         }
     }
 
-    return SsizeSolution { part1(v)};
+    return SsizeSolution{part1(v)};
 }
 } // namespace aoc
