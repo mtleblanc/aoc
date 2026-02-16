@@ -60,9 +60,6 @@ template <> struct IsSlow<2016, 5> : std::true_type
 template <> struct IsSlow<2016, 14> : std::true_type
 {
 };
-template <> struct IsSlow<2016, 23> : std::true_type
-{
-};
 
 template <> Solution_t<2015, 1> solve<2015, 1>(std::istream& input);
 template <> Solution_t<2015, 2> solve<2015, 2>(std::istream& input);

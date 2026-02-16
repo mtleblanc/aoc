@@ -62,8 +62,8 @@ int main(int argc, char* argv[])
     bool includeSlow = false;
     for (int i = 1; i < argc; ++i)
     {
-        if (std::string(argv[i]) ==
-            "--slow") // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+        if (std::string(argv[i]) == // NOLINT(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+            "--slow")
         {
             includeSlow = true;
         }
