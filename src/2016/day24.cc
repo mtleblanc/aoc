@@ -38,17 +38,12 @@ template <typename T, std::unsigned_integral I = unsigned> class VisitSet
     VisitSet(const std::shared_ptr<std::vector<T>>& targets) : targets_{targets}
     {
         assert(targets->size() + 1 <= std::numeric_limits<I>::digits);
-        seen_ = (1U << (targets->size() + 1)) - 1U;
+        seen_ = (1U << targets->size()) - 1U;
     }
 
     [[nodiscard]] bool isDone() const
     {
         return seen_ == 0;
-    }
-
-    [[nodiscard]] bool isDonePart1() const
-    {
-        return !(seen_ & 1 << targets_->size());
     }
 
     [[nodiscard]] VisitSet<T, I> visit(T t) const
@@ -60,10 +55,6 @@ template <typename T, std::unsigned_integral I = unsigned> class VisitSet
         }
         auto ret = *this;
         ret.seen_ &= ~bit;
-        if (ret.seen_ == 1U << targets_->size())
-        {
-            ret.seen_ = 1;
-        }
         return ret;
     }
 
@@ -102,11 +93,11 @@ template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
     while (horizon.size())
     {
         const auto& cur = horizon.front();
-        if (!part1 && cur.state.visited.isDonePart1())
+        if (!part1 && cur.state.visited.isDone())
         {
             part1 = cur.steps;
         }
-        if (cur.state.visited.isDone())
+        if (cur.state.visited.isDone() && maze[cur.state.loc] == '0')
         {
             return {*part1, cur.steps};
         }
