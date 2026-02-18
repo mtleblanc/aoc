@@ -24,7 +24,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
                              std::ranges::to<std::vector>();
 
     auto allUnique = [](const auto& ps)
-    { return std::set(ps.begin(), ps.end()).size() == ps.size(); };
+    { return std::set(std::from_range_t{}, ps).size() == ps.size(); };
 
     auto sortElements = [](const auto& r)
     {
