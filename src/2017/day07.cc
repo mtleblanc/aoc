@@ -23,81 +23,103 @@ using Solution = Solution_t<YEAR, DAY>;
 
 namespace
 {
-struct Program
+class ProgramTower
 {
-    std::string name;
-    int weight;
-    std::optional<int> totalWeight;
-    std::vector<Program*> children;
+  public:
+    struct Program;
 
-    [[nodiscard]] auto childWeights() const
-    {
-        return children | std::views::transform([](auto c) { return *c->totalWeight; });
-    }
-};
+  private:
+    std::map<std::string, Program> programs_;
+    Program* root_{};
 
-auto readProgram(std::istream& input)
-{
-    auto lines = readAllLines(input);
-    std::map<std::string, Program> programs;
-    for (const auto& p : lines)
+    void loadSkeleton(std::span<std::string> description)
     {
-        static constexpr auto NAME_AND_WEIGHT =
-            ctll::fixed_string(R"((\w*) \((\d+)\)(?: -> (.*))?)");
-        auto m = ctre::match<NAME_AND_WEIGHT>(p);
-        if (!m)
+        for (const auto& p : description)
         {
-            throw std::invalid_argument("Could not parse input: " + p);
-        }
-        auto name = m.get<1>().str();
-        auto& program = programs[name];
-        program.name = name;
-        program.weight = m.get<2>().to_number();
-        if (auto children = m.get<3>().to_optional_string())
-        {
-            std::string child;
-            std::stringstream ss{*children};
-            while (ss >> child)
+            static constexpr auto NAME_AND_WEIGHT =
+                ctll::fixed_string(R"((\w*) \((\d+)\)(?: -> (.*))?)");
+            auto m = ctre::match<NAME_AND_WEIGHT>(p);
+            if (!m)
             {
-                if (child.ends_with(','))
+                throw std::invalid_argument("Could not parse input: " + p);
+            }
+            auto name = m.get<1>().str();
+            auto& program = programs_[name];
+            program.name = name;
+            program.weight = m.get<2>().to_number();
+            if (auto children = m.get<3>().to_optional_string())
+            {
+                std::string child;
+                std::stringstream ss{*children};
+                while (ss >> child)
                 {
-                    child.pop_back();
+                    if (child.ends_with(','))
+                    {
+                        child.pop_back();
+                    }
+                    program.children.push_back(&programs_[child]);
                 }
-                program.children.push_back(&programs[child]);
             }
         }
     }
-    return programs;
-}
 
-void visit(Program& current)
-{
-    current.totalWeight = current.weight;
-    for (auto* p : current.children)
+    void visit(Program& current, std::set<Program*>& visited)
     {
-        if (!p->totalWeight)
+        current.totalWeight = current.weight;
+        for (auto* p : current.children)
         {
-            visit(*p);
+            if (!visited.contains(p))
+            {
+                visit(*p, visited);
+            }
+            current.totalWeight += p->totalWeight;
         }
-        *current.totalWeight += *p->totalWeight;
+        visited.insert(&current);
     }
-}
 
-// assumes single rooted tree, does not detect cycles or multiple roots
-// uses std::optional totalWeight to record visting nodes
-auto findRootAndPopulateWeights(std::map<std::string, Program>& programs)
-{
-    Program* head = nullptr;
-    for (auto& [n, p] : programs)
+    void construct(std::ranges::input_range auto&& programs)
     {
-        if (!p.totalWeight)
+        std::set<Program*> visited;
+        for (auto* p : programs)
         {
-            head = &p;
-            visit(p);
+            if (!visited.contains(p))
+            {
+                root_ = p;
+                visit(*p, visited);
+            }
         }
     }
-    return head;
-}
+
+  public:
+    ProgramTower(std::span<std::string> description)
+    {
+        loadSkeleton(description);
+        construct(programs_ | std::views::transform([](auto& p) { return &p.second; }));
+    }
+
+    [[nodiscard]] const Program* root() const
+    {
+        return root_;
+    }
+
+    [[nodiscard]] Program* root()
+    {
+        return root_;
+    }
+
+    struct Program
+    {
+        std::string name;
+        int weight{};
+        int totalWeight{};
+        std::vector<Program*> children;
+
+        [[nodiscard]] auto childWeights() const
+        {
+            return children | std::views::transform([](auto c) { return c->totalWeight; });
+        }
+    };
+};
 
 // auto oddOneOut(const std::ranges::forward_range auto& r, auto proj)
 // {
@@ -125,20 +147,20 @@ auto findRootAndPopulateWeights(std::map<std::string, Program>& programs)
 //     return first == std::invoke(proj, *it) ? ++r.begin() : r.begin();
 // }
 
-auto allEqual(const std::ranges::input_range auto& r, auto proj)
+auto allEqual(const std::ranges::input_range auto& r, auto&& proj)
 {
     auto it = r.begin();
     if (it == r.end())
     {
         return true;
     }
-    const auto& val = std::invoke(proj, *it);
-    return std::ranges::all_of(++it, r.end(), [&val](auto v) { return v == val; }, proj);
+    const auto val = std::invoke(proj, *it);
+    return std::ranges::all_of(++it, r.end(), [&val](const auto& v) { return v == val; }, proj);
 }
 
-auto findImbalanceHelper(const Program& program, int target) -> int
+auto findImbalanceHelper(const ProgramTower::Program& program, int target) -> int
 {
-    if (allEqual(program.children, &Program::totalWeight))
+    if (allEqual(program.children, &ProgramTower::Program::totalWeight))
     {
         return target - std::ranges::fold_left(program.childWeights(), 0, std::plus<>());
     }
@@ -148,7 +170,7 @@ auto findImbalanceHelper(const Program& program, int target) -> int
     return findImbalanceHelper(**incorrectProgram, nextTarget);
 }
 
-auto findImbalance(const Program& program) -> std::optional<int>
+auto findImbalance(const ProgramTower::Program& program) -> std::optional<int>
 {
     if (program.children.empty())
     {
@@ -166,19 +188,19 @@ auto findImbalance(const Program& program) -> std::optional<int>
         auto right = findImbalance(*program.children.back());
         return left ? left : right;
     }
-    auto weights = program.children | std::views::transform([](auto p) { return *p->totalWeight; });
-    auto [min, max] = std::ranges::minmax(weights);
-    auto odd = std::ranges::count(weights, min) == 1 ? min : max;
-    auto incorrectProgram = std::ranges::find(program.children, odd, &Program::totalWeight);
+    auto [min, max] = std::ranges::minmax(program.childWeights());
+    auto odd = std::ranges::count(program.childWeights(), min) == 1 ? min : max;
+    auto incorrectProgram =
+        std::ranges::find(program.children, odd, &ProgramTower::Program::totalWeight);
     return findImbalanceHelper(**incorrectProgram, min + max - odd);
 }
 } // namespace
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    auto programs = readProgram(input);
-    auto* root = findRootAndPopulateWeights(programs);
-    assert(root != nullptr);
-    return {root->name, std::to_string(*findImbalance(*root))};
+    auto lines = readAllLines(input);
+    auto programTower = ProgramTower{lines};
+    assert(programTower.root() != nullptr);
+    return {programTower.root()->name, std::to_string(*findImbalance(*programTower.root()))};
 }
 } // namespace aoc
