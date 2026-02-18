@@ -1,8 +1,10 @@
 #include "aoc.hh"
 #include <algorithm>
+#include <cassert>
 #include <ctre.hpp>
 #include <iostream>
 #include <map>
+#include <optional>
 #include <ranges>
 #include <set>
 #include <sstream>
@@ -25,8 +27,13 @@ struct Program
 {
     std::string name;
     int weight;
-    int totalWeight;
+    std::optional<int> totalWeight;
     std::vector<Program*> children;
+
+    [[nodiscard]] auto childWeights() const
+    {
+        return children | std::views::transform([](auto c) { return *c->totalWeight; });
+    }
 };
 
 auto readProgram(std::istream& input)
@@ -63,54 +70,79 @@ auto readProgram(std::istream& input)
     return programs;
 }
 
-void topSortHelper(Program& current, Program*& head, std::set<const Program*>& seen)
+void visit(Program& current)
 {
-
-    if (seen.contains(&current))
-    {
-        return;
-    }
-    seen.insert(&current);
+    current.totalWeight = current.weight;
     for (auto* p : current.children)
     {
-        topSortHelper(*p, head, seen);
+        if (!p->totalWeight)
+        {
+            visit(*p);
+        }
+        *current.totalWeight += *p->totalWeight;
     }
-    head = &current;
 }
 
-auto topSort(std::map<std::string, Program>& programs)
+// assumes single rooted tree, does not detect cycles or multiple roots
+// uses std::optional totalWeight to record visting nodes
+auto findRootAndPopulateWeights(std::map<std::string, Program>& programs)
 {
-    auto seen = std::set<const Program*>{};
     Program* head = nullptr;
     for (auto& [n, p] : programs)
     {
-        topSortHelper(p, head, seen);
+        if (!p.totalWeight)
+        {
+            head = &p;
+            visit(p);
+        }
     }
     return head;
 }
 
-void populateTotalWeight(Program& program)
+// auto oddOneOut(const std::ranges::forward_range auto& r, auto proj)
+// {
+//     auto it = r.begin();
+//     if (it == r.end())
+//     {
+//         return r;
+//     }
+//     auto first = std::invoke(proj, *it);
+//     if (++it == r.end())
+//     {
+//         return r.begin();
+//     }
+//     auto second = std::invoke(proj, *it);
+//     if (first == second)
+//     {
+//         return (std::ranges::find_if_not(
+//             it, r.end(), [&first](const auto& e) { return e != first; }, proj));
+//     }
+//     if (++it == r.end())
+//     {
+//         // first or second both valid returns
+//         return r.begin();
+//     }
+//     return first == std::invoke(proj, *it) ? ++r.begin() : r.begin();
+// }
+
+auto allEqual(const std::ranges::input_range auto& r, auto proj)
 {
-    program.totalWeight = program.weight;
-    for (auto* p : program.children)
+    auto it = r.begin();
+    if (it == r.end())
     {
-        populateTotalWeight(*p);
-        program.totalWeight += p->totalWeight;
+        return true;
     }
+    const auto& val = std::invoke(proj, *it);
+    return std::ranges::all_of(++it, r.end(), [&val](auto v) { return v == val; }, proj);
 }
 
 auto findImbalanceHelper(const Program& program, int target) -> int
 {
-    if (program.children.empty())
+    if (allEqual(program.children, &Program::totalWeight))
     {
-        return target;
+        return target - std::ranges::fold_left(program.childWeights(), 0, std::plus<>());
     }
     auto nextTarget = static_cast<int>((target - program.weight) / std::ssize(program.children));
-    auto isCorrectWeight = [nextTarget](auto* p) { return p->totalWeight == nextTarget; };
-    if (std::ranges::none_of(program.children, isCorrectWeight))
-    {
-        return target - program.totalWeight + program.weight;
-    }
     auto incorrectProgram = std::ranges::find_if_not(program.children, [nextTarget](auto* p)
                                                      { return p->totalWeight == nextTarget; });
     return findImbalanceHelper(**incorrectProgram, nextTarget);
@@ -128,11 +160,13 @@ auto findImbalance(const Program& program) -> std::optional<int>
     }
     if (program.children.size() == 2)
     {
+        // this is incorrect if the imbalanced weight has no disks below it holding 3 or more
+        // programs
         auto left = findImbalance(*program.children.front());
         auto right = findImbalance(*program.children.back());
         return left ? left : right;
     }
-    auto weights = program.children | std::views::transform(&Program::totalWeight);
+    auto weights = program.children | std::views::transform([](auto p) { return *p->totalWeight; });
     auto [min, max] = std::ranges::minmax(weights);
     auto odd = std::ranges::count(weights, min) == 1 ? min : max;
     auto incorrectProgram = std::ranges::find(program.children, odd, &Program::totalWeight);
@@ -143,8 +177,8 @@ auto findImbalance(const Program& program) -> std::optional<int>
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     auto programs = readProgram(input);
-    auto* head = topSort(programs);
-    populateTotalWeight(*head);
-    return {head->name, std::to_string(*findImbalance(*head))};
+    auto* root = findRootAndPopulateWeights(programs);
+    assert(root != nullptr);
+    return {root->name, std::to_string(*findImbalance(*root))};
 }
 } // namespace aoc
