@@ -20,7 +20,7 @@ template <typename T = int> struct GeneralSolution
 };
 
 using SsizeSolution = GeneralSolution<ssize_t>;
-using Solution = GeneralSolution<int>;
+using IntSolution = GeneralSolution<int>;
 using LongSolution = GeneralSolution<int64_t>;
 using StringSolution = GeneralSolution<std::string>;
 

@@ -33,7 +33,7 @@ template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
     }
     std::ranges::sort(left);
     std::ranges::sort(right);
-    Solution s;
+    IntSolution s;
     s.part1 = std::transform_reduce(left.begin(), left.end(), right.begin(), 0, std::plus<>(),
                                     [](auto l, auto r) { return std::abs(l - r); });
 
