@@ -149,6 +149,33 @@ auto oddOneOut(const std::ranges::forward_range auto& r, P proj)
     return first == std::invoke(proj, *it) ? ++r.begin() : r.begin();
 }
 
+// leaf first solution that works as long as incorrect node has 2 or more siblings
+[[maybe_unused]] std::optional<int> findImbalance(ProgramTower::Program* p)
+{
+    for (auto* c : p->children)
+    {
+        if (auto r = findImbalance(c))
+        {
+            return r;
+        }
+    }
+    auto bad = oddOneOut(p->children, &ProgramTower::Program::totalWeight);
+    if (bad == p->children.end())
+    {
+        return {};
+    }
+    if (p->children.size() < 3)
+    {
+        return {};
+    }
+    auto other = p->children.begin();
+    if (other == bad)
+    {
+        ++other;
+    }
+    return (*bad)->weight + (*other)->totalWeight - (*bad)->totalWeight;
+}
+
 template <typename P = std::identity>
 auto allEqual(const std::ranges::input_range auto& r, P proj = {})
 {
@@ -178,7 +205,9 @@ auto correctImbalanceAtRoot(const ProgramTower::Program* program)
     {
         ++other;
     }
-    return (*bad)->weight + (*other)->totalWeight - (*bad)->totalWeight;
+    auto target = (*other)->totalWeight;
+    program = *bad;
+    return target - program->totalWeight + program->weight;
 }
 
 auto correctImbalance(const ProgramTower::Program* program, int target)
@@ -230,7 +259,10 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     auto lines = readAllLines(input);
     auto programTower = ProgramTower{lines};
-    assert(programTower.root() != nullptr);
-    return {programTower.root()->name, std::to_string(correctImbalance(programTower.root()))};
+    auto* root = programTower.root();
+    assert(root != nullptr);
+    auto part2 = correctImbalance(root);
+    // auto part2 = *findImbalance(root).or_else([root]() -> std::optional<int> { return correctImbalance(root);});
+    return {root->name, std::to_string(part2)};
 }
 } // namespace aoc
