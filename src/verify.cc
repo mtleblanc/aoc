@@ -190,6 +190,8 @@ int main(int argc, char* argv[])
             YearHandler<2015, true>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2016)
             YearHandler<2016, true>{}.handleAll<DAYS>(root, answers, stats);
+        if (!yearFilter || yearFilter == 2017)
+            YearHandler<2017, true>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2024)
             YearHandler<2024, true>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2025)
@@ -206,6 +208,8 @@ int main(int argc, char* argv[])
             YearHandler<2015, false>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2016)
             YearHandler<2016, false>{}.handleAll<DAYS>(root, answers, stats);
+        if (!yearFilter || yearFilter == 2017)
+            YearHandler<2017, false>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2024)
             YearHandler<2024, false>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2025)
