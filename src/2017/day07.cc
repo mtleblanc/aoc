@@ -4,7 +4,6 @@
 #include <ctre.hpp>
 #include <iostream>
 #include <map>
-#include <optional>
 #include <ranges>
 #include <set>
 #include <sstream>
@@ -121,33 +120,37 @@ class ProgramTower
     };
 };
 
-// auto oddOneOut(const std::ranges::forward_range auto& r, auto proj)
-// {
-//     auto it = r.begin();
-//     if (it == r.end())
-//     {
-//         return r;
-//     }
-//     auto first = std::invoke(proj, *it);
-//     if (++it == r.end())
-//     {
-//         return r.begin();
-//     }
-//     auto second = std::invoke(proj, *it);
-//     if (first == second)
-//     {
-//         return (std::ranges::find_if_not(
-//             it, r.end(), [&first](const auto& e) { return e != first; }, proj));
-//     }
-//     if (++it == r.end())
-//     {
-//         // first or second both valid returns
-//         return r.begin();
-//     }
-//     return first == std::invoke(proj, *it) ? ++r.begin() : r.begin();
-// }
+// Included for completeness, only needed if the imbalanced node is directly connected to the root,
+// which is not the case for the input
+template <typename P = std::identity>
+auto oddOneOut(const std::ranges::forward_range auto& r, P proj)
+{
+    auto it = r.begin();
+    if (it == r.end())
+    {
+        return r.end();
+    }
+    auto first = std::invoke(proj, *it);
+    if (++it == r.end())
+    {
+        return r.begin();
+    }
+    auto second = std::invoke(proj, *it);
+    if (first == second)
+    {
+        return (std::ranges::find_if_not(
+            it, r.end(), [&first](const auto& e) { return e == first; }, proj));
+    }
+    if (++it == r.end())
+    {
+        // first or second both valid returns
+        return r.begin();
+    }
+    return first == std::invoke(proj, *it) ? ++r.begin() : r.begin();
+}
 
-auto allEqual(const std::ranges::input_range auto& r, auto&& proj)
+template <typename P = std::identity>
+auto allEqual(const std::ranges::input_range auto& r, P proj = {})
 {
     auto it = r.begin();
     if (it == r.end())
@@ -158,41 +161,68 @@ auto allEqual(const std::ranges::input_range auto& r, auto&& proj)
     return std::ranges::all_of(++it, r.end(), [&val](const auto& v) { return v == val; }, proj);
 }
 
-auto findImbalanceHelper(const ProgramTower::Program& program, int target) -> int
+constexpr auto BALANCED = [](auto* p) { return allEqual(p->childWeights()); };
+constexpr auto TOTAL_WEIGHT = &ProgramTower::Program::totalWeight;
+
+auto correctImbalanceAtRoot(const ProgramTower::Program* program)
 {
-    if (allEqual(program.children, &ProgramTower::Program::totalWeight))
+    const auto& kids = program->children;
+    assert(kids.size() > 1);
+    auto bad = oddOneOut(kids, TOTAL_WEIGHT);
+    if (bad == kids.end())
     {
-        return target - std::ranges::fold_left(program.childWeights(), 0, std::plus<>());
+        throw std::invalid_argument("No imbalance at root");
     }
-    auto nextTarget = static_cast<int>((target - program.weight) / std::ssize(program.children));
-    auto incorrectProgram = std::ranges::find_if_not(program.children, [nextTarget](auto* p)
-                                                     { return p->totalWeight == nextTarget; });
-    return findImbalanceHelper(**incorrectProgram, nextTarget);
+    auto other = kids.begin();
+    if (other == bad)
+    {
+        ++other;
+    }
+    return (*bad)->weight + (*other)->totalWeight - (*bad)->totalWeight;
 }
 
-auto findImbalance(const ProgramTower::Program& program) -> std::optional<int>
+auto correctImbalance(const ProgramTower::Program* program, int target)
 {
-    if (program.children.empty())
+    for (;;)
     {
-        return {};
+        const auto& kids = program->children;
+        if (allEqual(kids, TOTAL_WEIGHT))
+        {
+            return target - program->totalWeight + program->weight;
+        }
+        target -= program->weight;
+        target /= static_cast<int>(std::ssize(kids));
+        auto next = std::ranges::find_if_not(
+            kids, [target](const auto& v) { return v == target; }, TOTAL_WEIGHT);
+        assert(next != program->children.end());
+        program = *next;
     }
-    if (program.children.size() == 1)
+}
+
+auto correctImbalance(const ProgramTower::Program* program)
+{
+    while (program->children.size() == 1)
     {
-        return findImbalance(*program.children.front());
+        program = program->children.front();
     }
-    if (program.children.size() == 2)
+    assert(!BALANCED(program));
+    const auto& kids = program->children;
+    auto next = std::ranges::find_if_not(kids, BALANCED);
+    if (next != kids.end())
     {
-        // this is incorrect if the imbalanced weight has no disks below it holding 3 or more
-        // programs
-        auto left = findImbalance(*program.children.front());
-        auto right = findImbalance(*program.children.back());
-        return left ? left : right;
+        auto other = kids.begin();
+        // kids contains next, so not empty
+        assert(other != kids.end());
+        if (other == next)
+        {
+            ++other;
+        }
+        // kids does not have size 1 from while loop
+        assert(other != kids.end());
+        auto target = (*other)->totalWeight;
+        return correctImbalance(*next, target);
     }
-    auto [min, max] = std::ranges::minmax(program.childWeights());
-    auto odd = std::ranges::count(program.childWeights(), min) == 1 ? min : max;
-    auto incorrectProgram =
-        std::ranges::find(program.children, odd, &ProgramTower::Program::totalWeight);
-    return findImbalanceHelper(**incorrectProgram, min + max - odd);
+    return correctImbalanceAtRoot(program);
 }
 } // namespace
 
@@ -201,6 +231,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto lines = readAllLines(input);
     auto programTower = ProgramTower{lines};
     assert(programTower.root() != nullptr);
-    return {programTower.root()->name, std::to_string(*findImbalance(*programTower.root()))};
+    return {programTower.root()->name, std::to_string(correctImbalance(programTower.root()))};
 }
 } // namespace aoc
