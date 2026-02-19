@@ -79,22 +79,22 @@ include_directories(include)
 # Find all day*.cc files across all years
 file(GLOB_RECURSE DAY_SOURCES "src/*/day*.cc")
 
+# Static library containing all solutions (avoids compiling day*.cc twice)
+add_library(solutions STATIC ${DAY_SOURCES})
+target_link_libraries(solutions PUBLIC OpenSSL::Crypto nlohmann_json::nlohmann_json scn::scn ctre::ctre)
+if(MSVC)
+    target_compile_options(solutions PRIVATE /W4 /WX)
+else()
+    target_compile_options(solutions PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
+
 # Main executable that runs solutions
-add_executable(aoc src/main.cc ${DAY_SOURCES})
-target_link_libraries(aoc PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json scn::scn ctre::ctre)
+add_executable(aoc src/main.cc)
+target_link_libraries(aoc PRIVATE solutions)
 
 # Verify executable for checking solutions against expected answers
-add_executable(verify src/verify.cc ${DAY_SOURCES})
-target_link_libraries(verify PRIVATE OpenSSL::Crypto nlohmann_json::nlohmann_json scn::scn ctre::ctre)
-
-# Enable warnings for main executable and verify
-foreach(TARGET aoc verify)
-    if(MSVC)
-        target_compile_options(${TARGET} PRIVATE /W4 /WX)
-    else()
-        target_compile_options(${TARGET} PRIVATE -Wall -Wextra -Wpedantic -Werror)
-    endif()
-endforeach()
+add_executable(verify src/verify.cc)
+target_link_libraries(verify PRIVATE solutions nlohmann_json::nlohmann_json)
 
 # Enable testing
 enable_testing()
