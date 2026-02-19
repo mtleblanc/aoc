@@ -80,7 +80,7 @@ auto pascal(int target)
         }
         for (auto d : dirs)
         {
-            assert(loc + d < spiral.size());
+            assert(loc + d < std::ssize(spiral));
             spiral[loc] += spiral[loc + d];
         }
         if (spiral[loc] > target)
