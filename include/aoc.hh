@@ -69,7 +69,7 @@ inline std::string slurp(std::istream& input)
     input.seekg(0, std::ios_base::end);
     auto end = input.tellg();
     input.seekg(cur, std::ios_base::beg);
-    std::string ret("\0", end - cur);
+    std::string ret(end - cur, '\0');
     input.read(ret.data(), end - cur);
     return ret;
 }
