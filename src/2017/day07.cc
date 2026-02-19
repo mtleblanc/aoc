@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <ctre.hpp>
+#include <functional>
 #include <iostream>
 #include <map>
 #include <ranges>
@@ -262,7 +263,8 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto* root = programTower.root();
     assert(root != nullptr);
     auto part2 = correctImbalance(root);
-    // auto part2 = *findImbalance(root).or_else([root]() -> std::optional<int> { return correctImbalance(root);});
+    // auto part2 = *findImbalance(root).or_else([root]() -> std::optional<int> { return
+    // correctImbalance(root);});
     return {root->name, std::to_string(part2)};
 }
 } // namespace aoc

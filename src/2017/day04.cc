@@ -24,7 +24,11 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
                              std::ranges::to<std::vector>();
 
     auto allUnique = [](const auto& ps)
-    { return std::set(std::from_range_t{}, ps).size() == ps.size(); };
+#if __cpp_lib_containers_ranges >= 202202L
+    { return std::set(std::from_range, ps).size() == ps.size(); };
+#else
+    { return std::set(ps.begin(), ps.end()).size() == ps.size(); };
+#endif
 
     auto sortElements = [](const auto& r)
     {

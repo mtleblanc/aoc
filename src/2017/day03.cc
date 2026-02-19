@@ -1,6 +1,6 @@
 #include "aoc.hh"
-#include <bit>
 #include <cassert>
+#include <utility>
 
 /* https://adventofcode.com/2017/day/3
  */
@@ -44,7 +44,7 @@ auto pascal(int target)
     // every corner at least doubles, +2 so we can sum around without bounds checking, only
     // necessary for small input but kept in since it runs in microseconds anyway
     auto gridSize =
-        CHAR_BIT * sizeof(unsigned) - std::countl_zero(static_cast<unsigned>(target)) + 2;
+        std::numeric_limits<unsigned>::digits - std::countl_zero(static_cast<unsigned>(target)) + 2;
     std::vector<int> spiral(gridSize * gridSize);
     auto stride = static_cast<int>(gridSize);
     auto loc = gridSize / 2 * (gridSize + 1);
