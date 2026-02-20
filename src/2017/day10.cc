@@ -2,7 +2,6 @@
 #include "util.hh"
 #include <algorithm>
 #include <ctre.hpp>
-#include <ctre/wrapper.hpp>
 #include <functional>
 #include <iostream>
 #include <ranges>
@@ -59,9 +58,10 @@ std::string part2(std::string_view text)
     auto lengths = trim(text) | std::views::transform([](auto c) -> int { return c; }) |
                    std::ranges::to<std::vector>();
     std::ranges::copy(SUFFIX, std::back_inserter(lengths));
-    auto dense = hash(lengths, ROUNDS) | std::views::chunk(CHUNK) |
-                 std::views::transform(
-                     [](auto r) { return toHex(std::ranges::fold_left(r, 0, std::bit_xor<>())); });
+    auto dense =
+        hash(lengths, ROUNDS) | std::views::chunk(CHUNK) |
+        std::views::transform([](auto r)
+                              { return toHex(std::ranges::fold_left(r, 0, std::bit_xor<>()), 2); });
     return std::ranges::fold_left(dense, std::string{}, std::plus<>());
 }
 
