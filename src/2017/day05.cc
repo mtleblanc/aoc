@@ -12,33 +12,32 @@ namespace
 {
 auto part1(std::vector<int> offsets)
 {
-    int pc{};
+    size_t pc{};
     int steps{};
-    while (0 <= pc && pc < std::ssize(offsets))
+    for (; pc < offsets.size(); ++steps)
     {
         pc += offsets[pc]++;
-        ++steps;
     }
     return steps;
 }
 
 auto part2(std::vector<int> offsets)
 {
-    int pc{};
+    // loop is tight enough that using signed and comparing to 0 adds 50% runtime
+    size_t pc{};
     int steps{};
-    while (0 <= pc && pc < std::ssize(offsets))
+    for (; pc < offsets.size(); ++steps)
     {
-        auto offset = offsets[pc];
-        if (offset >= 3)
+        auto& jmp = offsets[pc];
+        pc += jmp;
+        if (jmp >= 3)
         {
-            --offsets[pc];
+            --jmp;
         }
         else
         {
-            ++offsets[pc];
+            ++jmp;
         }
-        pc += offset;
-        ++steps;
     }
     return steps;
 }
