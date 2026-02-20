@@ -85,7 +85,8 @@ target_link_libraries(solutions PUBLIC OpenSSL::Crypto nlohmann_json::nlohmann_j
 if(MSVC)
     target_compile_options(solutions PRIVATE /W4 /WX)
 else()
-    target_compile_options(solutions PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(solutions PRIVATE -Wall -Wextra -Wpedantic
+        $<$<NOT:$<CONFIG:Debug>>:-Werror>)
 endif()
 
 # Main executable that runs solutions
