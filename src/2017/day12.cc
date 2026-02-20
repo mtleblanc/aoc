@@ -26,7 +26,7 @@ class Program
     Program* representative()
     {
         auto* p = rep_;
-        while (p->rep_ != p->rep_->rep_)
+        while (p->rep_ != p)
         {
             p->rep_ = p->rep_->rep_;
             p = p->rep_;
@@ -82,7 +82,7 @@ class Network
         auto lu = [this](const auto& it) -> auto&
         { return this->programs[(*it).template get<1>().to_number()]; };
         auto& p = lu(it);
-        for (; ++it != ids.end();)
+        while (++it != ids.end())
         {
             auto& conn = lu(it);
             p.merge(conn);
@@ -91,6 +91,9 @@ class Network
 
     std::set<Program*> groups()
     {
+        // a bit of fragility here.  &Program::representative mutates both the item being iterated
+        // over and others, while these items are being put into a set.
+        // correctness depends on the pointers themselves not being invalidated or modified
         return programs | std::views::values | std::views::transform(&Program::representative) |
                std::ranges::to<std::set>();
     }
