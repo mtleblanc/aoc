@@ -20,7 +20,8 @@ template <> struct SolutionType<YEAR, DAY>
 using Solution = Solution_t<YEAR, DAY>;
 namespace
 {
-template <int LEN> std::vector<int> hash(std::span<int> lengths, int rounds = 1)
+constexpr auto LEN = 256;
+std::vector<int> hash(std::span<int> lengths, int rounds = 1)
 {
     int pos{};
     int skip{};
@@ -33,41 +34,43 @@ template <int LEN> std::vector<int> hash(std::span<int> lengths, int rounds = 1)
         {
             auto start = std::ranges::next(repView.begin(), pos);
             std::ranges::reverse(start, std::ranges::next(start, l));
-            pos += l + skip;
-            ++skip;
+            pos += l + skip++;
         }
     }
     return string;
 }
+
+int part1(std::string_view text)
+{
+
+    constexpr auto PAT = ctll::fixed_string(R"((\d+))");
+    auto parse = [](auto n) { return n.template get<1>().to_number(); };
+    auto part1Lengths =
+        ctre::search_all<PAT>(text) | std::views::transform(parse) | std::ranges::to<std::vector>();
+    auto part1Hash = hash(part1Lengths);
+    return part1Hash[0] * part1Hash[1];
+}
+
+std::string part2(std::string_view text)
+{
+    static constexpr auto ROUNDS = 64;
+    static constexpr auto CHUNK = 16;
+    static constexpr auto SUFFIX = std::array<int, 5>{{17, 31, 73, 47, 23}};
+    auto lengths = trim(text) | std::views::transform([](auto c) -> int { return c; }) |
+                   std::ranges::to<std::vector>();
+    std::ranges::copy(SUFFIX, std::back_inserter(lengths));
+    auto dense = hash(lengths, ROUNDS) | std::views::chunk(CHUNK) |
+                 std::views::transform(
+                     [](auto r) { return toHex(std::ranges::fold_left(r, 0, std::bit_xor<>())); });
+    return std::ranges::fold_left(dense, std::string{}, std::plus<>());
+}
+
 } // namespace
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    static constexpr auto PAT = ctll::fixed_string(R"((\d+))");
-    static constexpr auto LEN = 256;
-    static constexpr auto ROUNDS = 64;
-    static constexpr auto CHUNK = 16;
-    static constexpr auto SUFFIX = std::array<int, 5>{{17, 31, 73, 47, 23}};
     auto text = slurp(input);
-    auto parse = [](auto n) { return n.template get<1>().to_number(); };
-    auto part1Lengths =
-        ctre::search_all<PAT>(text) | std::views::transform(parse) | std::ranges::to<std::vector>();
-    auto part1Hash = hash<LEN>(part1Lengths);
-    auto part1 = part1Hash[0] * part1Hash[1];
 
-    auto part2Lengths = trim(text) | std::views::transform([](auto c) -> int { return c; }) |
-                        std::ranges::to<std::vector>();
-    std::ranges::copy(SUFFIX, std::back_inserter(part2Lengths));
-    auto part2Hash = hash<LEN>(part2Lengths, ROUNDS);
-    auto part2Dense =
-        part2Hash | std::views::chunk(CHUNK) |
-        std::views::transform([](const auto& r)
-                              { return std::ranges::fold_left(r, 0, std::bit_xor<>()); });
-    std::string part2;
-    for (auto h : part2Dense)
-    {
-        part2 += toHex(h);
-    }
-    return {std::to_string(part1), part2};
+    return {std::to_string(part1(text)), part2(text)};
 }
 } // namespace aoc

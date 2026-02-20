@@ -24,7 +24,7 @@ inline std::string_view trim(std::string_view s)
     return s.substr(start, end - start + 1);
 }
 
-inline std::string toHex(auto n)
+inline std::string toHex(const auto& n)
 {
     std::ostringstream ss;
     ss << std::hex << n;
