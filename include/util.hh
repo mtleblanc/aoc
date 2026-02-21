@@ -1,11 +1,14 @@
 #pragma once
 
 #include <charconv>
+#include <ctre.hpp>
 #include <iomanip>
 #include <ios>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace aoc
 {
@@ -32,10 +35,19 @@ inline std::string toHex(const auto& n, int padding = 0)
     return ss.str();
 }
 
-template <typename T> T toNum(std::string_view sv)
+template <typename T = int> T toNum(std::string_view sv)
 {
     T val{};
     std::from_chars(sv.begin(), sv.end(), val);
     return val;
+}
+
+template <typename T = int> inline std::vector<T> readNumbers(std::string_view s)
+{
+    static auto constexpr NUMS = ctll::fixed_string(R"((-?\d+))");
+    return ctre::search_all<NUMS>(s) |
+           std::views::transform([](auto m)
+                                 { return m.template get<1>().template to_number<T>(); }) |
+           std::ranges::to<std::vector>();
 }
 } // namespace aoc
