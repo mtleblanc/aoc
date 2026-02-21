@@ -22,23 +22,28 @@ constexpr auto PART1_REPS = 40'000'000;
 
 template <Residue FAC> struct Generator
 {
-    Residue previous;
-    Generator(Residue seed) : previous{seed} {};
+    Residue state;
+    Generator(Residue seed) : state{seed} {};
     Residue operator()()
     {
-        // Just doing previous = (previous * FAC) % MOD, but it seems the compiler's optimization of
+        // Just doing previous = (state * FAC) % MOD, but it seems the compiler's optimization of
         // % (2^31 - 1) is slow
         //
-        // compiler-explorer doesn't have a div, but does have a multiplicaiton by 0x2'0000'0005
-        previous *= FAC;
-        auto carry = previous >> MOD_SHIFT;
-        previous &= MOD;
-        previous += carry;
-        if (previous > MOD)
+        // compiler-explorer shows gcc computing division by MOD via k / n = (k * [(1<<m)/n]) >> m
+        //
+        // we can beat that recognizing that 2^31 % MOD = 1, and previous < MOD to start, so we have
+        // at most one carry
+        //
+        // speedup of about 75%
+        state *= FAC;
+        auto carry = state >> MOD_SHIFT;
+        state &= MOD;
+        state += carry;
+        if (state > MOD)
         {
-            previous -= MOD;
+            state -= MOD;
         }
-        return previous;
+        return state;
     }
 };
 
@@ -57,8 +62,8 @@ auto part1(Residue aSeed, Residue bSeed)
     return count;
 }
 
-constexpr Residue A_MASK = 3;
-constexpr Residue B_MASK = 7;
+constexpr Residue A_MOD = 4;
+constexpr Residue B_MOD = 8;
 constexpr auto PART2_REPS = 5'000'000;
 
 auto part2(Residue aSeed, Residue bSeed)
@@ -70,10 +75,10 @@ auto part2(Residue aSeed, Residue bSeed)
     {
         Residue aRes{};
         Residue bRes{};
-        while ((aRes = a()) & A_MASK)
+        while ((aRes = a()) % A_MOD)
         {
         }
-        while ((bRes = b()) & B_MASK)
+        while ((bRes = b()) % B_MOD)
         {
         }
         if (((aRes ^ bRes) & MASK) == 0)
