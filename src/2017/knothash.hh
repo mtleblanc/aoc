@@ -31,9 +31,20 @@ inline std::vector<int> denseHash(std::span<const int> lengths)
     static constexpr auto SUFFIX = std::array<int, 5>{{17, 31, 73, 47, 23}};
     std::vector<int> seed{lengths.begin(), lengths.end()};
     std::ranges::copy(SUFFIX, std::back_inserter(seed));
+#if __cpp_lib_ranges_chunk == 202202L
     return hash(seed, ROUNDS) | std::views::chunk(CHUNK) |
            std::views::transform([](auto r)
                                  { return std::ranges::fold_left(r, 0, std::bit_xor<>()); }) |
            std::ranges::to<std::vector>();
+#else
+    auto h = hash(seed, ROUNDS);
+    auto res = std::vector<int>{};
+    for (auto i : std::views::iota(0, std::ssize(h) / CHUNK))
+    {
+        res.push_back(std::ranges::fold_left(
+            h | std::views::drop(i * CHUNK) | std::views::take(CHUNK), 0, std::bit_xor<>()));
+    }
+    return res;
+#endif
 }
 } // namespace aoc
