@@ -1,7 +1,6 @@
 #include "aoc.hh"
 #include "knothash.hh"
 #include "util.hh"
-#include <algorithm>
 #include <ranges>
 
 /* https://adventofcode.com/2017/day/10
@@ -28,10 +27,8 @@ int part1(std::string_view text)
 
 std::string part2(std::string_view text)
 {
-    static constexpr auto SUFFIX = std::array<int, 5>{{17, 31, 73, 47, 23}};
     auto lengths = trim(text) | std::views::transform([](auto c) -> int { return c; }) |
                    std::ranges::to<std::vector>();
-    std::ranges::copy(SUFFIX, std::back_inserter(lengths));
     auto dense = denseHash(lengths) | std::views::transform([](auto n) { return toHex(n, 2); });
     return std::ranges::fold_left(dense, std::string{}, std::plus<>());
 }

@@ -5,7 +5,7 @@
 namespace aoc
 {
 constexpr auto LEN = 256;
-inline std::vector<int> hash(std::span<int> lengths, int rounds = 1)
+inline std::vector<int> hash(std::span<const int> lengths, int rounds = 1)
 {
     int pos{};
     int skip{};
@@ -24,11 +24,14 @@ inline std::vector<int> hash(std::span<int> lengths, int rounds = 1)
     return string;
 }
 
-inline std::vector<int> denseHash(std::span<int> lengths)
+inline std::vector<int> denseHash(std::span<const int> lengths)
 {
     static constexpr auto ROUNDS = 64;
     static constexpr auto CHUNK = 16;
-    return hash(lengths, ROUNDS) | std::views::chunk(CHUNK) |
+    static constexpr auto SUFFIX = std::array<int, 5>{{17, 31, 73, 47, 23}};
+    std::vector<int> seed{lengths.begin(), lengths.end()};
+    std::ranges::copy(SUFFIX, std::back_inserter(seed));
+    return hash(seed, ROUNDS) | std::views::chunk(CHUNK) |
            std::views::transform([](auto r)
                                  { return std::ranges::fold_left(r, 0, std::bit_xor<>()); }) |
            std::ranges::to<std::vector>();

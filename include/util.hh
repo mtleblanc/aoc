@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bitset>
 #include <charconv>
 #include <ctre.hpp>
 #include <iomanip>
@@ -33,6 +34,11 @@ inline std::string toHex(const auto& n, int padding = 0)
     std::ostringstream ss;
     ss << std::setfill('0') << std::setw(padding) << std::hex << n;
     return ss.str();
+}
+
+template <size_t BITS> inline std::string toBin(const auto& n)
+{
+    return std::bitset<BITS>(n).to_string();
 }
 
 template <typename T = int> T toNum(std::string_view sv)
