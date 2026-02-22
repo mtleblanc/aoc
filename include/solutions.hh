@@ -60,6 +60,11 @@ template <> struct SolutionType<2017, 10>
     using type = StringSolution;
 };
 
+template <> struct SolutionType<2017, 16>
+{
+    using type = StringSolution;
+};
+
 template <size_t Y, size_t D> struct IsSlow : std::false_type
 {
 };
