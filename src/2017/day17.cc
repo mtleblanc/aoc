@@ -33,14 +33,23 @@ struct Spinlock
     {
         return values[0];
     }
-
-    [[nodiscard]] int afterZero() const
-    {
-        auto it = std::ranges::find(values, 0);
-        ++it;
-        return it == values.end() ? values[0] : *it;
-    }
 };
+
+auto afterZero(int steps, int reps)
+{
+    int res{0};
+    int pos{0};
+    for (auto n : std::views::iota(0, reps))
+    {
+        pos = (pos + steps) % (n + 1);
+        if (pos == 0)
+        {
+            res = n + 1;
+        }
+        ++pos;
+    }
+    return res;
+}
 } // namespace
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
@@ -52,11 +61,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         l.insert(steps);
     }
     auto part1 = l.nextValue();
-    for ([[maybe_unused]] auto _ : std::views::iota(STEPS, STEPS_P2))
-    {
-        l.insert(steps);
-    }
-    auto part2 = l.afterZero();
+    auto part2 = afterZero(steps, STEPS_P2);
     return {part1, part2};
 }
 } // namespace aoc
