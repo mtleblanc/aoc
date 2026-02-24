@@ -2,7 +2,6 @@
 #include "util.hh"
 #include <algorithm>
 #include <cmath>
-#include <exception>
 #include <queue>
 #include <ranges>
 #include <stdexcept>
@@ -18,6 +17,52 @@ using Solution = Solution_t<YEAR, DAY>;
 
 namespace
 {
+/* returns a vector of integer solutions to a*x^2 + b*x + c = 0, only non-negative unless
+ * includeNegatives is specified
+ *
+ * The degenerate case of a=b=c=0 returns no solutions
+ */
+template <std::integral T>
+constexpr auto solveQuadratic(const T a, const T b, const T c,
+                              bool includeNegative = false) -> std::vector<T>
+{
+    if (a == 0)
+    {
+        // returns empty even if infinite solutions, up to caller to detect degeneracy
+        if (b == 0)
+        {
+            return {};
+        }
+        if (auto r = -c / b; (includeNegative || r >= 0) && c % b == 0)
+        {
+            return {r};
+        }
+        return {};
+    }
+    auto discrim = b * b - 4 * a * c;
+    if (discrim < 0)
+    {
+        return {};
+    }
+    auto sqrt = static_cast<T>(std::sqrt(discrim));
+    if (sqrt * sqrt != discrim)
+    {
+        return {};
+    }
+    auto res = std::vector<T>{};
+    auto n1 = -b + sqrt;
+    if (auto r = n1 / (2 * a); (r >= 0 || includeNegative) && n1 % (2 * a) == 0)
+    {
+        res.push_back(r);
+    }
+    auto n2 = -b - sqrt;
+    if (auto r = n2 / (2 * a); (r >= 0 || includeNegative) && n2 % (2 * a) == 0)
+    {
+        res.push_back(r);
+    }
+    return res;
+}
+
 using vec = std::array<int, 3>;
 vec& operator+=(vec& self, const vec& o)
 {
@@ -27,6 +72,7 @@ vec& operator+=(vec& self, const vec& o)
     }
     return self;
 }
+
 vec& operator-=(vec& self, const vec& o)
 {
     for (auto [a, b] : std::views::zip(self, o))
@@ -35,6 +81,7 @@ vec& operator-=(vec& self, const vec& o)
     }
     return self;
 }
+
 vec operator-(vec l, const vec& r)
 {
     return l -= r;
@@ -44,99 +91,6 @@ auto manhattan(auto v)
 {
     return std::ranges::fold_left(v | std::views::transform([](auto c) { return std::abs(c); }), 0,
                                   std::plus<>());
-};
-
-struct Particle
-{
-    vec p;
-    vec v;
-    vec a;
-    bool alive{true};
-
-    Particle(vec p, vec v, vec a) : p{p}, v{v}, a{a} {}
-    void update()
-    {
-        v += a;
-        p += v;
-    }
-
-    Particle operator-(const Particle& o) const
-    {
-        return Particle{p - o.p, v - o.v, a - o.a};
-    }
-
-    [[nodiscard]] std::optional<int> firstZero() const
-    {
-        // 0 = p + vt + 1/2a t^2
-        // t = (-v +/- sqrt(v^2 - 2ap))/2a
-        // TODO: is this helpful
-        if ((std::signbit(p[0]) == std::signbit(v[0]) &&
-             std::signbit(p[0]) == std::signbit(a[0])) ||
-            (std::signbit(p[0]) == std::signbit(v[0]) &&
-             std::signbit(p[0]) == std::signbit(a[0])) ||
-            (std::signbit(p[0]) == std::signbit(v[0]) && std::signbit(p[0]) == std::signbit(a[0])))
-        {
-            return {};
-        }
-        if (a[0] == 0)
-        {
-            if (v[0] == 0)
-            {
-                return {};
-            }
-            auto t = -p[0] / v[0];
-            if (t >= 0 && t * v[0] == -p[0] && 2 * p[1] + 2 * v[1] * t + a[1] * t * t == 0 &&
-                2 * p[2] + 2 * v[2] * t + a[2] * t * t == 0)
-            {
-                return t;
-            }
-            return {};
-        }
-        auto sq = v[0] * v[0] - 2 * a[0] * p[0];
-        // TODO: is this helpful
-        if (sq < 0 || sq % 4 == 2 || sq % 4 == 3)
-        {
-            return {};
-        }
-        auto sqrt = static_cast<int>(std::sqrt(sq));
-        if (sqrt * sqrt != sq)
-        {
-            return {};
-        }
-        std::vector<int> ts;
-        auto numerator = -v[0] + sqrt;
-        auto denominator = 2 * a[0];
-        ts.push_back((numerator % denominator == 0) ? numerator / denominator : -1);
-        numerator = -v[0] - sqrt;
-        ts.push_back((numerator % denominator == 0) ? numerator / denominator : -1);
-        std::vector<int> valid{};
-        for (auto t : ts)
-        {
-            if (t >= 0)
-            {
-                if (2 * p[1] + 2 * v[1] * t + a[1] * t * t == 0 &&
-                    2 * p[2] + 2 * v[2] * t + a[2] * t * t == 0)
-                {
-                    valid.push_back(t);
-                }
-            }
-        }
-        if (valid.empty())
-        {
-            return {};
-        }
-        return std::ranges::min(valid);
-    }
-
-    auto operator<=>(const Particle& o) const = default;
-};
-
-struct Collision
-{
-    int time;
-    std::pair<int, int> indices;
-    Collision(int time, std::pair<int, int> indices) : time{time}, indices{indices} {}
-    auto operator<=>(const Collision& o) const = default;
 };
 
 template <size_t N, typename T> std::array<T, N> toArray(std::span<T> v)
@@ -150,6 +104,67 @@ template <size_t N, typename T> std::array<T, N> toArray(std::span<T> v)
     std::ranges::copy(v, res.begin());
     return res;
 }
+
+struct Particle
+{
+    vec p;
+    vec v;
+    vec a;
+    std::optional<int> collisionTime;
+
+    Particle(vec p, vec v, vec a) : p{p}, v{v}, a{a} {}
+    void update()
+    {
+        v += a;
+        p += v;
+    }
+
+    [[nodiscard]] Particle operator-(const Particle& o) const
+    {
+        return Particle{p - o.p, v - o.v, a - o.a};
+    }
+
+    [[nodiscard]] std::optional<int> firstZero() const
+    {
+        auto p0 = p[0];
+        auto v0 = v[0];
+        auto a0 = a[0];
+        // This is not necessary on my input, but included for correctness.  Particles could always
+        // have matching x coordinates but differ in y or z
+        for (auto d = 1; d < 3 && p0 == 0 && v0 == 0 && a0 == 0; ++d)
+        {
+            p0 = p[d];
+            v0 = v[d];
+            a0 = a[d];
+        }
+        // degenerate case of stationary particle
+        if (p0 == 0 && v0 == 0 && a0 == 0)
+        {
+            return 0;
+        }
+        auto checkDimension = [this](auto dim, auto t)
+        {
+            auto a = this->a[dim];
+            auto v = this->v[dim];
+            auto p = this->p[dim];
+            return 2 * p + (2 * v + a) * t + a * t * t == 0;
+        };
+        auto check = [checkDimension](auto t)
+        { return checkDimension(0, t) && checkDimension(1, t) && checkDimension(2, t); };
+
+        auto solutions = solveQuadratic(a0, 2 * v0 + a0, 2 * p0);
+        auto valid = solutions | std::views::filter(check) | std::ranges::to<std::vector>();
+        return valid.empty() ? std::nullopt : std::optional{std::ranges::min(valid)};
+    }
+};
+
+struct Collision
+{
+    int time;
+    std::pair<int, int> indices;
+    Collision(int time, std::pair<int, int> indices) : time{time}, indices{indices} {}
+    auto operator<=>(const Collision& o) const = default;
+};
 
 int part2(std::vector<Particle>& particles)
 {
@@ -166,25 +181,20 @@ int part2(std::vector<Particle>& particles)
     }
     while (collisions.size())
     {
-        auto time = collisions.top().time;
-        auto toCollide = std::vector<int>{};
-        while (collisions.size() && collisions.top().time == time)
+        auto collision = collisions.top();
+        collisions.pop();
+        auto t = collision.time;
+        auto [l, r] = collision.indices;
+        if (particles[l].collisionTime.value_or(t) >= t &&
+            particles[r].collisionTime.value_or(t) >= t)
         {
-            auto [l, r] = collisions.top().indices;
-            if (particles[l].alive && particles[r].alive)
-            {
-                toCollide.push_back(l);
-                toCollide.push_back(r);
-            }
-            collisions.pop();
-        }
-        for (auto i : toCollide)
-        {
-            particles[i].alive = false;
+            particles[l].collisionTime = t;
+            particles[r].collisionTime = t;
         }
     }
 
-    return static_cast<int>(std::ranges::count_if(particles, [](auto p) { return p.alive; }));
+    return static_cast<int>(
+        std::ranges::count_if(particles, [](auto p) { return !p.collisionTime; }));
 }
 } // namespace
 
@@ -203,30 +213,13 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto particles =
         readAllLines(input) | std::views::transform(parse) | std::ranges::to<std::vector>();
 
-    auto fastest = std::ranges::min_element(
+    // asymptotic behavior is 1/2at^2, so smallest a wins.  but we also need to check v and p to
+    // break ties
+    auto asymptoticClosest = std::ranges::min_element(
         particles, {},
         [](auto p) { return std::make_tuple(manhattan(p.a), manhattan(p.v), manhattan(p.p)); });
 
-    int part1 = static_cast<int>(std::distance(particles.begin(), fastest));
-    // for (int step{0}; step < 1000000; ++step)
-    // {
-    //     std::ranges::sort(particles);
-    //     for (int i{}; i + 1 < std::ssize(particles); ++i)
-    //     {
-    //         if (particles[i].p == particles[i + 1].p)
-    //         {
-    //             auto collision = particles[i].p;
-    //             while (particles[i].p == collision)
-    //             {
-    //                 particles.erase(std::next(particles.begin(), i));
-    //             }
-    //         }
-    //     }
-    //     for (auto& p : particles)
-    //     {
-    //         p.update();
-    //     }
-    // }
+    int part1 = static_cast<int>(std::distance(particles.begin(), asymptoticClosest));
     return {part1, part2(particles)};
 }
 } // namespace aoc
