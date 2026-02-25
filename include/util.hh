@@ -13,9 +13,26 @@
 
 namespace aoc
 {
-constexpr auto mod(auto n, auto p)
+
+// return positive remainder
+// precondition p > 0
+constexpr inline auto mod(auto n, auto p)
 {
     return (n % p + p) % p;
+}
+
+// return positive remainder and floor quotient
+// precondition p > 0
+constexpr inline auto divmod(auto n, auto p)
+{
+    auto q = n / p;
+    auto r = n % p;
+    if (r < 0)
+    {
+        r += p;
+        --q;
+    }
+    return std::make_pair(q, r);
 }
 
 inline std::string_view trim(std::string_view s)
