@@ -46,10 +46,14 @@ auto listConnections(auto& components)
     return res;
 }
 
-auto dfs(auto& connections, auto& seen, int currentNode = 0) -> int
+auto dfs(const auto& connections, auto& seen, int currentNode = 0) -> int
 {
     auto best = 0;
-    for (auto c : connections[currentNode])
+    if (!connections.contains(currentNode))
+    {
+        return best;
+    }
+    for (auto* c : connections.at(currentNode))
     {
         if (seen.contains(c))
         {
@@ -64,17 +68,21 @@ auto dfs(auto& connections, auto& seen, int currentNode = 0) -> int
     return best;
 }
 
-auto part1(auto& connections)
+auto part1(const auto& connections)
 {
     auto seen = std::set<Conn*>{};
-
     return dfs(connections, seen);
 }
 
-auto dfs2(auto& connections, auto& seen, int currentNode = 0, int depth = 0) -> std::pair<int, int>
+auto dfs2(const auto& connections, auto& seen, int currentNode = 0,
+          int depth = 0) -> std::pair<int, int>
 {
     auto best = std::make_pair(depth, 0);
-    for (auto c : connections[currentNode])
+    if (!connections.contains(currentNode))
+    {
+        return best;
+    }
+    for (auto* c : connections.at(currentNode))
     {
         if (seen.contains(c))
         {
@@ -90,10 +98,9 @@ auto dfs2(auto& connections, auto& seen, int currentNode = 0, int depth = 0) -> 
     return best;
 }
 
-auto part2(auto& connections)
+auto part2(const auto& connections)
 {
     auto seen = std::set<Conn*>{};
-
     return dfs2(connections, seen).second;
 }
 } // namespace
