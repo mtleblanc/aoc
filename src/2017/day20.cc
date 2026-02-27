@@ -202,12 +202,27 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     auto parse = [](auto line)
     {
+#if __cpp_lib_ranges_chunk == 202202L
         auto coords = std::ranges::to<std::vector>(readNumbers(line) | std::views::chunk(3) |
                                                    std::views::transform(toArray<3, int>));
         if (coords.size() != 3)
         {
             throw std::invalid_argument("Expected 9 coordinates: " + std::string(line));
         }
+#else
+        auto numbers = readNumbers(line);
+        if (numbers.size() != 9)
+        {
+            throw std::invalid_argument("Expected 9 coordinates: " + std::string(line));
+        }
+        auto coords = std::vector<std::array<int, 3>>(3);
+        for (int i = 0; i < 3; ++i)
+        {
+            std::ranges::copy(std::next(numbers.begin(), 3 * i),
+                              std::next(numbers.begin(), 3 * (i + 1)), coords[i].begin());
+        }
+
+#endif
         return Particle{coords[0], coords[1], coords[2]};
     };
     auto particles =

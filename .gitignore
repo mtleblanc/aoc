@@ -5,5 +5,7 @@ build-debug/
 build-release/
 build-clang-debug/
 build-clang-release/
+build-clang-libcxx-debug/
+build-clang-libcxx-release/
 inputs/**/input*
 .cache

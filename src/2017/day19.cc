@@ -1,4 +1,5 @@
 #include "aoc.hh"
+#include <algorithm>
 #include <cassert>
 
 /* https://adventofcode.com/2017/day/19

@@ -36,12 +36,38 @@
         "CMAKE_C_COMPILER": "clang-20",
         "CMAKE_CXX_COMPILER": "clang++-20"
       }
+    },
+    {
+      "name": "clang-libcxx-debug",
+      "displayName": "Clang + libc++ Debug",
+      "binaryDir": "${sourceDir}/build-clang-libcxx-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_C_COMPILER": "clang-20",
+        "CMAKE_CXX_COMPILER": "clang++-20",
+        "CMAKE_CXX_FLAGS": "-stdlib=libc++",
+        "CMAKE_EXE_LINKER_FLAGS": "-stdlib=libc++"
+      }
+    },
+    {
+      "name": "clang-libcxx-release",
+      "displayName": "Clang + libc++ Release",
+      "binaryDir": "${sourceDir}/build-clang-libcxx-release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_C_COMPILER": "clang-20",
+        "CMAKE_CXX_COMPILER": "clang++-20",
+        "CMAKE_CXX_FLAGS": "-stdlib=libc++",
+        "CMAKE_EXE_LINKER_FLAGS": "-stdlib=libc++"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "gcc-debug",     "configurePreset": "gcc-debug"     },
-    { "name": "gcc-release",   "configurePreset": "gcc-release"   },
-    { "name": "clang-debug",   "configurePreset": "clang-debug"   },
-    { "name": "clang-release", "configurePreset": "clang-release" }
+    { "name": "gcc-debug",            "configurePreset": "gcc-debug"            },
+    { "name": "gcc-release",          "configurePreset": "gcc-release"          },
+    { "name": "clang-debug",          "configurePreset": "clang-debug"          },
+    { "name": "clang-release",        "configurePreset": "clang-release"        },
+    { "name": "clang-libcxx-debug",   "configurePreset": "clang-libcxx-debug"   },
+    { "name": "clang-libcxx-release", "configurePreset": "clang-libcxx-release" }
   ]
 }

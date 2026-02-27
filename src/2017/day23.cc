@@ -1,5 +1,6 @@
 #include "aoc.hh"
 #include <deque>
+#include <optional>
 #include <stdexcept>
 #include <utility>
 #include <vector>
