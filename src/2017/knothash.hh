@@ -9,7 +9,7 @@ inline std::vector<int> hash(std::span<const int> lengths, int rounds = 1)
 {
     int pos{};
     int skip{};
-    auto string = std::views::iota(0, LEN) | std::ranges::to<std::vector>();
+    auto string = std::ranges::to<std::vector>(std::views::iota(0, LEN));
     auto repView = std::views::iota(0UZ) |
                    std::views::transform([&string](auto n) -> auto& { return string[n % LEN]; });
     for ([[maybe_unused]] auto _ : std::views::iota(0, rounds))
@@ -32,10 +32,10 @@ inline std::vector<int> denseHash(std::span<const int> lengths)
     std::vector<int> seed{lengths.begin(), lengths.end()};
     std::ranges::copy(SUFFIX, std::back_inserter(seed));
 #if __cpp_lib_ranges_chunk == 202202L
-    return hash(seed, ROUNDS) | std::views::chunk(CHUNK) |
-           std::views::transform([](auto r)
-                                 { return std::ranges::fold_left(r, 0, std::bit_xor<>()); }) |
-           std::ranges::to<std::vector>();
+    return std::ranges::to<std::vector>(
+        hash(seed, ROUNDS) | std::views::chunk(CHUNK) |
+        std::views::transform([](auto r)
+                              { return std::ranges::fold_left(r, 0, std::bit_xor<>()); }));
 #else
     auto h = hash(seed, ROUNDS);
     auto res = std::vector<int>{};

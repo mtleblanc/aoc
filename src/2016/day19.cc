@@ -121,9 +121,9 @@ namespace
 
 // linear time but clear, just need to get the starting point correct then it's just erase 2 skip 1
 // until only 1 is left
-[[maybe_unused]] constexpr int josephusCrossBrute(int n)
+[[maybe_unused]] int josephusCrossBrute(int n)
 {
-    auto living = std::views::iota(1, n + 1) | std::ranges::to<std::list>();
+    auto living = std::ranges::to<std::list>(std::views::iota(1, n + 1));
     auto victim = std::next(living.begin(), n / 2);
     for (bool dbl{n % 2 == 1}; std::next(living.begin(), 1) != living.end();)
     {

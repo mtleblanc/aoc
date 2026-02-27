@@ -43,9 +43,9 @@ struct Scanner
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    auto scanners = readAllLines(input) |
-                    std::views::transform([](const auto& s) { return Scanner{readNumbers(s)}; }) |
-                    std::ranges::to<std::vector>();
+    auto scanners = std::ranges::to<std::vector>(
+        readAllLines(input) |
+        std::views::transform([](const auto& s) { return Scanner{readNumbers(s)}; }));
 
     auto part1 = std::ranges::fold_left(
         scanners | std::views::filter([](const auto& s) { return s.caught(); }) |

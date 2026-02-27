@@ -68,9 +68,9 @@ template <typename T = int> T toNum(std::string_view sv)
 template <typename T = int> inline std::vector<T> readNumbers(std::string_view s)
 {
     static auto constexpr NUMS = ctll::fixed_string(R"((-?\d+))");
-    return ctre::search_all<NUMS>(s) |
-           std::views::transform([](auto m)
-                                 { return m.template get<1>().template to_number<T>(); }) |
-           std::ranges::to<std::vector>();
+    auto v =
+        ctre::search_all<NUMS>(s) |
+        std::views::transform([](auto m) { return m.template get<1>().template to_number<T>(); });
+    return std::ranges::to<std::vector>(v);
 }
 } // namespace aoc

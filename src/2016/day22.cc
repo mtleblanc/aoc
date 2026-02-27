@@ -135,9 +135,9 @@ auto solveSlidingBlock(const std::vector<Node>& nodes)
     auto target = std::ranges::max(nodes | std::views::filter([](auto n) { return n.y == 0; }) |
                                    std::views::transform(&Node::x));
     auto space = empty->cap;
-    auto valid = nodes | std::views::filter([space](auto n) { return n.used <= space; }) |
-                 std::views::transform([](auto n) { return std::make_pair(n.x, n.y); }) |
-                 std::ranges::to<std::set>();
+    auto valid = std::ranges::to<std::set>(
+        nodes | std::views::filter([space](auto n) { return n.used <= space; }) |
+        std::views::transform([](auto n) { return std::make_pair(n.x, n.y); }));
     std::set<PuzzleState> seen;
     std::priority_queue<PuzzleSearch, std::vector<PuzzleSearch>, std::greater<>> horizon;
     PuzzleState start{.empty = {empty->x, empty->y}, .target = {target, 0}};

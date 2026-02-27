@@ -3,5 +3,7 @@ a.out
 build/
 build-debug/
 build-release/
+build-clang-debug/
+build-clang-release/
 inputs/**/input*
 .cache

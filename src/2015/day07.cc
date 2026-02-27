@@ -96,10 +96,9 @@ template <typename T> auto buildCircuit(const std::vector<std::string>& connecti
     Circuit<T> lut;
     for (const auto& connection : connections)
     {
-        auto parts = connection | std::views::split(' ') |
-                     std::views::transform([](auto const& rng)
-                                           { return std::ranges::to<std::string>(rng); }) |
-                     std::ranges::to<std::vector>();
+        auto parts = std::ranges::to<std::vector>(
+            connection | std::views::split(' ') |
+            std::views::transform([](auto rng) { return std::string(rng.begin(), rng.end()); }));
         assert(parts[parts.size() - 2] == "->");
         Wire<T>& w = lut[parts.back()];
         if (parts.size() == 3)

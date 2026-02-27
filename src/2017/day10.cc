@@ -27,8 +27,8 @@ int part1(std::string_view text)
 
 std::string part2(std::string_view text)
 {
-    auto lengths = trim(text) | std::views::transform([](auto c) -> int { return c; }) |
-                   std::ranges::to<std::vector>();
+    auto lengths = std::ranges::to<std::vector>(
+        trim(text) | std::views::transform([](auto c) -> int { return c; }));
     auto dense = denseHash(lengths) | std::views::transform([](auto n) { return toHex(n, 2); });
     return std::ranges::fold_left(dense, std::string{}, std::plus<>());
 }

@@ -27,18 +27,18 @@ const std::map<std::string, Dir> lut = {{"n", Dir::N}, {"ne", Dir::NE}, {"se", D
 
 auto parse(std::string_view text)
 {
-    return text | std::views::split(',') |
-           std::views::transform(
-               [](auto sv)
-               {
-                   auto s = std::string{sv.begin(), sv.end()};
-                   if (!lut.contains(s))
-                   {
-                       throw std::invalid_argument("Unknown direction: " + s);
-                   }
-                   return lut.at(s);
-               }) |
-           std::ranges::to<std::vector>();
+    return std::ranges::to<std::vector>(text | std::views::split(',') |
+                                        std::views::transform(
+                                            [](auto sv)
+                                            {
+                                                auto s = std::string{sv.begin(), sv.end()};
+                                                if (!lut.contains(s))
+                                                {
+                                                    throw std::invalid_argument(
+                                                        "Unknown direction: " + s);
+                                                }
+                                                return lut.at(s);
+                                            }));
 }
 
 auto hexhatten(auto sw, auto se)

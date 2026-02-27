@@ -66,8 +66,8 @@ template <bool WRAP> long tsp(const std::vector<std::vector<long>>& distanceMatr
         return total;
     };
 
-    auto order = std::views::iota(0UL, distanceMatrix.size() - (WRAP ? 1 : 0)) |
-                 std::ranges::to<std::vector>();
+    auto order =
+        std::ranges::to<std::vector>(std::views::iota(0UL, distanceMatrix.size() - (WRAP ? 1 : 0)));
 
     std::vector<long> routeDistances;
     do

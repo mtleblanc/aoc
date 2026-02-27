@@ -98,13 +98,12 @@ struct Instruction
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     static constexpr auto PART2_REPEATS = 1'000'000'000UZ;
-    auto instructions =
+    auto instructions = std::ranges::to<std::vector>(
         trim(slurp(input)) | std::views::split(',') |
         std::views::transform([](auto sv)
-                              { return Instruction{std::string_view{sv.begin(), sv.end()}}; }) |
-        std::ranges::to<std::vector>();
+                              { return Instruction{std::string_view{sv.begin(), sv.end()}}; }));
 
-    auto order = std::views::iota('a', static_cast<char>('a' + N)) | std::ranges::to<std::string>();
+    auto order = std::ranges::to<std::string>(std::views::iota('a', static_cast<char>('a' + N)));
     auto orders = std::vector<std::string>{};
     do
     {

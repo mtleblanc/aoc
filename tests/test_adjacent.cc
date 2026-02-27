@@ -19,10 +19,10 @@ TEST_CASE("adjacent<2> over string")
         result.emplace_back(a, b);
     }
     REQUIRE(result.size() == 4);
-    REQUIRE(result[0] == std::tuple{'a', 'b'});
-    REQUIRE(result[1] == std::tuple{'b', 'c'});
-    REQUIRE(result[2] == std::tuple{'c', 'd'});
-    REQUIRE(result[3] == std::tuple{'d', 'e'});
+    REQUIRE((result[0] == std::tuple{'a', 'b'}));
+    REQUIRE((result[1] == std::tuple{'b', 'c'}));
+    REQUIRE((result[2] == std::tuple{'c', 'd'}));
+    REQUIRE((result[3] == std::tuple{'d', 'e'}));
 }
 
 TEST_CASE("adjacent<3> over string")
@@ -34,8 +34,8 @@ TEST_CASE("adjacent<3> over string")
         result.emplace_back(a, b, c);
     }
     REQUIRE(result.size() == 2);
-    REQUIRE(result[0] == std::tuple{'a', 'b', 'c'});
-    REQUIRE(result[1] == std::tuple{'b', 'c', 'd'});
+    REQUIRE((result[0] == std::tuple{'a', 'b', 'c'}));
+    REQUIRE((result[1] == std::tuple{'b', 'c', 'd'}));
 }
 
 TEST_CASE("adjacent<4> over string")
@@ -47,8 +47,8 @@ TEST_CASE("adjacent<4> over string")
         result.emplace_back(a, b, c, d);
     }
     REQUIRE(result.size() == 2);
-    REQUIRE(result[0] == std::tuple{'a', 'b', 'c', 'd'});
-    REQUIRE(result[1] == std::tuple{'b', 'c', 'd', 'e'});
+    REQUIRE((result[0] == std::tuple{'a', 'b', 'c', 'd'}));
+    REQUIRE((result[1] == std::tuple{'b', 'c', 'd', 'e'}));
 }
 
 TEST_CASE("adjacent<1> yields each element")
@@ -60,9 +60,9 @@ TEST_CASE("adjacent<1> yields each element")
         result.emplace_back(a);
     }
     REQUIRE(result.size() == 3);
-    REQUIRE(result[0] == std::tuple{'a'});
-    REQUIRE(result[1] == std::tuple{'b'});
-    REQUIRE(result[2] == std::tuple{'c'});
+    REQUIRE((result[0] == std::tuple{'a'}));
+    REQUIRE((result[1] == std::tuple{'b'}));
+    REQUIRE((result[2] == std::tuple{'c'}));
 }
 
 TEST_CASE("adjacent with exact N elements")
@@ -74,7 +74,7 @@ TEST_CASE("adjacent with exact N elements")
         result.emplace_back(a, b, c);
     }
     REQUIRE(result.size() == 1);
-    REQUIRE(result[0] == std::tuple{'a', 'b', 'c'});
+    REQUIRE((result[0] == std::tuple{'a', 'b', 'c'}));
 }
 
 TEST_CASE("adjacent with fewer than N elements is empty")
@@ -108,9 +108,9 @@ TEST_CASE("adjacent over vector of ints")
         result.emplace_back(a, b, c);
     }
     REQUIRE(result.size() == 3);
-    REQUIRE(result[0] == std::tuple{10, 20, 30});
-    REQUIRE(result[1] == std::tuple{20, 30, 40});
-    REQUIRE(result[2] == std::tuple{30, 40, 50});
+    REQUIRE((result[0] == std::tuple{10, 20, 30}));
+    REQUIRE((result[1] == std::tuple{20, 30, 40}));
+    REQUIRE((result[2] == std::tuple{30, 40, 50}));
 }
 
 TEST_CASE("adjacent over view with sentinel")
@@ -123,8 +123,8 @@ TEST_CASE("adjacent over view with sentinel")
         result.emplace_back(a, b, c);
     }
     REQUIRE(result.size() == 2);
-    REQUIRE(result[0] == std::tuple{10, 20, 30});
-    REQUIRE(result[1] == std::tuple{20, 30, 40});
+    REQUIRE((result[0] == std::tuple{10, 20, 30}));
+    REQUIRE((result[1] == std::tuple{20, 30, 40}));
 }
 
 TEST_CASE("adjacent over rvalue view")
@@ -136,8 +136,8 @@ TEST_CASE("adjacent over rvalue view")
         result.emplace_back(a, b, c);
     }
     REQUIRE(result.size() == 2);
-    REQUIRE(result[0] == std::tuple{10, 20, 30});
-    REQUIRE(result[1] == std::tuple{20, 30, 40});
+    REQUIRE((result[0] == std::tuple{10, 20, 30}));
+    REQUIRE((result[1] == std::tuple{20, 30, 40}));
 }
 
 TEST_CASE("adjacent yields references", "[reference]")
@@ -173,9 +173,9 @@ TEST_CASE("adjacent over forward_list uses sentinel path", "[sentinel]")
         result.emplace_back(a, b, c);
     }
     REQUIRE(result.size() == 3);
-    REQUIRE(result[0] == std::tuple{1, 2, 3});
-    REQUIRE(result[1] == std::tuple{2, 3, 4});
-    REQUIRE(result[2] == std::tuple{3, 4, 5});
+    REQUIRE((result[0] == std::tuple{1, 2, 3}));
+    REQUIRE((result[1] == std::tuple{2, 3, 4}));
+    REQUIRE((result[2] == std::tuple{3, 4, 5}));
 }
 
 TEST_CASE("adjacent over short forward_list is empty", "[sentinel]")
@@ -209,7 +209,7 @@ TEST_CASE("adjacent forward_list with exact N elements", "[sentinel]")
         result.emplace_back(a, b);
     }
     REQUIRE(result.size() == 1);
-    REQUIRE(result[0] == std::tuple{10, 20});
+    REQUIRE((result[0] == std::tuple{10, 20}));
 }
 
 TEST_CASE("post-increment iterator")
@@ -218,8 +218,8 @@ TEST_CASE("post-increment iterator")
     auto view = adjacent<2>(s);
     auto it = view.begin();
     auto prev = it++;
-    REQUIRE(*prev == std::tuple{'a', 'b'});
-    REQUIRE(*it == std::tuple{'b', 'c'});
+    REQUIRE((*prev == std::tuple{'a', 'b'}));
+    REQUIRE((*it == std::tuple{'b', 'c'}));
 }
 
 TEST_CASE("adjacent satisfies forward_iterator for forward range", "[category]")
@@ -273,7 +273,8 @@ TEST_CASE("adjacent is common_range for common underlying range", "[category]")
 TEST_CASE("adjacent is not common_range for non-common underlying range", "[category]")
 {
     using view_t = decltype(adjacent<2>(
-        std::declval<std::ranges::take_while_view<std::ranges::ref_view<std::vector<int>>, bool (*)(int)>&>()));
+        std::declval<std::ranges::take_while_view<std::ranges::ref_view<std::vector<int>>,
+                                                  bool (*)(int)>&>()));
     STATIC_REQUIRE(!std::ranges::common_range<view_t>);
 }
 
@@ -366,11 +367,11 @@ TEST_CASE("adjacent bidirectional: pre-decrement", "[bidirectional]")
     auto it = view.begin();
     ++it;
     ++it;
-    REQUIRE(*it == std::tuple{30, 40});
+    REQUIRE((*it == std::tuple{30, 40}));
     --it;
-    REQUIRE(*it == std::tuple{20, 30});
+    REQUIRE((*it == std::tuple{20, 30}));
     --it;
-    REQUIRE(*it == std::tuple{10, 20});
+    REQUIRE((*it == std::tuple{10, 20}));
 }
 
 TEST_CASE("adjacent bidirectional: post-decrement", "[bidirectional]")
@@ -380,8 +381,8 @@ TEST_CASE("adjacent bidirectional: post-decrement", "[bidirectional]")
     auto it = view.begin();
     ++it;
     auto prev = it--;
-    REQUIRE(*prev == std::tuple{20, 30});
-    REQUIRE(*it == std::tuple{10, 20});
+    REQUIRE((*prev == std::tuple{20, 30}));
+    REQUIRE((*it == std::tuple{10, 20}));
 }
 
 TEST_CASE("adjacent random access: operator[]", "[random_access]")
@@ -389,9 +390,9 @@ TEST_CASE("adjacent random access: operator[]", "[random_access]")
     std::vector<int> v = {1, 2, 3, 4, 5};
     auto view = adjacent<3>(v);
     auto it = view.begin();
-    REQUIRE(it[0] == std::tuple{1, 2, 3});
-    REQUIRE(it[1] == std::tuple{2, 3, 4});
-    REQUIRE(it[2] == std::tuple{3, 4, 5});
+    REQUIRE((it[0] == std::tuple{1, 2, 3}));
+    REQUIRE((it[1] == std::tuple{2, 3, 4}));
+    REQUIRE((it[2] == std::tuple{3, 4, 5}));
 }
 
 TEST_CASE("adjacent random access: operator+", "[random_access]")
@@ -399,8 +400,8 @@ TEST_CASE("adjacent random access: operator+", "[random_access]")
     std::vector<int> v = {1, 2, 3, 4, 5};
     auto view = adjacent<2>(v);
     auto it = view.begin();
-    REQUIRE(*(it + 3) == std::tuple{4, 5});
-    REQUIRE(*(2 + it) == std::tuple{3, 4});
+    REQUIRE((*(it + 3) == std::tuple{4, 5}));
+    REQUIRE((*(2 + it) == std::tuple{3, 4}));
 }
 
 TEST_CASE("adjacent random access: operator-", "[random_access]")
@@ -408,7 +409,7 @@ TEST_CASE("adjacent random access: operator-", "[random_access]")
     std::vector<int> v = {1, 2, 3, 4, 5};
     auto view = adjacent<2>(v);
     auto it = view.begin() + 3;
-    REQUIRE(*(it - 2) == std::tuple{2, 3});
+    REQUIRE((*(it - 2) == std::tuple{2, 3}));
 }
 
 TEST_CASE("adjacent random access: operator+=/-=", "[random_access]")
@@ -417,9 +418,9 @@ TEST_CASE("adjacent random access: operator+=/-=", "[random_access]")
     auto view = adjacent<2>(v);
     auto it = view.begin();
     it += 3;
-    REQUIRE(*it == std::tuple{4, 5});
+    REQUIRE((*it == std::tuple{4, 5}));
     it -= 2;
-    REQUIRE(*it == std::tuple{2, 3});
+    REQUIRE((*it == std::tuple{2, 3}));
 }
 
 TEST_CASE("adjacent random access: iterator difference", "[random_access]")

@@ -201,7 +201,7 @@ template <> struct SolutionType<YEAR, DAY>
 template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
 {
     auto instructions =
-        readAllLines(input) | std::views::transform(parse) | std::ranges::to<std::vector>();
+        std::ranges::to<std::vector>(readAllLines(input) | std::views::transform(parse));
     std::string pass{"abcdefgh"};
     for (auto& instr : instructions)
     {

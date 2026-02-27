@@ -40,7 +40,7 @@ long tsp(const std::vector<std::vector<long>>& distanceMatrix, auto reducer)
         return total;
     };
 
-    auto order = std::views::iota(0UL, distanceMatrix.size()) | std::ranges::to<std::vector>();
+    auto order = std::ranges::to<std::vector>(std::views::iota(0UL, distanceMatrix.size()));
 
     std::vector<long> routeDistances;
     do

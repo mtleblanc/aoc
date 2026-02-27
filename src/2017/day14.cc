@@ -24,8 +24,8 @@ auto generateGrid(std::string_view seed)
     for (auto i : std::views::iota(0, ROWS))
     {
         auto rowSeed = base + std::to_string(i);
-        auto lengths = rowSeed | std::views::transform([](auto c) -> int { return c; }) |
-                       std::ranges::to<std::vector>();
+        auto lengths = std::ranges::to<std::vector>(
+            rowSeed | std::views::transform([](auto c) -> int { return c; }));
         auto hash = denseHash(lengths);
         hashes.emplace_back(denseHash(lengths));
     }
@@ -89,15 +89,13 @@ class Node
 auto part2(auto grid)
 {
     static constexpr auto BITS = 8;
-    auto stringGrid = grid |
-                      std::views::transform(
-                          [](const auto& row)
-                          {
-                              return std::views::join(std::views::transform(
-                                         row, [](auto n) { return toBin<BITS>(n); })) |
-                                     std::ranges::to<std::string>();
-                          }) |
-                      std::ranges::to<std::vector>();
+    auto stringGrid = std::ranges::to<std::vector>(
+        grid | std::views::transform(
+                   [](const auto& row)
+                   {
+                       return std::ranges::to<std::string>(std::views::join(
+                           std::views::transform(row, [](auto n) { return toBin<BITS>(n); })));
+                   }));
     std::map<std::pair<int, int>, Node> nodes;
     for (const auto& [y, row] : std::views::zip(std::views::iota(0), stringGrid))
     {
@@ -126,8 +124,8 @@ auto part2(auto grid)
             }
         }
     }
-    auto groups = nodes | std::views::values | std::views::transform(&Node::representative) |
-                  std::ranges::to<std::set>();
+    auto groups = std::ranges::to<std::set>(nodes | std::views::values |
+                                            std::views::transform(&Node::representative));
     return std::ssize(groups);
 }
 } // namespace

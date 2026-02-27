@@ -133,18 +133,18 @@ struct TransitionRules
 
     void parseRule(std::string_view sv)
     {
-        auto rows = sv | std::views::split('>') |
-                    std::views::transform(
-                        [](auto sr) { return static_cast<int>(std::ranges::count(sr, '/')) + 1; }) |
-                    std::ranges::to<std::vector>();
+        auto rows = std::ranges::to<std::vector>(
+            sv | std::views::split('>') |
+            std::views::transform([](auto sr)
+                                  { return static_cast<int>(std::ranges::count(sr, '/')) + 1; }));
         auto parseSquare = [](auto sr)
         {
-            return sr | std::views::filter([](auto c) { return c == '.' || c == '#'; }) |
-                   std::views::transform([](auto c) { return c == '#' ? 1 : 0; }) |
-                   std::ranges::to<std::vector>();
+            return std::ranges::to<std::vector>(
+                sr | std::views::filter([](auto c) { return c == '.' || c == '#'; }) |
+                std::views::transform([](auto c) { return c == '#' ? 1 : 0; }));
         };
-        auto vals = sv | std::views::split('>') | std::views::transform(parseSquare) |
-                    std::ranges::to<std::vector>();
+        auto vals = std::ranges::to<std::vector>(sv | std::views::split('>') |
+                                                 std::views::transform(parseSquare));
 
         assert(rows.size() == 2);
         assert(rows[0] == 2 || rows[0] == 3);

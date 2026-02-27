@@ -38,9 +38,9 @@ struct Room
         };
         auto v = std::ranges::to<std::vector>(counts | std::views::transform(revPair));
         std::ranges::partial_sort(v, v.begin() + CHECKSUM_LENGTH);
-        auto expected = v | std::views::take(CHECKSUM_LENGTH) |
-                        std::views::transform(&std::pair<int, char>::second) |
-                        std::ranges::to<std::string>();
+        auto expectedView = v | std::views::take(CHECKSUM_LENGTH) |
+                            std::views::transform(&std::pair<int, char>::second);
+        auto expected = std::ranges::to<std::string>(expectedView);
         return expected == checksum;
     }
 
@@ -56,7 +56,7 @@ struct Room
             constexpr int PERIOD = 26;
             return (c - 'a' + this->id) % PERIOD + 'a';
         };
-        return name | std::views::transform(decryptLetter) | std::ranges::to<std::string>();
+        return std::ranges::to<std::string>(name | std::views::transform(decryptLetter));
     }
 };
 

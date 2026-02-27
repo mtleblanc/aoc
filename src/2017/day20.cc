@@ -153,7 +153,7 @@ struct Particle
         { return checkDimension(0, t) && checkDimension(1, t) && checkDimension(2, t); };
 
         auto solutions = solveQuadratic(a0, 2 * v0 + a0, 2 * p0);
-        auto valid = solutions | std::views::filter(check) | std::ranges::to<std::vector>();
+        auto valid = std::ranges::to<std::vector>(solutions | std::views::filter(check));
         return valid.empty() ? std::nullopt : std::optional{std::ranges::min(valid)};
     }
 };
@@ -202,8 +202,8 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     auto parse = [](auto line)
     {
-        auto coords = readNumbers(line) | std::views::chunk(3) |
-                      std::views::transform(toArray<3, int>) | std::ranges::to<std::vector>();
+        auto coords = std::ranges::to<std::vector>(readNumbers(line) | std::views::chunk(3) |
+                                                   std::views::transform(toArray<3, int>));
         if (coords.size() != 3)
         {
             throw std::invalid_argument("Expected 9 coordinates: " + std::string(line));
@@ -211,7 +211,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         return Particle{coords[0], coords[1], coords[2]};
     };
     auto particles =
-        readAllLines(input) | std::views::transform(parse) | std::ranges::to<std::vector>();
+        std::ranges::to<std::vector>(readAllLines(input) | std::views::transform(parse));
 
     // asymptotic behavior is 1/2at^2, so smallest a wins.  but we also need to check v and p to
     // break ties

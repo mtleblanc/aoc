@@ -94,8 +94,8 @@ class Network
         // a bit of fragility here.  &Program::representative mutates both the item being iterated
         // over and others, while these items are being put into a set.
         // correctness depends on the pointers themselves not being invalidated or modified
-        return programs | std::views::values | std::views::transform(&Program::representative) |
-               std::ranges::to<std::set>();
+        return std::ranges::to<std::set>(programs | std::views::values |
+                                         std::views::transform(&Program::representative));
     }
 };
 } // namespace

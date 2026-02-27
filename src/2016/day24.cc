@@ -75,9 +75,8 @@ template <> Solution_t<YEAR, DAY> solve<YEAR, DAY>(std::istream& input)
     const auto stride = std::ranges::distance(maze.begin(), std::ranges::find(maze, '\n')) + 1;
     assert(maze.size() % stride == 0);
     const auto start = std::ranges::distance(maze.begin(), std::ranges::find(maze, '0'));
-    auto targets = maze |
-                   std::views::filter([](auto c) { return c != '.' && c != '#' && c != '\n'; }) |
-                   std::ranges::to<std::vector>();
+    auto targets = std::ranges::to<std::vector>(
+        maze | std::views::filter([](auto c) { return c != '.' && c != '#' && c != '\n'; }));
     std::ranges::sort(targets);
     const auto ptargets = std::make_shared<decltype(targets)>(std::move(targets));
 

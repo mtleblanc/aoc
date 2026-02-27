@@ -14,14 +14,13 @@ using Solution = Solution_t<YEAR, DAY>;
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    const auto passphrases = readAllLines(input) |
-                             std::views::transform(
-                                 [](const auto& line)
-                                 {
-                                     std::stringstream ss{line};
-                                     return readAll<std::string>(ss);
-                                 }) |
-                             std::ranges::to<std::vector>();
+    const auto passphrases =
+        std::ranges::to<std::vector>(readAllLines(input) | std::views::transform(
+                                                               [](const auto& line)
+                                                               {
+                                                                   std::stringstream ss{line};
+                                                                   return readAll<std::string>(ss);
+                                                               }));
 
     auto allUnique = [](const auto& ps)
 #if __cpp_lib_containers_ranges >= 202202L

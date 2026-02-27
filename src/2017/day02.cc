@@ -13,14 +13,13 @@ using Solution = Solution_t<YEAR, DAY>;
 
 template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
-    const auto spreadsheet = readAllLines(input) |
-                             std::views::transform(
-                                 [](const auto& line)
-                                 {
-                                     std::stringstream ss{line};
-                                     return readAll<int>(ss);
-                                 }) |
-                             std::ranges::to<std::vector>();
+    const auto spreadsheet =
+        std::ranges::to<std::vector>(readAllLines(input) | std::views::transform(
+                                                               [](const auto& line)
+                                                               {
+                                                                   std::stringstream ss{line};
+                                                                   return readAll<int>(ss);
+                                                               }));
     auto part1View = spreadsheet | std::views::transform(
                                        [](const auto& row)
                                        {
