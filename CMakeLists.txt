@@ -94,7 +94,7 @@ add_executable(aoc src/main.cc)
 target_link_libraries(aoc PRIVATE solutions)
 
 # Verify executable for checking solutions against expected answers
-add_executable(verify src/verify.cc)
+add_executable(verify src/verify.cc src/dispatch.cc)
 target_link_libraries(verify PRIVATE solutions nlohmann_json::nlohmann_json)
 
 # Enable testing
