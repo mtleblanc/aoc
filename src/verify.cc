@@ -192,6 +192,8 @@ int main(int argc, char* argv[])
             YearHandler<2016, true>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2017)
             YearHandler<2017, true>{}.handleAll<DAYS>(root, answers, stats);
+        if (!yearFilter || yearFilter == 2018)
+            YearHandler<2018, true>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2024)
             YearHandler<2024, true>{}.handleAll<DAYS>(root, answers, stats);
         if (!yearFilter || yearFilter == 2025)
