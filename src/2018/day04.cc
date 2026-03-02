@@ -77,8 +77,9 @@ auto parse(std::string_view event)
     throw std::invalid_argument(std::format("Unrecognized event: {}", event));
 }
 
-auto part1(std::span<Event> events)
+auto findSleepy(std::span<Event> events)
 {
+    constexpr static auto MINUTES = 60;
     if (events.empty())
     {
         throw std::invalid_argument("Empty event list");
@@ -87,18 +88,16 @@ auto part1(std::span<Event> events)
     {
         throw std::invalid_argument("First event not on-duty");
     }
-    auto guardNaptime = std::map<int, int>{};
-    auto guardEvents = std::map<int, std::vector<const Event*>>{};
-    auto currentGuard = events.front().guardId;
-    auto currentSleepStart = std::optional<int>{};
+    auto naptimes = std::map<int, std::array<int, MINUTES>>{};
+    auto guard = events.front().guardId;
+    auto sleep = std::optional<int>{};
 
     for (const auto& e : events)
     {
-        if (currentSleepStart && e.type != Event::Type::WAKE)
+        if (sleep && e.type != Event::Type::WAKE)
         {
-            throw std::invalid_argument(std::format("Guard {} didn't wake on {}-{}-{} {}:{}",
-                                                    currentGuard, e.year, e.month, e.day, e.hour,
-                                                    e.minute));
+            throw std::invalid_argument(std::format("Guard {} didn't wake on {}-{}-{} {}:{}", guard,
+                                                    e.year, e.month, e.day, e.hour, e.minute));
         }
         if (e.type != Event::Type::ON_DUTY && e.hour != 0)
         {
@@ -108,42 +107,32 @@ auto part1(std::span<Event> events)
         switch (e.type)
         {
         case Event::Type::ON_DUTY:
-            currentGuard = e.guardId;
+            guard = e.guardId;
             break;
         case Event::Type::SLEEP:
-            currentSleepStart = e.minute;
-            guardEvents[currentGuard].push_back(&e);
+            sleep = e.minute;
             break;
         case Event::Type::WAKE:
-            guardNaptime[currentGuard] += e.minute - *currentSleepStart;
-            guardEvents[currentGuard].push_back(&e);
-            currentSleepStart = {};
+            for (auto h : std::views::iota(*sleep, e.minute))
+            {
+                ++naptimes[guard][h];
+            }
+            sleep = {};
             break;
         }
     }
 
-    auto sleepiestGuard =
-        std::ranges::max_element(guardNaptime, {}, [](auto p) { return p.second; })->first;
+    const auto& p1 = *std::ranges::max_element(
+        naptimes, {}, [](auto p) { return std::ranges::fold_left(p.second, 0, std::plus<>()); });
+    auto p1Minute = static_cast<int>(
+        std::ranges::distance(p1.second.begin(), std::ranges::max_element(p1.second)));
 
-    constexpr static auto MINUTES = 60;
-    auto hours = std::array<int, MINUTES>{};
-    auto sleepEvents = guardEvents[sleepiestGuard];
-    for (auto it = sleepEvents.begin(); it != sleepEvents.end(); ++it)
-    {
-        const auto* sleep = *it;
-        const auto* wake = *++it;
-        assert(sleep->type == Event::Type::SLEEP);
-        assert(wake->type == Event::Type::WAKE);
-        for (auto h : std::views::iota(sleep->minute, wake->minute))
-        {
-            ++hours[h];
-        }
-    }
+    const auto& p2 =
+        *std::ranges::max_element(naptimes, {}, [](auto p) { return std::ranges::max(p.second); });
+    auto p2Minute = static_cast<int>(
+        std::ranges::distance(p2.second.begin(), std::ranges::max_element(p2.second)));
 
-    auto sleepiestMinute =
-        static_cast<int>(std::ranges::distance(hours.begin(), std::ranges::max_element(hours)));
-
-    return sleepiestMinute * sleepiestGuard;
+    return Solution{p1Minute * p1.first, p2Minute * p2.first};
 }
 } // namespace
 
@@ -153,6 +142,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     std::ranges::sort(lines);
     auto events = std::ranges::to<std::vector>(lines | std::views::transform(parse));
 
-    return {part1(events)};
+    return {findSleepy(events)};
 }
 } // namespace aoc
