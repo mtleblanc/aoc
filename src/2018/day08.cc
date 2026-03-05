@@ -17,7 +17,12 @@ namespace
 struct Node
 {
     std::vector<int> metadata;
-    std::vector<std::unique_ptr<Node>> children;
+    std::vector<std::unique_ptr<Node>> children_;
+
+    [[nodiscard]] auto children() const
+    {
+        return children_ | std::views::transform([](const auto& c) -> const auto& { return *c; });
+    }
 };
 
 std::unique_ptr<Node> parseNode(auto& input)
@@ -29,12 +34,12 @@ std::unique_ptr<Node> parseNode(auto& input)
         throw std::invalid_argument{"Unexpected EOF"};
     }
     auto res = std::make_unique<Node>();
-    res->children.reserve(subNodes);
+    res->children_.reserve(subNodes);
     for (auto i = 0; i < subNodes; ++i)
     {
-        res->children.push_back(parseNode(input));
+        res->children_.push_back(parseNode(input));
     }
-    res->metadata.assign(metadata, 0);
+    res->metadata.resize(metadata);
     for (auto i = 0; i < metadata; ++i)
     {
         if (!(input >> res->metadata[i]))
@@ -45,24 +50,26 @@ std::unique_ptr<Node> parseNode(auto& input)
     return res;
 }
 
-auto part1(const std::unique_ptr<Node>& root) -> int
+auto part1(const auto& root) -> int
 {
-    auto ownMetadata = std::ranges::fold_left(root->metadata, 0, std::plus{});
-    return std::ranges::fold_left(root->children | std::views::transform(part1), ownMetadata,
-                                  std::plus<>());
+    auto ownMetadata = std::ranges::fold_left(root.metadata, 0, std::plus{});
+    return std::ranges::fold_left(
+        root.children() | std::views::transform([](const auto& np) { return part1(np); }),
+        ownMetadata, std::plus<>());
 }
 
-auto part2(const std::unique_ptr<Node>& root) -> int
+auto part2(const auto& root) -> int
 {
-    if (root->children.empty())
+    auto children = root.children();
+    if (children.empty())
     {
-        return std::ranges::fold_left(root->metadata, 0, std::plus{});
+        return std::ranges::fold_left(root.metadata, 0, std::plus{});
     }
     return std::ranges::fold_left(
-        root->metadata |
-            std::views::filter([maxIndex = std::ssize(root->children)](auto n)
+        root.metadata |
+            std::views::filter([maxIndex = std::ssize(children)](auto n)
                                { return n <= maxIndex && 0 < n; }) |
-            std::views::transform([&root](auto n) { return part2(root->children[n - 1]); }),
+            std::views::transform([&children](auto n) { return part2(children[n - 1]); }),
         0, std::plus{});
 }
 
@@ -72,6 +79,6 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
 {
     auto root = parseNode(input);
 
-    return {part1(root), part2(root)};
+    return {part1(*root), part2(*root)};
 }
 } // namespace aoc
