@@ -18,7 +18,21 @@ using Solution = Solution_t<YEAR, DAY>;
 
 namespace
 {
-template <int SCORE, int OFFSET> auto simulate(auto players, auto marbles)
+void rotateRight(auto& deque)
+{
+    deque.push_front(deque.back());
+    deque.pop_back();
+}
+
+void rotateLeft(auto& deque)
+{
+    deque.push_back(deque.front());
+    deque.pop_front();
+}
+
+constexpr auto SCORE = 23;
+constexpr auto OFFSET = 7;
+auto simulate(auto players, auto marbles)
 {
     auto scores = std::vector<int64_t>(players);
     auto circle = std::deque<int>{0};
@@ -27,20 +41,17 @@ template <int SCORE, int OFFSET> auto simulate(auto players, auto marbles)
         if (next % SCORE == 0)
         {
             scores[turn] += next;
-            for ([[maybe_unused]] auto _ : std::views::iota(0, OFFSET))
+            for (auto i = 0; i < OFFSET; ++i)
             {
-                circle.push_front(circle.back());
-                circle.pop_back();
+                rotateRight(circle);
             }
             scores[turn] += circle.back();
             circle.pop_back();
-            circle.push_back(circle.front());
-            circle.pop_front();
+            rotateLeft(circle);
         }
         else
         {
-            circle.push_back(circle.front());
-            circle.pop_front();
+            rotateLeft(circle);
             circle.push_back(next);
         }
     }
@@ -58,10 +69,7 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
     auto players = numbers[0];
     auto marbles = numbers[1];
 
-    static constexpr auto SCORE = 23;
-    static constexpr auto OFFSET = 7;
     static constexpr auto P2_MUL = 100;
-    return {simulate<SCORE, OFFSET>(players, marbles),
-            simulate<SCORE, OFFSET>(players, marbles * P2_MUL)};
+    return {simulate(players, marbles), simulate(players, marbles * P2_MUL)};
 }
 } // namespace aoc
