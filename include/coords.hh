@@ -34,13 +34,27 @@ template <auto f> consteval auto filter()
 template <typename T, size_t N>
 concept TupleLike = requires { requires std::tuple_size<T>::value == N; };
 
+template <TupleLike<2> T, TupleLike<2> U> T& operator+=(T& l, U r)
+{
+    std::get<0>(l) += std::get<0>(r);
+    std::get<1>(l) += std::get<1>(r);
+    return l;
+}
+
 template <TupleLike<2> T, TupleLike<2> U> T operator+(T l, U r)
 {
-    return T{std::get<0>(l) + std::get<0>(r), std::get<1>(l) + std::get<1>(r)};
+    return l += r;
+}
+
+template <TupleLike<2> T, TupleLike<2> U> T& operator-=(T& l, U r)
+{
+    std::get<0>(l) -= std::get<0>(r);
+    std::get<1>(l) -= std::get<1>(r);
+    return l;
 }
 
 template <TupleLike<2> T, TupleLike<2> U> T operator-(T l, U r)
 {
-    return T{std::get<0>(l) - std::get<0>(r), std::get<1>(l) - std::get<1>(r)};
+    return l -= r;
 }
 } // namespace aoc
