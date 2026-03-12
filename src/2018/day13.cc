@@ -19,74 +19,85 @@ using Solution = Solution_t<YEAR, DAY>;
 
 namespace
 {
-struct Direction
+enum class Turn
 {
-
-    enum class Turn
-    {
-        LEFT,
-        STRAIGHT,
-        RIGHT,
-        REVERSE,
-        COUNT
-    };
-
-    // y,x indexing so that sort is reading order
-    static constexpr auto UP = std::make_pair(-1, 0);
-    static constexpr auto LEFT = std::make_pair(0, -1);
-    static constexpr auto RIGHT = std::make_pair(0, 1);
-    static constexpr auto DOWN = std::make_pair(1, 0);
-
-    static constexpr auto doTurn(std::pair<int, int> direction, Turn turn) -> std::pair<int, int>
-    {
-        auto [y, x] = direction;
-        switch (turn)
-        {
-        case Turn::LEFT:
-            return {-x, y};
-        case Turn::STRAIGHT:
-            return direction;
-        case Turn::RIGHT:
-            return {x, -y};
-        case Turn::REVERSE:
-            return {-y, -x};
-        case Turn::COUNT:
-            throw std::logic_error{"Invalid turn value"};
-        default:
-            std::unreachable();
-        }
-    }
-
-    static constexpr auto doCorner(std::pair<int, int> direction, char c) -> std::pair<int, int>
-    {
-        if (c != '\\' && c != '/')
-        {
-            throw std::invalid_argument{"Invalid corner"};
-        }
-        auto [y, x] = direction;
-        if (c == '\\')
-        {
-            return {x, y};
-        }
-        return {-x, -y};
-    }
+    LEFT,
+    STRAIGHT,
+    RIGHT,
 };
+
+// y,x indexing so that sort is reading order
+constexpr auto UP = std::make_pair(-1, 0);
+constexpr auto LEFT = std::make_pair(0, -1);
+constexpr auto RIGHT = std::make_pair(0, 1);
+constexpr auto DOWN = std::make_pair(1, 0);
+
+constexpr auto applyTurn(std::pair<int, int> direction, Turn turn) -> std::pair<int, int>
+{
+    auto [y, x] = direction;
+    switch (turn)
+    {
+    case Turn::LEFT:
+        return {-x, y};
+    case Turn::STRAIGHT:
+        return direction;
+    case Turn::RIGHT:
+        return {x, -y};
+    default:
+        std::unreachable();
+    }
+}
 
 struct Cart
 {
+    constexpr static std::array<Turn, 3> TURNS = {{Turn::LEFT, Turn::STRAIGHT, Turn::RIGHT}};
+
     std::pair<int, int> loc;
     std::pair<int, int> dir;
     int turnIndex = 0;
     bool alive = true;
-    constexpr static std::array<Direction::Turn, 3> TURNS = {
-        {Direction::Turn::LEFT, Direction::Turn::STRAIGHT, Direction::Turn::RIGHT}};
 
-    [[nodiscard]] Direction::Turn turn() const
+    Cart(std::pair<int, int> loc, std::pair<int, int> dir) : loc{loc}, dir{dir} {}
+    void turn(char m)
+    {
+        auto [y, x] = dir;
+        switch (m)
+        {
+        case '|':
+        case '-':
+            break;
+        case '\\':
+            dir = {x, y};
+            break;
+        case '/':
+        {
+            dir = {-x, -y};
+            break;
+        }
+        case '+':
+        {
+            dir = applyTurn(dir, turnDecision());
+            ++turnIndex;
+            break;
+        }
+        default:
+            throw std::logic_error{"off route"};
+        }
+    }
+    [[nodiscard]] Turn turnDecision() const
     {
         return TURNS[turnIndex % std::ssize(TURNS)];
     }
 
-    auto operator<=>(const Cart&) const = default;
+    auto operator<=>(const Cart& o) const
+    {
+        return loc <=> o.loc;
+    }
+
+    bool operator==(const Cart& o) const
+    {
+        return (*this <=> o) == std::strong_ordering::equal;
+    }
 };
 
 class Maze
@@ -97,10 +108,10 @@ class Maze
   public:
     Maze(std::string m) : maze_{std::move(m)}, width_{static_cast<int>(maze_.find('\n') + 1)} {}
     // y,x indexing so that sort is reading order
-    auto index(auto i)
+    [[nodiscard]] auto index(auto i) const
     {
         return std::make_pair(i / width_, i % width_);
-    };
+    }
 
     auto& operator[](int i)
     {
@@ -112,8 +123,8 @@ class Maze
     }
     auto& operator[](std::pair<int, int> coord)
     {
-        auto [x, y] = coord;
-        return operator[](x, y);
+        auto [y, x] = coord;
+        return operator[](y, x);
     }
     auto& operator[](int i) const
     {
@@ -125,11 +136,11 @@ class Maze
     }
     auto& operator[](std::pair<int, int> coord) const
     {
-        auto [x, y] = coord;
-        return operator[](x, y);
+        auto [y, x] = coord;
+        return operator[](y, x);
     }
 
-    auto size()
+    [[nodiscard]] auto size() const
     {
         return std::ssize(maze_);
     }
@@ -137,13 +148,17 @@ class Maze
 
 auto simulate(const auto& maze, auto carts)
 {
-    auto found = false;
+    auto foundFirstCollision = false;
     auto res = StringSolution{};
     for (;;)
     {
-        std::ranges::sort(carts);
         carts = std::ranges::to<std::vector>(carts |
                                              std::views::filter([](auto& c) { return c.alive; }));
+        std::ranges::sort(carts);
+        if (carts.size() == 0)
+        {
+            throw std::invalid_argument{"No carts remain"};
+        }
         if (carts.size() == 1)
         {
             auto [y, x] = carts.front().loc;
@@ -162,9 +177,9 @@ auto simulate(const auto& maze, auto carts)
                 std::ranges::find_if(carts, [=](auto c) { return c.alive && c.loc == nextLoc; });
             if (crash != carts.end())
             {
-                if (!found)
+                if (!foundFirstCollision)
                 {
-                    found = true;
+                    foundFirstCollision = true;
                     res.part1 = std::format("{},{}", nextLoc.second, nextLoc.first);
                 }
                 c.alive = false;
@@ -172,26 +187,7 @@ auto simulate(const auto& maze, auto carts)
                 continue;
             }
             c.loc = nextLoc;
-            switch (maze[c.loc])
-            {
-            case '|':
-            case '-':
-                break;
-            case '\\':
-            case '/':
-            {
-                c.dir = Direction::doCorner(c.dir, maze[c.loc]);
-                break;
-            }
-            case '+':
-            {
-                c.dir = Direction::doTurn(c.dir, c.turn());
-                ++c.turnIndex;
-                break;
-            }
-            default:
-                throw std::logic_error{"off route"};
-            }
+            c.turn(maze[c.loc]);
         }
     }
 }
@@ -206,19 +202,19 @@ template <> Solution solve<YEAR, DAY>(std::istream& input)
         {
         case '^':
             maze[i] = '|';
-            carts.emplace_back(maze.index(i), Direction::UP);
+            carts.emplace_back(maze.index(i), UP);
             break;
         case '<':
             maze[i] = '-';
-            carts.emplace_back(maze.index(i), Direction::LEFT);
+            carts.emplace_back(maze.index(i), LEFT);
             break;
         case 'v':
             maze[i] = '|';
-            carts.emplace_back(maze.index(i), Direction::DOWN);
+            carts.emplace_back(maze.index(i), DOWN);
             break;
         case '>':
             maze[i] = '-';
-            carts.emplace_back(maze.index(i), Direction::RIGHT);
+            carts.emplace_back(maze.index(i), RIGHT);
             break;
         case '+':
         case '-':
