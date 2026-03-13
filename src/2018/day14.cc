@@ -1,8 +1,8 @@
 #include "aoc.hh"
 #include "util.hh"
 #include <algorithm>
+#include <compare>
 #include <iterator>
-#include <print>
 #include <ranges>
 
 /* https://adventofcode.com/2018/day/14
@@ -45,16 +45,17 @@ class Scoreboard : std::ranges::view_interface<Scoreboard>
   public:
     class Iterator
     {
-        Scoreboard* sb;
+        friend class Scoreboard;
+        Scoreboard* sb = nullptr;
         int64_t index = 0;
         Iterator(Scoreboard* sb) : sb{sb} {}
-        friend class Scoreboard;
 
       public:
         using difference_type = int64_t;
         using value_type = int;
         using reference = int;
-        using iterator_category = std::random_access_iterator_tag;
+
+        Iterator() = default; // to satisfy forward_range, UB to use except for assignment
         auto operator*() const
         {
             while (std::ssize(sb->scoreboard) <= index)
@@ -76,18 +77,6 @@ class Scoreboard : std::ranges::view_interface<Scoreboard>
             return ++res;
         }
 
-        auto& operator--()
-        {
-            --index;
-            return (*this);
-        }
-
-        auto operator--(int)
-        {
-            auto res = *this;
-            return --res;
-        }
-
         auto operator-(Iterator o) const
         {
             return index - o.index;
@@ -96,6 +85,11 @@ class Scoreboard : std::ranges::view_interface<Scoreboard>
         auto operator<=>(const Iterator& o) const
         {
             return index <=> o.index;
+        }
+
+        auto operator==(const Iterator& o) const
+        {
+            return (*this <=> o) == std::strong_ordering::equal;
         }
     };
 
@@ -127,15 +121,7 @@ auto part1(auto practice, auto& scoreboard)
 
 auto part2(const auto& target, auto& scoreboard)
 {
-    auto it = scoreboard.begin();
-
-    for (;; ++it)
-    {
-        if (std::ranges::equal(target, std::views::counted(it, std::ssize(target))))
-        {
-            return it - scoreboard.begin();
-        }
-    }
+    return std::ranges::search(scoreboard, target).begin() - scoreboard.begin();
 }
 } // namespace
 
