@@ -1,8 +1,6 @@
 #include "aoc.hh"
 #include "util.hh"
 #include <algorithm>
-#include <compare>
-#include <iterator>
 #include <ranges>
 
 /* https://adventofcode.com/2018/day/14
@@ -22,7 +20,7 @@ namespace
 {
 constexpr auto B = 10;
 
-class Scoreboard : std::ranges::view_interface<Scoreboard>
+class Scoreboard
 {
     // NOLINTNEXTLINE(*-magic-numbers)
     std::vector<int> scoreboard{3, 7};
@@ -43,55 +41,14 @@ class Scoreboard : std::ranges::view_interface<Scoreboard>
     }
 
   public:
-    class Iterator
+    auto operator[](int index) -> int
     {
-        friend class Scoreboard;
-        Scoreboard* sb = nullptr;
-        int64_t index = 0;
-        Iterator(Scoreboard* sb) : sb{sb} {}
-
-      public:
-        using difference_type = int64_t;
-        using value_type = int;
-        using reference = int;
-
-        Iterator() = default; // to satisfy forward_range, UB to use except for assignment
-        auto operator*() const
+        while (std::ssize(scoreboard) <= index)
         {
-            while (std::ssize(sb->scoreboard) <= index)
-            {
-                sb->makeRecipes();
-            }
-            return sb->scoreboard[index];
+            makeRecipes();
         }
-
-        auto& operator++()
-        {
-            ++index;
-            return (*this);
-        }
-
-        auto operator++(int)
-        {
-            auto res = *this;
-            return ++res;
-        }
-
-        auto operator-(Iterator o) const
-        {
-            return index - o.index;
-        }
-
-        auto operator<=>(const Iterator& o) const
-        {
-            return index <=> o.index;
-        }
-
-        auto operator==(const Iterator& o) const
-        {
-            return (*this <=> o) == std::strong_ordering::equal;
-        }
-    };
+        return scoreboard[index];
+    }
 
     Scoreboard() = default;
     Scoreboard(const Scoreboard&) = delete;
@@ -100,28 +57,25 @@ class Scoreboard : std::ranges::view_interface<Scoreboard>
     Scoreboard& operator=(Scoreboard&&) = default;
     ~Scoreboard() = default;
 
-    auto begin()
+    auto view()
     {
-        return Iterator{this};
-    }
-
-    static auto end()
-    {
-        return std::unreachable_sentinel;
+        return std::views::iota(0) | std::views::transform([this](auto n) { return (*this)[n]; });
     }
 };
 
 auto part1(auto practice, auto& scoreboard)
 {
     static constexpr auto N = 10;
-    auto resScores = scoreboard | std::views::drop(practice) | std::views::take(N);
+    auto v = scoreboard.view();
+    auto resScores = v | std::views::drop(practice) | std::views::take(N);
     return std::ranges::fold_left(resScores, int64_t{0},
                                   [](auto acc, auto n) { return B * acc + n; });
 }
 
 auto part2(const auto& target, auto& scoreboard)
 {
-    return std::ranges::search(scoreboard, target).begin() - scoreboard.begin();
+    auto v = scoreboard.view();
+    return std::ranges::search(v, target).begin() - v.begin();
 }
 } // namespace
 
